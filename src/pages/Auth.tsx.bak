@@ -1,0 +1,251 @@
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/hooks/useLanguage';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Eye, EyeOff } from 'lucide-react';
+import logo from '@/assets/logo.png';
+import { LanguageSelector } from '@/components/LanguageSelector';
+
+const Auth = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { user, signIn, signUp } = useAuth();
+  const { t } = useLanguage();
+  const [loading, setLoading] = useState(false);
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      const redirectTo = searchParams.get('redirect') || '/';
+      navigate(redirectTo);
+    }
+  }, [user, navigate, searchParams]);
+
+  const [loginData, setLoginData] = useState({
+    email: '',
+    password: '',
+  });
+
+  const [signupData, setSignupData] = useState({
+    email: '',
+    password: '',
+    fullName: '',
+    whatsapp: '',
+  });
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const { error } = await signIn(loginData.email, loginData.password);
+    setLoading(false);
+
+    if (!error) {
+      const redirectTo = searchParams.get('redirect') || '/';
+      navigate(redirectTo);
+    }
+  };
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const { error } = await signUp(
+      signupData.email,
+      signupData.password,
+      signupData.fullName,
+      signupData.whatsapp
+    );
+    setLoading(false);
+
+    if (!error) {
+      setSignupData({ email: '', password: '', fullName: '', whatsapp: '' });
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center p-3 sm:p-4">
+      <div className="w-full max-w-md">
+        <div className="flex justify-end mb-3 sm:mb-4">
+          <LanguageSelector />
+        </div>
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="flex justify-center mb-3 sm:mb-4">
+            <img src={logo} alt="GamingFlix" className="h-10 sm:h-12 w-auto" />
+          </div>
+          <p className="text-muted-foreground text-sm sm:text-base">{t.authTagline}</p>
+        </div>
+
+        <Tabs defaultValue="login" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 rounded-xl">
+            <TabsTrigger value="login" className="rounded-lg text-sm sm:text-base">
+              {t.loginTab}
+            </TabsTrigger>
+            <TabsTrigger value="signup" className="rounded-lg text-sm sm:text-base">
+              {t.signupTab}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="login">
+            <Card className="rounded-2xl border-border shadow-lg">
+              <CardHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4">
+                <CardTitle className="text-xl sm:text-2xl">{t.loginTitle}</CardTitle>
+                <CardDescription className="text-sm sm:text-base">
+                  {t.loginDescription}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+                <form onSubmit={handleLogin} className="space-y-3 sm:space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="login-email" className="text-sm sm:text-base">
+                      {t.emailLabel}
+                    </Label>
+                    <Input
+                      id="login-email"
+                      type="email"
+                      placeholder={t.emailPlaceholder}
+                      value={loginData.email}
+                      onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                      className="h-10 sm:h-11 rounded-xl text-sm sm:text-base"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="login-password" className="text-sm sm:text-base">
+                      {t.passwordLabel}
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="login-password"
+                        type={showLoginPassword ? 'text' : 'password'}
+                        value={loginData.password}
+                        onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                        className="h-10 sm:h-11 rounded-xl text-sm sm:text-base pr-10"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowLoginPassword(!showLoginPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        {showLoginPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <Link
+                      to="/forgot-password"
+                      className="text-sm text-primary hover:underline"
+                    >
+                      Esqueci minha senha
+                    </Link>
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full h-10 sm:h-11 rounded-xl text-sm sm:text-base"
+                    disabled={loading}
+                  >
+                    {loading ? t.loggingInButton : t.loginButton}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="signup">
+            <Card className="rounded-2xl border-border shadow-lg">
+              <CardHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4">
+                <CardTitle className="text-xl sm:text-2xl">{t.signupTitle}</CardTitle>
+                <CardDescription className="text-sm sm:text-base">
+                  {t.signupDescription}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+                <form onSubmit={handleSignup} className="space-y-3 sm:space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-name" className="text-sm sm:text-base">
+                      {t.fullNameLabel}
+                    </Label>
+                    <Input
+                      id="signup-name"
+                      type="text"
+                      placeholder={t.fullNamePlaceholder}
+                      value={signupData.fullName}
+                      onChange={(e) => setSignupData({ ...signupData, fullName: e.target.value })}
+                      className="h-10 sm:h-11 rounded-xl text-sm sm:text-base"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-whatsapp" className="text-sm sm:text-base">
+                      {t.whatsappLabel}
+                    </Label>
+                    <Input
+                      id="signup-whatsapp"
+                      type="tel"
+                      placeholder={t.whatsappPlaceholder}
+                      value={signupData.whatsapp}
+                      onChange={(e) => setSignupData({ ...signupData, whatsapp: e.target.value })}
+                      className="h-10 sm:h-11 rounded-xl text-sm sm:text-base"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email" className="text-sm sm:text-base">
+                      {t.emailLabel}
+                    </Label>
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      placeholder={t.emailPlaceholder}
+                      value={signupData.email}
+                      onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
+                      className="h-10 sm:h-11 rounded-xl text-sm sm:text-base"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password" className="text-sm sm:text-base">
+                      {t.passwordLabel}
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="signup-password"
+                        type={showSignupPassword ? 'text' : 'password'}
+                        value={signupData.password}
+                        onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
+                        className="h-10 sm:h-11 rounded-xl text-sm sm:text-base pr-10"
+                        required
+                        minLength={6}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowSignupPassword(!showSignupPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        {showSignupPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      </button>
+                    </div>
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full h-10 sm:h-11 rounded-xl text-sm sm:text-base"
+                    disabled={loading}
+                  >
+                    {loading ? t.signingUpButton : t.signupButton}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+};
+
+export default Auth;

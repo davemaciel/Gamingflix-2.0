@@ -1,0 +1,166 @@
+╔══════════════════════════════════════════════════════════════════╗
+║               🎯 PRÓXIMOS PASSOS - MIGRAÇÃO MONGODB                ║
+╚══════════════════════════════════════════════════════════════════╝
+
+📦 MIGRAÇÃO ESTRUTURAL COMPLETA! ✅
+
+O projeto foi completamente adaptado para usar MongoDB em vez do Supabase.
+Porém, algumas páginas ainda precisam ser atualizadas manualmente.
+
+═══════════════════════════════════════════════════════════════════
+
+🟢 O QUE JÁ ESTÁ FUNCIONANDO:
+
+✅ Backend completo (Express + MongoDB)
+✅ API REST com todas as rotas necessárias
+✅ Autenticação JWT (login/cadastro/logout)
+✅ Hooks useAuth e useSubscription adaptados
+✅ Cliente API (src/lib/api.ts) criado
+✅ Scripts de migração de dados funcionando
+✅ Script de inicialização automática
+
+═══════════════════════════════════════════════════════════════════
+
+🟡 O QUE PRECISA SER ATUALIZADO:
+
+❗ src/pages/Catalog.tsx
+   - Linha 53-65: Substitua `supabase.rpc('get_public_games')` 
+     por `gamesApi.getAll()`
+
+❗ src/pages/GameDetail.tsx
+   - Queries diretas ao Supabase devem usar `gamesApi`
+
+❗ src/pages/Admin.tsx
+   - Queries diretas ao Supabase devem usar `gamesApi` e `subscriptionsApi`
+
+═══════════════════════════════════════════════════════════════════
+
+🚀 COMO INICIAR AGORA:
+
+1️⃣ CERTIFIQUE-SE QUE MONGODB ESTÁ RODANDO:
+   npm run check:mongodb
+
+   Se não estiver:
+   - Windows: net start MongoDB
+   - Docker: docker start mongodb
+
+2️⃣ MIGRE OS DADOS DO SUPABASE (se ainda não fez):
+   npm run migrate:supabase-to-mongo
+   
+   Responda "s" para importar automaticamente
+
+3️⃣ INSTALE AS DEPENDÊNCIAS DO BACKEND:
+   cd backend
+   npm install
+   cd ..
+
+4️⃣ INICIE O PROJETO:
+   
+   OPÇÃO A - Automático (recomendado):
+   ─────────────────────────────────
+   Clique duas vezes: iniciar-projeto.bat
+   
+   Ou no terminal:
+   iniciar-projeto.bat
+
+   OPÇÃO B - Manual:
+   ─────────────────
+   Terminal 1: cd backend && npm start
+   Terminal 2: npm run dev
+
+═══════════════════════════════════════════════════════════════════
+
+🔧 APÓS INICIAR:
+
+✓ Frontend: http://localhost:5173
+✓ Backend:  http://localhost:3000
+✓ MongoDB:  mongodb://localhost:27017
+
+Teste fazer login/cadastro. A autenticação deve funcionar!
+
+═══════════════════════════════════════════════════════════════════
+
+📝 ATUALIZAÇÕES NECESSÁRIAS NAS PÁGINAS:
+
+Para que o catálogo e detalhes dos jogos funcionem perfeitamente,
+você precisará atualizar essas 3 páginas para usar a nova API.
+
+Exemplo de como ficará:
+
+ANTES (Supabase):
+─────────────────
+import { supabase } from '@/integrations/supabase/client';
+
+const { data } = await supabase.from('games').select('*');
+
+DEPOIS (MongoDB API):
+────────────────────
+import { gamesApi } from '@/lib/api';
+
+const games = await gamesApi.getAll();
+
+═══════════════════════════════════════════════════════════════════
+
+🎯 ORDEM RECOMENDADA:
+
+1. Teste a autenticação (login/cadastro) ✅ DEVE FUNCIONAR
+2. Atualize Catalog.tsx para listar jogos
+3. Atualize GameDetail.tsx para ver detalhes
+4. Atualize Admin.tsx para gerenciar jogos (admin)
+5. Crie um usuário admin (veja GUIA-INICIAR-MONGODB.md)
+
+═══════════════════════════════════════════════════════════════════
+
+📚 DOCUMENTAÇÃO COMPLETA:
+
+- GUIA-INICIAR-MONGODB.md         → Como iniciar tudo
+- GUIA-MIGRACAO-SUPABASE-MONGODB.md → Como migrar dados
+- RESUMO-MIGRACAO-MONGODB.md      → Resumo técnico completo
+- QUICK-START-MIGRACAO.txt        → Guia rápido migração
+
+═══════════════════════════════════════════════════════════════════
+
+💡 DICA: CRIAR USUÁRIO ADMIN
+
+Após fazer cadastro, promova seu usuário a admin:
+
+mongosh
+> use gameflix
+> db.profiles.findOne({ email: "seu@email.com" })
+> db.user_roles.insertOne({
+    id: crypto.randomUUID(),
+    user_id: "ID_DO_USUARIO_COPIADO_ACIMA",
+    role: "admin",
+    created_at: new Date()
+  })
+
+═══════════════════════════════════════════════════════════════════
+
+✅ CHECKLIST RÁPIDO:
+
+☐ MongoDB instalado e rodando
+☐ Dados migrados do Supabase
+☐ Dependências instaladas (npm install)
+☐ Backend rodando (porta 3000)
+☐ Frontend rodando (porta 5173)
+☐ Login/cadastro testado e funcionando
+☐ Páginas Catalog/GameDetail/Admin atualizadas (pendente)
+☐ Usuário admin criado
+☐ Sistema 100% funcional
+
+═══════════════════════════════════════════════════════════════════
+
+🎉 PARABÉNS!
+
+A estrutura está pronta. Falta apenas atualizar as 3 páginas que
+ainda fazem queries diretas ao Supabase para usar a nova API.
+
+O trabalho pesado já foi feito! 🚀
+
+═══════════════════════════════════════════════════════════════════
+
+❓ DÚVIDAS?
+
+Leia os guias na raiz do projeto. Eles têm TUDO explicado!
+
+═══════════════════════════════════════════════════════════════════

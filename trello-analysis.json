@@ -1,0 +1,314 @@
+{
+  "boardName": "GAMINGFLIX BACKUP",
+  "totalLists": 13,
+  "totalCards": 91,
+  "gameLists": [
+    {
+      "name": "Games Offline",
+      "id": "6676ed46270d7e3172d55cf4",
+      "cardsCount": 42,
+      "cards": [
+        {
+          "name": "Inzoi",
+          "hasDescription": true,
+          "descriptionLength": 1490
+        },
+        {
+          "name": "Monster Hunter Wilds",
+          "hasDescription": true,
+          "descriptionLength": 980
+        },
+        {
+          "name": "Stellar Blade",
+          "hasDescription": true,
+          "descriptionLength": 991
+        },
+        {
+          "name": "The First Berseker Kazhan",
+          "hasDescription": true,
+          "descriptionLength": 981
+        },
+        {
+          "name": "The Elder Scrolls IV Oblivion: Remastered",
+          "hasDescription": true,
+          "descriptionLength": 972
+        },
+        {
+          "name": "Expedition 33",
+          "hasDescription": true,
+          "descriptionLength": 985
+        },
+        {
+          "name": "Bleach Rebirth of Souls",
+          "hasDescription": true,
+          "descriptionLength": 973
+        },
+        {
+          "name": "AC Shadows",
+          "hasDescription": true,
+          "descriptionLength": 1407
+        },
+        {
+          "name": "Assassin's Creed Mirage",
+          "hasDescription": true,
+          "descriptionLength": 2035
+        },
+        {
+          "name": "Assassin’s Creed Valhalla",
+          "hasDescription": true,
+          "descriptionLength": 1946
+        },
+        {
+          "name": "Baldur's Gate 3",
+          "hasDescription": true,
+          "descriptionLength": 919
+        },
+        {
+          "name": "Black Myth: Wukong",
+          "hasDescription": true,
+          "descriptionLength": 967
+        },
+        {
+          "name": "Cyberpunk 2077",
+          "hasDescription": true,
+          "descriptionLength": 977
+        },
+        {
+          "name": "Dead Island 2",
+          "hasDescription": true,
+          "descriptionLength": 56
+        },
+        {
+          "name": "Dragon Ball Sparking Zero",
+          "hasDescription": true,
+          "descriptionLength": 970
+        },
+        {
+          "name": "Dragon's Dogma 2",
+          "hasDescription": true,
+          "descriptionLength": 979
+        },
+        {
+          "name": "EA FC 2024",
+          "hasDescription": true,
+          "descriptionLength": 1050
+        },
+        {
+          "name": "EA FC 2025",
+          "hasDescription": true,
+          "descriptionLength": 1032
+        },
+        {
+          "name": "Elden Ring",
+          "hasDescription": true,
+          "descriptionLength": 1040
+        },
+        {
+          "name": "Enigma do Medo",
+          "hasDescription": true,
+          "descriptionLength": 968
+        },
+        {
+          "name": "Final Fantasy 16",
+          "hasDescription": true,
+          "descriptionLength": 926
+        },
+        {
+          "name": "Final Fantasy 7 Rebirth",
+          "hasDescription": true,
+          "descriptionLength": 901
+        },
+        {
+          "name": "Ghost of Tsushima",
+          "hasDescription": true,
+          "descriptionLength": 972
+        },
+        {
+          "name": "God of War + Ragnarok",
+          "hasDescription": true,
+          "descriptionLength": 978
+        },
+        {
+          "name": "Granblue Fantasy Relink",
+          "hasDescription": true,
+          "descriptionLength": 851
+        },
+        {
+          "name": "Hogwarts Legacy",
+          "hasDescription": true,
+          "descriptionLength": 974
+        },
+        {
+          "name": "Horizon Forbidden West",
+          "hasDescription": true,
+          "descriptionLength": 994
+        },
+        {
+          "name": "Mortal Kombat 1",
+          "hasDescription": true,
+          "descriptionLength": 976
+        },
+        {
+          "name": "NBA 2K24",
+          "hasDescription": true,
+          "descriptionLength": 936
+        },
+        {
+          "name": "Red Dead Redemption 1",
+          "hasDescription": true,
+          "descriptionLength": 1355
+        },
+        {
+          "name": "Red Dead Redemption 2",
+          "hasDescription": true,
+          "descriptionLength": 1351
+        },
+        {
+          "name": "Resident Evil 2 Remake",
+          "hasDescription": true,
+          "descriptionLength": 947
+        },
+        {
+          "name": "Resident Evil 4 Remake",
+          "hasDescription": true,
+          "descriptionLength": 1123
+        },
+        {
+          "name": "Split Fiction",
+          "hasDescription": true,
+          "descriptionLength": 965
+        },
+        {
+          "name": "Silent Hill 2",
+          "hasDescription": true,
+          "descriptionLength": 965
+        },
+        {
+          "name": "Stalker 2",
+          "hasDescription": true,
+          "descriptionLength": 977
+        },
+        {
+          "name": "Star Wars Outlaws",
+          "hasDescription": true,
+          "descriptionLength": 2046
+        },
+        {
+          "name": "Street Fighter 6",
+          "hasDescription": true,
+          "descriptionLength": 977
+        },
+        {
+          "name": "WWE 2K25",
+          "hasDescription": true,
+          "descriptionLength": 998
+        },
+        {
+          "name": "Naruto Storm Connections",
+          "hasDescription": true,
+          "descriptionLength": 1021
+        },
+        {
+          "name": "TEKKEN 8",
+          "hasDescription": true,
+          "descriptionLength": 975
+        },
+        {
+          "name": "The Last of Us 1+2",
+          "hasDescription": true,
+          "descriptionLength": 970
+        }
+      ]
+    },
+    {
+      "name": "Games Online",
+      "id": "6676ed46270d7e3172d55cf5",
+      "cardsCount": 6,
+      "cards": [
+        {
+          "name": "Call of Duty: Modern Warfare(2019)",
+          "hasDescription": true,
+          "descriptionLength": 382
+        },
+        {
+          "name": "Call of Duty Modern Warfare 3",
+          "hasDescription": true,
+          "descriptionLength": 859
+        },
+        {
+          "name": "Call of Duty Black Ops 6",
+          "hasDescription": true,
+          "descriptionLength": 845
+        },
+        {
+          "name": "Helldivers 2",
+          "hasDescription": true,
+          "descriptionLength": 951
+        },
+        {
+          "name": "Red Dead Redemption (Social Club)",
+          "hasDescription": true,
+          "descriptionLength": 1040
+        },
+        {
+          "name": "Suicide Squad: Kill the Justice League",
+          "hasDescription": true,
+          "descriptionLength": 982
+        }
+      ]
+    },
+    {
+      "name": "GamePacks",
+      "id": "6676ed46270d7e3172d55cf6",
+      "cardsCount": 9,
+      "cards": [
+        {
+          "name": "Horizon Zero Dawn / Marvel Midnight Suns",
+          "hasDescription": true,
+          "descriptionLength": 939
+        },
+        {
+          "name": "Tomb Raider Collection",
+          "hasDescription": true,
+          "descriptionLength": 1075
+        },
+        {
+          "name": "Batman Arkham Collection",
+          "hasDescription": true,
+          "descriptionLength": 932
+        },
+        {
+          "name": "Resident Evil 4 / 5 / 6",
+          "hasDescription": true,
+          "descriptionLength": 859
+        },
+        {
+          "name": "Red Dead 2 / Resident Evil Village",
+          "hasDescription": false,
+          "descriptionLength": 0
+        },
+        {
+          "name": "Mortal Kombat Bundle / Injustice 2",
+          "hasDescription": false,
+          "descriptionLength": 0
+        },
+        {
+          "name": "Spider-Man / Miles Morales",
+          "hasDescription": true,
+          "descriptionLength": 909
+        },
+        {
+          "name": "The Evil Within Collection",
+          "hasDescription": true,
+          "descriptionLength": 859
+        },
+        {
+          "name": "Horizon Zero Dawn / Marvel Midnight Suns",
+          "hasDescription": false,
+          "descriptionLength": 0
+        }
+      ]
+    }
+  ],
+  "totalGameCards": 57
+}

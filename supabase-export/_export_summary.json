@@ -1,0 +1,30 @@
+{
+  "exportDate": "2025-11-14T13:28:19.646Z",
+  "supabaseUrl": "https://rtyrmkniabujabcwbcnh.supabase.co",
+  "tables": [
+    {
+      "name": "games",
+      "records": 49
+    },
+    {
+      "name": "profiles",
+      "records": 12
+    },
+    {
+      "name": "subscription_plans",
+      "records": 4
+    },
+    {
+      "name": "subscriptions",
+      "records": 7
+    },
+    {
+      "name": "user_game_selections",
+      "records": 0
+    },
+    {
+      "name": "user_roles",
+      "records": 13
+    }
+  ]
+}

@@ -1,0 +1,696 @@
+{
+  "timestamp": "2025-10-09T19:13:08.589Z",
+  "supabaseUrl": "https://vidzpylrltqkzfxfzzzd.supabase.co",
+  "totalGames": 57,
+  "inserted": 0,
+  "failed": 57,
+  "successRate": "0.00%",
+  "errors": [
+    {
+      "title": "Inzoi",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Monster Hunter Wilds",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Stellar Blade",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "The First Berseker Kazhan",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "The Elder Scrolls IV Oblivion: Remastered",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Expedition 33",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Bleach Rebirth of Souls",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "AC Shadows",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Assassin's Creed Mirage",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Assassin’s Creed Valhalla",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Baldur's Gate 3",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Black Myth: Wukong",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Cyberpunk 2077",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Dead Island 2",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Dragon Ball Sparking Zero",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Dragon's Dogma 2",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "EA FC 2024",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "EA FC 2025",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Elden Ring",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Enigma do Medo",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Final Fantasy 16",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Final Fantasy 7 Rebirth",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Ghost of Tsushima",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "God of War + Ragnarok",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Granblue Fantasy Relink",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Hogwarts Legacy",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Horizon Forbidden West",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Mortal Kombat 1",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "NBA 2K24",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Red Dead Redemption 1",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Red Dead Redemption 2",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Resident Evil 2 Remake",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Resident Evil 4 Remake",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Split Fiction",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Silent Hill 2",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Stalker 2",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Star Wars Outlaws",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Street Fighter 6",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "WWE 2K25",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Naruto Storm Connections",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "TEKKEN 8",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "The Last of Us 1+2",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Call of Duty: Modern Warfare(2019)",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Call of Duty Modern Warfare 3",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Call of Duty Black Ops 6",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Helldivers 2",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Red Dead Redemption (Social Club)",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Suicide Squad: Kill the Justice League",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Horizon Zero Dawn / Marvel Midnight Suns",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Tomb Raider Collection",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Batman Arkham Collection",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Resident Evil 4 / 5 / 6",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Red Dead 2 / Resident Evil Village",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Mortal Kombat Bundle / Injustice 2",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Spider-Man / Miles Morales",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "The Evil Within Collection",
+      "error": "new row violates row-level security policy for table \"games\""
+    },
+    {
+      "title": "Horizon Zero Dawn / Marvel Midnight Suns",
+      "error": "new row violates row-level security policy for table \"games\""
+    }
+  ],
+  "games": [
+    {
+      "title": "Inzoi",
+      "login": "InzoiMHZ",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-blue-600 to-purple-600",
+      "tutorialSteps": 8
+    },
+    {
+      "title": "Monster Hunter Wilds",
+      "login": "kddgames02",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-blue-600 to-purple-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Stellar Blade",
+      "login": "sbladeMHZ01",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-blue-600 to-purple-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "The First Berseker Kazhan",
+      "login": "KhazanFLIX",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-blue-600 to-purple-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "The Elder Scrolls IV Oblivion: Remastered",
+      "login": "kazakh_zzzzzrr13",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-blue-600 to-purple-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Expedition 33",
+      "login": "expedition33ggmax",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-blue-600 to-purple-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Bleach Rebirth of Souls",
+      "login": "BleachRebirthFlix",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-blue-600 to-purple-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "AC Shadows",
+      "login": "acshadowsflix",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-blue-600 to-purple-600",
+      "tutorialSteps": 3
+    },
+    {
+      "title": "Assassin's Creed Mirage",
+      "login": "ACMirage@gamingflix.space",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-blue-600 to-gray-800",
+      "tutorialSteps": 10
+    },
+    {
+      "title": "Assassin’s Creed Valhalla",
+      "login": "ACValhalla@gamingflix.space",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-blue-600 to-gray-800",
+      "tutorialSteps": 9
+    },
+    {
+      "title": "Baldur's Gate 3",
+      "login": "eesskk3749",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-blue-600 to-purple-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Black Myth: Wukong",
+      "login": "wukongflix",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-blue-600 to-purple-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Cyberpunk 2077",
+      "login": "phantomspace2077",
+      "hasPassword": true,
+      "hasFamilyCode": true,
+      "gradient": "from-yellow-400 to-pink-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Dead Island 2",
+      "login": "DeadIsland2@gamingflix.space",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-blue-600 to-purple-600",
+      "tutorialSteps": 3
+    },
+    {
+      "title": "Dragon Ball Sparking Zero",
+      "login": "sparkinggflix",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-orange-500 to-blue-500",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Dragon's Dogma 2",
+      "login": "dragonsdogmagflix",
+      "hasPassword": true,
+      "hasFamilyCode": true,
+      "gradient": "from-blue-600 to-purple-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "EA FC 2024",
+      "login": "annie_floyd1995",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-green-500 to-blue-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "EA FC 2025",
+      "login": "duz51213",
+      "hasPassword": true,
+      "hasFamilyCode": true,
+      "gradient": "from-green-500 to-blue-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Elden Ring",
+      "login": "eldenflix2024",
+      "hasPassword": true,
+      "hasFamilyCode": true,
+      "gradient": "from-yellow-600 to-gray-800",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Enigma do Medo",
+      "login": "EnigmaFlix",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-blue-600 to-purple-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Final Fantasy 16",
+      "login": "ffantasy16flix",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-purple-600 to-blue-700",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Final Fantasy 7 Rebirth",
+      "login": "**Senha:**",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-purple-600 to-blue-700",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Ghost of Tsushima",
+      "login": "tsushimaflix",
+      "hasPassword": true,
+      "hasFamilyCode": true,
+      "gradient": "from-red-600 to-yellow-500",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "God of War + Ragnarok",
+      "login": "gowgamingflix",
+      "hasPassword": true,
+      "hasFamilyCode": true,
+      "gradient": "from-red-600 to-gray-900",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Granblue Fantasy Relink",
+      "login": "granbluegflix",
+      "hasPassword": true,
+      "hasFamilyCode": true,
+      "gradient": "from-blue-600 to-purple-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Hogwarts Legacy",
+      "login": "davehogwarts",
+      "hasPassword": true,
+      "hasFamilyCode": true,
+      "gradient": "from-purple-600 to-yellow-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Horizon Forbidden West",
+      "login": "horizonforbgflix",
+      "hasPassword": true,
+      "hasFamilyCode": true,
+      "gradient": "from-blue-500 to-orange-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Mortal Kombat 1",
+      "login": "kombatspace01",
+      "hasPassword": true,
+      "hasFamilyCode": true,
+      "gradient": "from-yellow-500 to-red-700",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "NBA 2K24",
+      "login": "luckycurt",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-blue-600 to-purple-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Red Dead Redemption 1",
+      "login": "rdr1off",
+      "hasPassword": true,
+      "hasFamilyCode": true,
+      "gradient": "from-red-700 to-orange-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Red Dead Redemption 2",
+      "login": "w5Png0482",
+      "hasPassword": true,
+      "hasFamilyCode": true,
+      "gradient": "from-red-700 to-orange-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Resident Evil 2 Remake",
+      "login": "steamok1090006",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-red-600 to-black",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Resident Evil 4 Remake",
+      "login": "davere4remake",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-red-600 to-black",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Split Fiction",
+      "login": "gcxmrv6659",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-blue-600 to-purple-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Silent Hill 2",
+      "login": "oconnerhill1",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-gray-600 to-red-800",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Stalker 2",
+      "login": "minjackswirter1970",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-blue-600 to-purple-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Star Wars Outlaws",
+      "login": "starwarsoutlaw@gamingflix.space",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-blue-600 to-purple-600",
+      "tutorialSteps": 10
+    },
+    {
+      "title": "Street Fighter 6",
+      "login": "streetflix6",
+      "hasPassword": true,
+      "hasFamilyCode": true,
+      "gradient": "from-blue-600 to-red-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "WWE 2K25",
+      "login": "lclstoregamewwe2k25ggmax",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-blue-600 to-purple-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Naruto Storm Connections",
+      "login": "narutocolecaoclaigames",
+      "hasPassword": true,
+      "hasFamilyCode": true,
+      "gradient": "from-orange-500 to-blue-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "TEKKEN 8",
+      "login": "Tekken8gflix",
+      "hasPassword": true,
+      "hasFamilyCode": true,
+      "gradient": "from-purple-600 to-red-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "The Last of Us 1+2",
+      "login": "gftlou1",
+      "hasPassword": true,
+      "hasFamilyCode": true,
+      "gradient": "from-green-700 to-gray-800",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Call of Duty: Modern Warfare(2019)",
+      "login": "codmw1@gamingflix.space",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-orange-500 to-red-600",
+      "tutorialSteps": 3
+    },
+    {
+      "title": "Call of Duty Modern Warfare 3",
+      "login": "vodkablackmw3",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-orange-500 to-red-600",
+      "tutorialSteps": 6
+    },
+    {
+      "title": "Call of Duty Black Ops 6",
+      "login": "BlackOps6Flix1",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-orange-500 to-red-600",
+      "tutorialSteps": 6
+    },
+    {
+      "title": "Helldivers 2",
+      "login": "helldiversflix",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-blue-600 to-purple-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Red Dead Redemption (Social Club)",
+      "login": "davereddead",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-red-700 to-orange-600",
+      "tutorialSteps": 3
+    },
+    {
+      "title": "Suicide Squad: Kill the Justice League",
+      "login": "suicidesquadgflix",
+      "hasPassword": true,
+      "hasFamilyCode": true,
+      "gradient": "from-blue-600 to-purple-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Horizon Zero Dawn / Marvel Midnight Suns",
+      "login": "rodriquez214",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-blue-500 to-orange-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Tomb Raider Collection",
+      "login": "**contato@gamingflix.space**",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-brown-600 to-gray-700",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Batman Arkham Collection",
+      "login": "viw90778",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-blue-600 to-purple-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Resident Evil 4 / 5 / 6",
+      "login": "sqzul318",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-red-600 to-black",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Red Dead 2 / Resident Evil Village",
+      "login": "Consultar suporte",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-red-600 to-black",
+      "tutorialSteps": 3
+    },
+    {
+      "title": "Mortal Kombat Bundle / Injustice 2",
+      "login": "Consultar suporte",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-yellow-500 to-red-700",
+      "tutorialSteps": 3
+    },
+    {
+      "title": "Spider-Man / Miles Morales",
+      "login": "spidermanflix",
+      "hasPassword": true,
+      "hasFamilyCode": true,
+      "gradient": "from-red-600 to-blue-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "The Evil Within Collection",
+      "login": "hqwb12933",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-blue-600 to-purple-600",
+      "tutorialSteps": 7
+    },
+    {
+      "title": "Horizon Zero Dawn / Marvel Midnight Suns",
+      "login": "Consultar suporte",
+      "hasPassword": true,
+      "hasFamilyCode": false,
+      "gradient": "from-blue-500 to-orange-600",
+      "tutorialSteps": 3
+    }
+  ]
+}

@@ -1,0 +1,144 @@
+╔══════════════════════════════════════════════════════════╗
+║  GUIA RÁPIDO: MIGRAR SUPABASE → MONGODB (SEM PLANO PAGO) ║
+╚══════════════════════════════════════════════════════════╝
+
+📋 PASSO A PASSO
+
+1️⃣ INSTALAR MONGODB
+   ─────────────────
+   • Windows: https://www.mongodb.com/try/download/community
+   • Ou Docker: docker run -d -p 27017:27017 --name mongodb mongo
+
+2️⃣ INSTALAR DEPENDÊNCIAS
+   ─────────────────────
+   npm install
+
+3️⃣ VERIFICAR SE MONGODB ESTÁ RODANDO
+   ─────────────────────────────────
+   npm run check:mongodb
+
+   Se der erro, inicie o MongoDB:
+   • Windows: net start MongoDB
+   • Docker: docker start mongodb
+
+4️⃣ EXECUTAR A MIGRAÇÃO
+   ───────────────────
+   
+   OPÇÃO A - Automático (Windows):
+   ─────────────────────────────
+   Clique duas vezes em: MIGRAR-DADOS.bat
+
+   OPÇÃO B - Manual:
+   ─────────────────
+   npm run migrate:supabase-to-mongo
+
+   O script vai:
+   ✓ Conectar no Supabase
+   ✓ Baixar TODOS os dados (games, users, subscriptions, etc)
+   ✓ Salvar em arquivos JSON (pasta supabase-export/)
+   ✓ Perguntar se quer importar no MongoDB
+   ✓ Importar tudo no MongoDB local
+
+5️⃣ CONFERIR OS DADOS
+   ─────────────────
+   
+   Via MongoDB Compass (GUI):
+   • Baixar: https://www.mongodb.com/try/download/compass
+   • Conectar: mongodb://localhost:27017
+   • Abrir banco: gameflix
+
+   Via Linha de Comando:
+   mongosh
+   > use gameflix
+   > db.games.countDocuments()
+   > db.games.findOne()
+
+═══════════════════════════════════════════════════════════
+
+📊 TABELAS QUE SERÃO MIGRADAS:
+
+✓ games                  - Catálogo de jogos
+✓ profiles               - Perfis de usuários  
+✓ subscription_plans     - Planos de assinatura
+✓ subscriptions          - Assinaturas ativas
+✓ user_game_selections   - Jogos escolhidos
+✓ user_roles             - Permissões/Roles
+
+═══════════════════════════════════════════════════════════
+
+❓ FAQ
+
+Q: Os dados do Supabase vão ser apagados?
+A: NÃO! Apenas fazemos uma cópia. O Supabase continua intacto.
+
+Q: Preciso de plano pago do Supabase?
+A: NÃO! Usamos a API pública do Supabase que funciona no plano grátis.
+
+Q: Posso rodar a migração várias vezes?
+A: SIM! Mas ATENÇÃO: cada vez que rodar, os dados do MongoDB
+   serão SUBSTITUÍDOS pelos dados atuais do Supabase.
+
+Q: E se eu tiver muitos dados?
+A: O script baixa em páginas de 1000 registros por vez.
+   Funciona mesmo com milhares de registros!
+
+Q: Posso escolher quais tabelas migrar?
+A: Sim! Edite o arquivo export-supabase-to-mongodb.js
+   e modifique o array TABLES (linha 13).
+
+═══════════════════════════════════════════════════════════
+
+🔧 COMANDOS ÚTEIS
+
+• Verificar MongoDB:
+  npm run check:mongodb
+
+• Migrar tudo:
+  npm run migrate:supabase-to-mongo
+
+• Só importar (se já exportou antes):
+  npm run import:mongo-only
+
+• Ver o que foi exportado:
+  Abra a pasta: supabase-export/
+
+═══════════════════════════════════════════════════════════
+
+💡 DICA: MIGRAÇÃO RÁPIDA
+
+Se você só quer os jogos (tabela games), pode usar:
+
+1. Edite: export-supabase-to-mongodb.js
+2. Mude linha 13 de:
+   const TABLES = ['games', 'profiles', ...];
+   Para:
+   const TABLES = ['games'];
+3. Execute: npm run migrate:supabase-to-mongo
+
+═══════════════════════════════════════════════════════════
+
+📞 PROBLEMAS?
+
+❌ Erro: "MongoServerError: connect ECONNREFUSED"
+   → MongoDB não está rodando
+   → Solução: net start MongoDB
+
+❌ Erro: "Cannot find module 'mongodb'"
+   → Dependências não instaladas
+   → Solução: npm install
+
+❌ Erro: "Authentication failed" 
+   → Credenciais erradas do Supabase
+   → Solução: Verifique o arquivo .env
+
+❌ Nenhum dado exportado
+   → Verifique se tem dados no Supabase
+   → Abra: https://supabase.com/dashboard
+
+═══════════════════════════════════════════════════════════
+
+📖 DOCUMENTAÇÃO COMPLETA
+
+Para mais detalhes, veja: GUIA-MIGRACAO-SUPABASE-MONGODB.md
+
+═══════════════════════════════════════════════════════════

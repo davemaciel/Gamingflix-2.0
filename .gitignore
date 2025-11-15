@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+.vercel/
+
+# Environment variables (IMPORTANTE: Não commitar!)
+.env
+.env.local
+.env.production
+.env.development
+backend/.env
+
+# Mas INCLUIR arquivo de exemplo
+!.env.example
+!backend/.env.example
+
+# Security
+*.pem
+*.key
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+
+# Logs
+logs/
+backend/logs/
+*.log
+
+# IMPORTANTE: INCLUIR backups do MongoDB (necessário para migração)
+!mongodb-backup/
+!mongodb-backup/**/*.json
+
+# Arquivos grandes (> 100 MB não permitidos no GitHub)
+*.exe
+*.zip
+*.rar
+*.7z
+*.tar.gz
+*.torrent
+temp_extract/
+supabase/*.exe
+supabase/*.zip

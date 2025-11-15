@@ -1,0 +1,80 @@
+[
+  {
+    "id": "1ef2da06-7c81-4a75-a768-abeb431602f9",
+    "user_id": "7d8dc322-8fd4-4216-8726-bc0fcb9760d1",
+    "role": "client",
+    "created_at": "2025-10-09T21:46:54.601852+00:00"
+  },
+  {
+    "id": "d3463ef3-7f2e-4fb3-b54a-dd59ee189d29",
+    "user_id": "58434be3-e7dd-407a-85a6-e9361559f0ba",
+    "role": "client",
+    "created_at": "2025-10-10T06:22:17.852242+00:00"
+  },
+  {
+    "id": "c012e887-a5ef-4ea0-b0f6-87cbd509bd55",
+    "user_id": "33ec9743-ba23-4560-823c-61bd56f901a7",
+    "role": "client",
+    "created_at": "2025-10-10T08:11:01.830547+00:00"
+  },
+  {
+    "id": "b89dbced-4f8b-4c57-81f2-dad00ac6bbc5",
+    "user_id": "01a770eb-9c33-49d5-86f4-e297d712c76a",
+    "role": "admin",
+    "created_at": "2025-10-10T13:11:25.868485+00:00"
+  },
+  {
+    "id": "91f056d7-24dc-4edd-8d3b-1d98130f0f66",
+    "user_id": "67ab6e57-85b4-4bbd-bb95-9e8109334475",
+    "role": "client",
+    "created_at": "2025-10-14T05:48:52.318617+00:00"
+  },
+  {
+    "id": "bfa4fc4d-32e4-4bb3-9f51-d574519b8fc5",
+    "user_id": "33141ad9-7183-4d5c-a6c4-4c7cd9f1218d",
+    "role": "client",
+    "created_at": "2025-10-15T00:53:05.109355+00:00"
+  },
+  {
+    "id": "f3a34648-c3f9-4fad-a4ad-fb8122d4a35d",
+    "user_id": "33141ad9-7183-4d5c-a6c4-4c7cd9f1218d",
+    "role": "admin",
+    "created_at": "2025-10-15T03:21:20.794787+00:00"
+  },
+  {
+    "id": "93f44e72-c7b9-4fc3-a423-874df48c06f5",
+    "user_id": "b346c41e-fbec-44f4-a5a8-5084ca44b394",
+    "role": "client",
+    "created_at": "2025-11-02T00:40:57.759261+00:00"
+  },
+  {
+    "id": "c6fbacdf-0399-4b0f-8c58-d329d45cdab3",
+    "user_id": "93f23b9e-9a4e-43ea-b330-b363805fdf6f",
+    "role": "client",
+    "created_at": "2025-11-02T16:09:42.962348+00:00"
+  },
+  {
+    "id": "2cb9b3de-8ffd-482c-92a7-6b82a067d6da",
+    "user_id": "d94c3620-f080-46c8-8aa3-6f611eed8c8a",
+    "role": "client",
+    "created_at": "2025-11-02T19:42:24.464954+00:00"
+  },
+  {
+    "id": "b58e8679-6155-4a0d-854e-a739e1b5229b",
+    "user_id": "04541106-7b53-4be0-829b-be96def58af2",
+    "role": "client",
+    "created_at": "2025-11-03T18:03:13.35305+00:00"
+  },
+  {
+    "id": "7c56214c-e837-4ec0-8e47-c8edefb97aa5",
+    "user_id": "e141be49-133a-4e8a-b1d3-ece6fdc2f681",
+    "role": "client",
+    "created_at": "2025-11-05T02:54:31.344811+00:00"
+  },
+  {
+    "id": "01e4ad58-1b61-4489-93e7-5df30a2179a9",
+    "user_id": "9ecdcd34-9fb0-4035-b39b-78036e379594",
+    "role": "admin",
+    "created_at": "2025-10-09T19:59:38.956407+00:00"
+  }
+]

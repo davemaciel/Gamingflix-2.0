@@ -1,0 +1,83 @@
+[
+  {
+    "_id": "69189aabc92edd0550eaec35",
+    "id": "972fbb94-2254-4437-9298-65afaa162579",
+    "name": "Ultimate",
+    "slug": "ultimate",
+    "price": 99.9,
+    "max_games": 999999,
+    "description": "FOUNDERS - Acesso ILIMITADO a todos os jogos + Preço vitalício de R$ 67,90",
+    "features": [
+      "Acesso ILIMITADO a todos os jogos",
+      "Troca ilimitada de jogos",
+      "Garantia de 30 dias",
+      "Suporte VIP 24/7",
+      "Acesso offline",
+      "Todos os lançamentos",
+      "Acesso antecipado a novos jogos"
+    ],
+    "is_active": true,
+    "created_at": "2025-10-09T19:45:12.62484+00:00",
+    "updated_at": "2025-10-14T22:13:25.085751+00:00"
+  },
+  {
+    "_id": "69189aabc92edd0550eaec36",
+    "id": "58e49305-7638-48f9-9675-beb325868e73",
+    "name": "Basic",
+    "slug": "basic",
+    "price": 29.9,
+    "max_games": 3,
+    "description": "Perfeito para começar sua jornada gamer",
+    "features": [
+      "Acesso a 3 jogos simultâneos",
+      "Troca de jogos a qualquer momento",
+      "Garantia de 30 dias",
+      "Suporte prioritário",
+      "Acesso offline"
+    ],
+    "is_active": false,
+    "created_at": "2025-10-09T19:45:12.62484+00:00",
+    "updated_at": "2025-10-14T22:13:25.085751+00:00"
+  },
+  {
+    "_id": "69189aabc92edd0550eaec37",
+    "id": "ccbd27c4-4b8b-4ffc-87ab-769aa838292b",
+    "name": "Gamer",
+    "slug": "gamer",
+    "price": 59.9,
+    "max_games": 10,
+    "description": "Para quem quer variedade e mais opções",
+    "features": [
+      "Acesso a 10 jogos simultâneos",
+      "Troca ilimitada de jogos",
+      "Garantia de 30 dias",
+      "Suporte prioritário",
+      "Acesso offline",
+      "Lançamentos recentes"
+    ],
+    "is_active": false,
+    "created_at": "2025-10-09T19:45:12.62484+00:00",
+    "updated_at": "2025-10-14T22:13:25.085751+00:00"
+  },
+  {
+    "_id": "69189aabc92edd0550eaec38",
+    "id": "810c59bb-4b8e-4f8c-ac55-23bb10f302ae",
+    "name": "Select",
+    "slug": "select",
+    "price": 49.9,
+    "max_games": 999999,
+    "description": "Acesso aos jogos mais populares selecionados",
+    "features": [
+      "Acesso aos jogos SELECIONADOS pela equipe",
+      "Catálogo curado com os melhores títulos",
+      "Troca ilimitada dentro do catálogo Select",
+      "Garantia de 30 dias",
+      "Suporte prioritário",
+      "Acesso offline",
+      "Novos jogos adicionados mensalmente"
+    ],
+    "is_active": false,
+    "created_at": "2025-10-14T01:31:44.444242+00:00",
+    "updated_at": "2025-10-14T22:13:25.085751+00:00"
+  }
+]

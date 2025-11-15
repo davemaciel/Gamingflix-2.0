@@ -1,0 +1,44 @@
+# Caddyfile - Gameflix Catalog
+# Configuração automática gerada em 2025-10-10 02:40:55
+# Atualizado com suporte ao Bot Steam Guard em /bot
+# ✅ PROXY REVERSO para Backend Nativo integrado
+
+ultimate.gamingflix.space {
+    # Backend API - Proxy reverso para localhost:3000
+    handle /api/* {
+        reverse_proxy localhost:3000
+    }
+    
+    # Bot Steam Guard - Servir arquivos estáticos do build
+    handle /bot* {
+        uri strip_prefix /bot
+        root * C:\Users\spaceverse001\Desktop\gameflix-catalog-51332-main\v2-1-ggflixbot\dist
+        try_files {path} /index.html
+        file_server
+    }
+    
+    # Catálogo principal
+    reverse_proxy localhost:80
+    
+    # Headers de segurança
+    header {
+        Strict-Transport-Security "max-age=31536000;"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+    
+    # Compressão
+    encode gzip
+    
+    # Logs
+    log {
+        output file "C:\Users\spaceverse001\Desktop\gameflix-catalog-51332-main\logs\caddy-access.log"
+        format json
+    }
+}
+
+# Redirecionar www para domínio principal
+www.ultimate.gamingflix.space {
+    redir https://ultimate.gamingflix.space{uri} permanent
+}

@@ -1,0 +1,211 @@
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+
+interface RequestOptions extends RequestInit {
+  requireAuth?: boolean;
+}
+
+class ApiClient {
+  private token: string | null = null;
+
+  constructor() {
+    this.token = localStorage.getItem('auth_token');
+  }
+
+  setToken(token: string | null) {
+    this.token = token;
+    if (token) {
+      localStorage.setItem('auth_token', token);
+    } else {
+      localStorage.removeItem('auth_token');
+    }
+  }
+
+  getToken() {
+    return this.token;
+  }
+
+  private async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+    const { requireAuth = true, ...fetchOptions } = options;
+
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      ...fetchOptions.headers,
+    };
+
+    if (requireAuth && this.token) {
+      headers['Authorization'] = `Bearer ${this.token}`;
+    }
+
+    const response = await fetch(`${API_URL}${endpoint}`, {
+      ...fetchOptions,
+      headers,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
+      throw new Error(error.error || `HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  async post<T>(endpoint: string, data?: any, options?: RequestOptions): Promise<T> {
+    return this.request<T>(endpoint, {
+      ...options,
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async get<T>(endpoint: string, options?: RequestOptions): Promise<T> {
+    return this.request<T>(endpoint, {
+      ...options,
+      method: 'GET',
+    });
+  }
+
+  async put<T>(endpoint: string, data?: any, options?: RequestOptions): Promise<T> {
+    return this.request<T>(endpoint, {
+      ...options,
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async delete<T>(endpoint: string, options?: RequestOptions): Promise<T> {
+    return this.request<T>(endpoint, {
+      ...options,
+      method: 'DELETE',
+    });
+  }
+}
+
+export const apiClient = new ApiClient();
+
+export interface User {
+  id: string;
+  email: string;
+  username?: string | null;
+  full_name: string;
+  whatsapp: string;
+  avatar_url?: string | null;
+  is_founder: boolean;
+  role: 'admin' | 'client';
+  has_active_subscription?: boolean;
+  subscription_expires_at?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AuthResponse {
+  user: User;
+  token: string;
+}
+
+export const authApi = {
+  signUp: (email: string, password: string, full_name: string, whatsapp: string, username: string) =>
+    apiClient.post<AuthResponse>('/auth/signup', { email, password, full_name, whatsapp, username }, { requireAuth: false }),
+
+  signIn: (email: string, password: string) =>
+    apiClient.post<AuthResponse>('/auth/signin', { email, password }, { requireAuth: false }),
+
+  getMe: () => apiClient.get<{ user: User }>('/auth/me'),
+
+  checkRole: () => apiClient.get<{ isAdmin: boolean }>('/auth/role'),
+
+  forgotPassword: (email: string) =>
+    apiClient.post<{ message: string }>('/auth/forgot-password', { email }, { requireAuth: false }),
+
+  resetPassword: (token: string, password: string) =>
+    apiClient.post<{ message: string }>('/auth/reset-password', { token, password }, { requireAuth: false }),
+
+  checkUsername: (username: string) =>
+    apiClient.get<{ available: boolean; username: string }>(`/auth/check-username/${username}`, { requireAuth: false }),
+
+  updateProfile: (data: { username?: string; full_name?: string; whatsapp?: string; avatar_url?: string }) =>
+    apiClient.put<{ user: User }>('/auth/profile', data),
+
+  changePassword: (currentPassword: string, newPassword: string) =>
+    apiClient.post<{ message: string }>('/auth/change-password', { currentPassword, newPassword }),
+};
+
+export interface Game {
+  id: string;
+  title: string;
+  cover_url: string;
+  description: string;
+  gradient: string;
+  login: string;
+  password: string;
+  family_code?: string;
+  tutorial: any[];
+  created_at?: string;
+  updated_at?: string;
+}
+
+export const gamesApi = {
+  getAll: () => apiClient.get<Game[]>('/games'),
+
+  getById: (id: string) => apiClient.get<Game>(`/games/${id}`),
+
+  create: (game: Partial<Game>) => apiClient.post<Game>('/games', game),
+
+  update: (id: string, game: Partial<Game>) => apiClient.put<Game>(`/games/${id}`, game),
+
+  delete: (id: string) => apiClient.delete(`/games/${id}`),
+};
+
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  max_games: number;
+  description: string;
+  features: string[];
+}
+
+export interface Subscription {
+  id: string;
+  user_id: string;
+  plan_id: string;
+  status: 'active' | 'cancelled' | 'expired' | 'pending';
+  started_at: string;
+  expires_at: string | null;
+  plan: SubscriptionPlan;
+}
+
+export const subscriptionsApi = {
+  getMySubscription: () => apiClient.get<Subscription | null>('/subscriptions/me'),
+
+  getFounderStatus: () => apiClient.get<{ is_founder: boolean }>('/subscriptions/founder'),
+
+  getPlans: () => apiClient.get<SubscriptionPlan[]>('/subscriptions/plans'),
+
+  getMyGames: () => apiClient.get<Game[]>('/subscriptions/games'),
+
+  addGame: (game_id: string) => apiClient.post('/subscriptions/games', { game_id }),
+
+  removeGame: (game_id: string) => apiClient.delete(`/subscriptions/games/${game_id}`),
+};
+
+export const usersApi = {
+  getAll: () => apiClient.get<User[]>('/users'),
+  
+  getById: (id: string) => apiClient.get<User>(`/users/${id}`),
+  
+  update: (id: string, data: Partial<User>) => apiClient.put(`/users/${id}`, data),
+  
+  updateRole: (id: string, role: 'admin' | 'client') => 
+    apiClient.put(`/users/${id}/role`, { role }),
+  
+  delete: (id: string) => apiClient.delete(`/users/${id}`),
+  
+  createSubscription: (id: string, plan_id: string, duration_months: number) =>
+    apiClient.post(`/users/${id}/subscription`, { plan_id, duration_months }),
+  
+  cancelSubscription: (id: string) => apiClient.delete(`/users/${id}/subscription`),
+  
+  renewSubscription: (id: string, duration_months: number) =>
+    apiClient.put(`/users/${id}/subscription/renew`, { duration_months }),
+};
