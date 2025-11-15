@@ -8,14 +8,9 @@ build/
 out/
 .vercel/
 
-# Environment variables (IMPORTANTE: Não commitar!)
-.env
-.env.local
-.env.production
-.env.development
-backend/.env
-
-# Mas INCLUIR arquivo de exemplo
+# Environment variables
+# INCLUINDO .env pois repositório é PRIVADO (backup completo)
+# ⚠️ SE TORNAR PÚBLICO, REMOVER .env IMEDIATAMENTE!
 !.env.example
 !backend/.env.example
 

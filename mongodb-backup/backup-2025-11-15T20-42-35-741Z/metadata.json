@@ -1,0 +1,13 @@
+{
+  "timestamp": "2025-11-15T20:42:35.789Z",
+  "database": "gameflix",
+  "totalCollections": 5,
+  "totalDocuments": 92,
+  "collections": [
+    "profiles",
+    "games",
+    "subscriptions",
+    "subscription_plans",
+    "user_roles"
+  ]
+}
