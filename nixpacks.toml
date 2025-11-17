@@ -1,9 +1,11 @@
 # Configuração Railway - Deploy Unificado (Frontend + Backend)
+# Todas as dependências (frontend + backend) estão no package.json raiz
+
 [phases.setup]
 nixPkgs = ["nodejs_20"]
 
 [phases.install]
-cmds = ["bash install-all.sh"]
+cmds = ["npm install"]
 
 [phases.build]
 cmds = ["npm run build"]
