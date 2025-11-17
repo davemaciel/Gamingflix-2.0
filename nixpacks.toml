@@ -1,11 +1,19 @@
+# Configuração Railway - Deploy Unificado (Frontend + Backend)
 [phases.setup]
 nixPkgs = ["nodejs_20"]
 
 [phases.install]
+# Instala dependências do frontend
 cmds = ["npm ci"]
 
 [phases.build]
-cmds = ["npm run build"]
+# 1. Builda o frontend (gera pasta /dist)
+# 2. Instala dependências do backend
+cmds = [
+  "npm run build",
+  "cd backend && npm ci"
+]
 
 [start]
-cmd = "npm run start"
+# Inicia o backend que serve o frontend buildado
+cmd = "cd backend && npm start"
