@@ -1,7 +1,7 @@
 // Teste de conexão MongoDB Atlas
 import { MongoClient } from 'mongodb';
 
-const MONGODB_URL = 'mongodb+srv://gameflix:GamingFlix2025@ggflix.m5lplz.mongodb.net/gameflix?appName=ggflix';
+const MONGODB_URL = 'mongodb+srv://gameflix:GamingFlix2025@ggflix.m5lpb1z.mongodb.net/gameflix?appName=ggflix';
 
 async function testConnection() {
   console.log('🔄 Testando conexão com MongoDB Atlas...');

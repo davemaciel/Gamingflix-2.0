@@ -13,6 +13,7 @@
     "preview": "vite preview",
     "start": "node backend/src/index.js",
     "test:mongodb-atlas": "node test-mongodb-atlas.js",
+    "migrate:local-to-atlas": "node migrar-local-para-atlas.js",
     "test:supabase": "node test-supabase-connection.js",
     "analyze:trello": "node analyze-trello.js",
     "import:games": "node import-trello-data.js",

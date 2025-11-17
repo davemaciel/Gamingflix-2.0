@@ -3,7 +3,7 @@ VARIÁVEIS DE AMBIENTE - RAILWAY
 Copie e cole TODAS no Railway → Variables
 ===========================================
 
-MONGODB_URL=mongodb+srv://gameflix:GamingFlix2025@ggflix.m5lplz.mongodb.net/gameflix?appName=ggflix
+MONGODB_URL=mongodb+srv://gameflix:GamingFlix2025@ggflix.m5lpb1z.mongodb.net/gameflix?appName=ggflix
 
 MONGODB_DB_NAME=gameflix
 

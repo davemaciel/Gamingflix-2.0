@@ -14,8 +14,20 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const envPath = path.resolve(__dirname, '../.env');
 
-// Carrega as variáveis de ambiente
-dotenv.config({ path: envPath });
+// Só carrega o backend/.env quando estamos rodando localmente.
+// Em plataformas como Render ou Railway as variáveis já vêm do ambiente.
+const runningInManagedEnv =
+  process.env.RENDER === 'true' ||
+  Boolean(process.env.RENDER_EXTERNAL_HOSTNAME) ||
+  Boolean(process.env.RAILWAY_ENVIRONMENT) ||
+  process.env.CLOUD_ENV === 'true';
+
+if (!runningInManagedEnv || process.env.LOAD_LOCAL_ENV === 'true') {
+  dotenv.config({ path: envPath });
+} else {
+  // Ainda assim carregamos variáveis padrão do processo sem tocar no arquivo local
+  dotenv.config();
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
