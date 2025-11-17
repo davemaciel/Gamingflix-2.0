@@ -105,7 +105,8 @@ app.listen(PORT, HOST, async () => {
     subscriptionCheckerInterval = startSubscriptionChecker();
   } catch (error) {
     logger.error('Erro ao conectar ao MongoDB:', error);
-    process.exit(1);
+    // Não encerramos o processo aqui para evitar que o Railway retorne 502.
+    // A aplicação continuará rodando e os erros de banco aparecerão nos logs e nas rotas.
   }
 });
 
