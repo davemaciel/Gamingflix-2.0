@@ -109,7 +109,6 @@ app.listen(PORT, HOST, async () => {
   }
 });
 
-// Tratamento de sinais para encerramento gracioso
 process.on('SIGTERM', async () => {
   logger.info('SIGTERM recebido. Encerrando servidor...');
   if (subscriptionCheckerInterval) {
