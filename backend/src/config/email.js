@@ -1,8 +1,23 @@
 import pkg from 'nodemailer';
+import { Resend } from 'resend';
 import { logger } from '../utils/logger.js';
 
 // Compatibilidade com módulos ESM
 const nodemailer = pkg.default || pkg;
+
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const RESEND_FROM = process.env.RESEND_FROM;
+let resendClient = null;
+
+const getFromAddress = () => RESEND_FROM || process.env.SMTP_FROM || process.env.SMTP_USER;
+
+const getResendClient = () => {
+  if (!RESEND_API_KEY) return null;
+  if (!resendClient) {
+    resendClient = new Resend(RESEND_API_KEY);
+  }
+  return resendClient;
+};
 
 export const createEmailTransporter = () => {
   const emailConfig = {
@@ -14,6 +29,61 @@ export const createEmailTransporter = () => {
       pass: process.env.SMTP_PASS
     }
   };
+
+const sendViaResend = async (mailOptions) => {
+  const client = getResendClient();
+  if (!client) return false;
+
+  const from = mailOptions.from || getFromAddress();
+  if (!from) {
+    logger.error('Resend FROM address not configured.');
+    return false;
+  }
+
+  try {
+    await client.emails.send({
+      from,
+      to: mailOptions.to,
+      subject: mailOptions.subject,
+      html: mailOptions.html
+    });
+    return true;
+  } catch (error) {
+    logger.error('Error sending email via Resend:', error);
+    return false;
+  }
+};
+
+const sendViaSMTP = async (mailOptions) => {
+  const transporter = createEmailTransporter();
+  if (!transporter) return false;
+
+  const from = mailOptions.from || getFromAddress();
+  if (!from) {
+    logger.error('SMTP FROM address not configured.');
+    return false;
+  }
+
+  try {
+    await transporter.sendMail({ ...mailOptions, from });
+    return true;
+  } catch (error) {
+    logger.error('Error sending email via SMTP:', error);
+    return false;
+  }
+};
+
+const sendEmail = async (mailOptions) => {
+  if (getResendClient()) {
+    const success = await sendViaResend(mailOptions);
+    if (success) {
+      return true;
+    }
+    logger.warn('Falling back to SMTP after Resend failure.');
+  }
+
+  return await sendViaSMTP(mailOptions);
+};
 
   if (!emailConfig.auth.user || !emailConfig.auth.pass) {
     logger.warn('SMTP credentials not configured. Password reset emails will not be sent.');
@@ -29,13 +99,6 @@ export const createEmailTransporter = () => {
 };
 
 export const sendPasswordResetEmail = async (email, resetToken, fullName = null) => {
-  const transporter = createEmailTransporter();
-  
-  if (!transporter) {
-    logger.error('Email transporter not configured');
-    return false;
-  }
-
   const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}`;
 
   const mailOptions = {
@@ -114,24 +177,17 @@ export const sendPasswordResetEmail = async (email, resetToken, fullName = null)
     `
   };
 
-  try {
-    await transporter.sendMail(mailOptions);
+  const sent = await sendEmail(mailOptions);
+  if (sent) {
     logger.info(`Password reset email sent to ${email}`);
     return true;
-  } catch (error) {
-    logger.error('Error sending password reset email:', error);
-    return false;
   }
+
+  logger.error('Failed to send password reset email');
+  return false;
 };
 
 export const sendWelcomeEmail = async (email, fullName) => {
-  const transporter = createEmailTransporter();
-  
-  if (!transporter) {
-    logger.warn('Email transporter not configured - skipping welcome email');
-    return false;
-  }
-
   const mailOptions = {
     from: process.env.SMTP_FROM || process.env.SMTP_USER,
     to: email,
@@ -202,24 +258,17 @@ export const sendWelcomeEmail = async (email, fullName) => {
     `
   };
 
-  try {
-    await transporter.sendMail(mailOptions);
+  const sent = await sendEmail(mailOptions);
+  if (sent) {
     logger.info(`Welcome email sent to ${email}`);
     return true;
-  } catch (error) {
-    logger.error('Error sending welcome email:', error);
-    return false;
   }
+
+  logger.warn('Failed to send welcome email');
+  return false;
 };
 
 export const sendSubscriptionActivatedEmail = async (email, fullName, planName, expiryDate) => {
-  const transporter = createEmailTransporter();
-  
-  if (!transporter) {
-    logger.warn('Email transporter not configured - skipping subscription email');
-    return false;
-  }
-
   const formattedExpiry = expiryDate ? new Date(expiryDate).toLocaleDateString('pt-BR', {
     day: '2-digit',
     month: 'long',
@@ -303,24 +352,17 @@ export const sendSubscriptionActivatedEmail = async (email, fullName, planName, 
     `
   };
 
-  try {
-    await transporter.sendMail(mailOptions);
+  const sent = await sendEmail(mailOptions);
+  if (sent) {
     logger.info(`Subscription activated email sent to ${email}`);
     return true;
-  } catch (error) {
-    logger.error('Error sending subscription activated email:', error);
-    return false;
   }
+
+  logger.warn('Failed to send subscription activated email');
+  return false;
 };
 
 export const sendPasswordChangedEmail = async (email, fullName) => {
-  const transporter = createEmailTransporter();
-  
-  if (!transporter) {
-    logger.warn('Email transporter not configured - skipping password changed email');
-    return false;
-  }
-
   const currentDate = new Date().toLocaleString('pt-BR', { 
     timeZone: 'America/Sao_Paulo',
     day: '2-digit',
@@ -407,14 +449,14 @@ export const sendPasswordChangedEmail = async (email, fullName) => {
     `
   };
 
-  try {
-    await transporter.sendMail(mailOptions);
+  const sent = await sendEmail(mailOptions);
+  if (sent) {
     logger.info(`Password changed email sent to ${email}`);
     return true;
-  } catch (error) {
-    logger.error('Error sending password changed email:', error);
-    return false;
   }
+
+  logger.warn('Failed to send password changed email');
+  return false;
 };
 
 export const sendSubscriptionExpiringEmail = async (email, fullName, planName, daysRemaining, expiryDate) => {
