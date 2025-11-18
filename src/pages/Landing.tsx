@@ -1,28 +1,49 @@
 ﻿import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Check, Gamepad2, Shield, Clock, Repeat, Zap, LogOut, MessageCircle } from 'lucide-react';
+import { Check, Gamepad2, Shield, Clock, Repeat, Zap, LogOut, ShoppingCart } from 'lucide-react';
 import logo from '@/assets/logo.png';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/hooks/useLanguage';
 import { LanguageSelector } from '@/components/LanguageSelector';
-import { openWhatsApp } from '@/config/whatsapp';
 import { getFoundersPricing } from '@/config/founders';
+import { checkoutApi } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
 
 const Landing = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { t, language } = useLanguage();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
   };
 
-  const handleWhatsApp = () => {
-    openWhatsApp(t.whatsappMessage);
+  const handleCheckout = async () => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      const session = await checkoutApi.getSession();
+      window.open(session.checkout_url, '_blank');
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao abrir checkout',
+        description: error.message || 'Tente novamente',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const { founders: foundersPrice, regular: regularPrice } = getFoundersPricing(language);
@@ -157,10 +178,11 @@ const Landing = () => {
             <Button 
               size="lg" 
               className="text-lg px-8 gap-2 bg-primary hover:bg-primary/90" 
-              onClick={handleWhatsApp}
+              onClick={handleCheckout}
+              disabled={loading}
             >
-              <MessageCircle className="h-5 w-5" />
-              {t.secureFoundersSpot}
+              <ShoppingCart className="h-5 w-5" />
+              {loading ? 'Carregando...' : t.secureFoundersSpot}
             </Button>
             <Link to="/catalogo">
               <Button size="lg" variant="outline" className="text-lg px-8">
@@ -348,10 +370,11 @@ const Landing = () => {
               <CardFooter className="flex flex-col gap-3">
                 <Button 
                   className="w-full py-5 sm:py-6 text-sm sm:text-base gap-2 bg-primary hover:bg-primary/90" 
-                  onClick={handleWhatsApp}
+                  onClick={handleCheckout}
+                  disabled={loading}
                 >
-                  <MessageCircle className="h-5 w-5" />
-                  {t.whatsappButtonLabel}
+                  <ShoppingCart className="h-5 w-5" />
+                  {loading ? 'Carregando...' : t.whatsappButtonLabel}
                 </Button>
                 <p className="text-xs text-center text-muted-foreground">
                   {t.whatsappButtonDescription}
@@ -467,10 +490,11 @@ const Landing = () => {
           <Button 
             size="lg" 
             className="text-lg px-12 gap-2 bg-primary hover:bg-primary/90" 
-            onClick={handleWhatsApp}
+            onClick={handleCheckout}
+            disabled={loading}
           >
-            <MessageCircle className="h-5 w-5" />
-            {t.secureMySpotNow}
+            <ShoppingCart className="h-5 w-5" />
+            {loading ? 'Carregando...' : t.secureMySpotNow}
           </Button>
         </div>
       </section>

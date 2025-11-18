@@ -1,9 +1,11 @@
 ﻿import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Crown, Check, MessageCircle } from 'lucide-react';
+import { Crown, Check, ShoppingCart } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
-import { openWhatsApp } from '@/config/whatsapp';
 import { getFoundersPricing } from '@/config/founders';
+import { checkoutApi } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
 
 interface UpgradeModalProps {
   open: boolean;
@@ -12,13 +14,27 @@ interface UpgradeModalProps {
 
 export const UpgradeModal = ({ open, onOpenChange }: UpgradeModalProps) => {
   const { t, language } = useLanguage();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
 
   const { founders: foundersPrice } = getFoundersPricing(language);
   const foundersHighlight = t.foundersLimitedSpotsHighlight.replace('{{price}}', foundersPrice);
 
-  const handleUpgrade = () => {
-    onOpenChange(false);
-    openWhatsApp(t.whatsappMessage);
+  const handleUpgrade = async () => {
+    try {
+      setLoading(true);
+      const session = await checkoutApi.getSession();
+      window.open(session.checkout_url, '_blank');
+      onOpenChange(false);
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao abrir checkout',
+        description: error.message || 'Tente novamente',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const benefits = [
@@ -73,10 +89,11 @@ export const UpgradeModal = ({ open, onOpenChange }: UpgradeModalProps) => {
             </Button>
             <Button
               onClick={handleUpgrade}
+              disabled={loading}
               className="w-full rounded-2xl gap-2 bg-primary hover:bg-primary/90 text-sm sm:text-base"
             >
-              <MessageCircle className="h-4 w-4" />
-              {t.upgradeViewPlans}
+              <ShoppingCart className="h-4 w-4" />
+              {loading ? 'Carregando...' : t.upgradeViewPlans}
             </Button>
           </div>
         </div>

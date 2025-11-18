@@ -119,15 +119,14 @@ export const TransactionsManagement = () => {
   return (
     <div className="space-y-6">
       {/* Estatísticas */}
-      {stats && (
-        <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total</CardTitle>
               <CreditCard className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.total}</div>
+              <div className="text-2xl font-bold">{stats?.total || 0}</div>
             </CardContent>
           </Card>
 
@@ -137,7 +136,7 @@ export const TransactionsManagement = () => {
               <DollarSign className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{stats.paid}</div>
+              <div className="text-2xl font-bold text-green-600">{stats?.paid || 0}</div>
             </CardContent>
           </Card>
 
@@ -147,7 +146,7 @@ export const TransactionsManagement = () => {
               <Clock className="h-4 w-4 text-yellow-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
+              <div className="text-2xl font-bold text-yellow-600">{stats?.pending || 0}</div>
             </CardContent>
           </Card>
 
@@ -157,11 +156,10 @@ export const TransactionsManagement = () => {
               <DollarSign className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-primary">{formatCurrency(stats.revenue)}</div>
+              <div className="text-2xl font-bold text-primary">{formatCurrency(stats?.revenue || 0)}</div>
             </CardContent>
           </Card>
         </div>
-      )}
 
       {/* Filtros */}
       <Card>
