@@ -1,7 +1,5 @@
 ﻿import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { useAuth } from "@/hooks/useAuth";
-import { useSubscription } from "@/hooks/useSubscription";
 import { useNavigate } from "react-router-dom";
 import { AuthDialog } from "@/components/AuthDialog";
 import { UpgradeModal } from "@/components/UpgradeModal";
@@ -13,13 +11,20 @@ interface Game {
   gradient: string;
 }
 
-interface GameCardProps {
-  game: Game;
+interface User {
+  id: string;
+  email: string;
+  username?: string;
 }
 
-export const GameCard = ({ game }: GameCardProps) => {
-  const { user } = useAuth();
-  const { hasCatalogAccess, loading: subscriptionLoading } = useSubscription();
+interface GameCardProps {
+  game: Game;
+  user: User | null;
+  hasCatalogAccess: boolean;
+  subscriptionLoading: boolean;
+}
+
+export const GameCard = ({ game, user, hasCatalogAccess, subscriptionLoading }: GameCardProps) => {
   const navigate = useNavigate();
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);

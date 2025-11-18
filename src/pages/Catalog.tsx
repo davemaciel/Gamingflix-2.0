@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useSubscription } from '@/hooks/useSubscription';
 import { useLanguage } from '@/hooks/useLanguage';
 import { gamesApi } from '@/lib/api';
 import { Header } from '@/components/Header';
@@ -22,6 +23,7 @@ let catalogPromise: Promise<Game[]> | null = null;
 
 const Index = () => {
   const { user } = useAuth();
+  const { hasCatalogAccess, loading: subscriptionLoading } = useSubscription();
   const { t } = useLanguage();
   const { toast } = useToast();
   const [games, setGames] = useState<Game[]>([]);
@@ -161,7 +163,13 @@ const Index = () => {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
             {filteredGames.map((game) => (
-              <GameCard key={game.id} game={game} />
+              <GameCard 
+                key={game.id} 
+                game={game} 
+                user={user}
+                hasCatalogAccess={hasCatalogAccess}
+                subscriptionLoading={subscriptionLoading}
+              />
             ))}
           </div>
         )}
