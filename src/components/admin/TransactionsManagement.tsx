@@ -40,15 +40,20 @@ export const TransactionsManagement = () => {
       if (statusFilter) params.status = statusFilter;
       if (searchEmail) params.email = searchEmail;
 
+      console.log('Carregando transações com params:', params);
       const response = await transactionsApi.getAll(params);
+      console.log('Transações carregadas:', response);
       setTransactions(response.transactions);
       setTotal(response.total);
     } catch (error: any) {
+      console.error('Erro ao carregar transações:', error);
       toast({
         variant: 'destructive',
         title: 'Erro ao carregar transações',
-        description: error.message,
+        description: error.response?.data?.error || error.message || 'Erro desconhecido',
       });
+      setTransactions([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
@@ -56,14 +61,25 @@ export const TransactionsManagement = () => {
 
   const loadStats = async () => {
     try {
+      console.log('Carregando estatísticas...');
       const statsData = await transactionsApi.getStats();
+      console.log('Estatísticas carregadas:', statsData);
       setStats(statsData);
     } catch (error: any) {
       console.error('Erro ao carregar estatísticas:', error);
+      setStats({
+        total: 0,
+        paid: 0,
+        pending: 0,
+        failed: 0,
+        refunded: 0,
+        revenue: 0
+      });
     }
   };
 
   useEffect(() => {
+    console.log('TransactionsManagement montado');
     loadTransactions();
     loadStats();
   }, [currentPage, statusFilter]);
