@@ -7,6 +7,7 @@ const nodemailer = pkg.default || pkg;
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_FROM = process.env.RESEND_FROM;
+const isResendConfigured = Boolean(RESEND_API_KEY && RESEND_FROM);
 let resendClient = null;
 
 const getFromAddress = () => RESEND_FROM || process.env.SMTP_FROM || process.env.SMTP_USER;
@@ -19,6 +20,10 @@ const getResendClient = () => {
   return resendClient;
 };
 
+if (!isResendConfigured) {
+  logger.warn('Resend provider not configured (missing RESEND_API_KEY and/or RESEND_FROM). Emails will use SMTP.');
+}
+
 export const createEmailTransporter = () => {
   const emailConfig = {
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
@@ -29,6 +34,19 @@ export const createEmailTransporter = () => {
       pass: process.env.SMTP_PASS
     }
   };
+
+  if (!emailConfig.auth.user || !emailConfig.auth.pass) {
+    logger.warn('SMTP credentials not configured. Password reset emails will not be sent.');
+    return null;
+  }
+
+  try {
+    return nodemailer.createTransport(emailConfig);
+  } catch (error) {
+    logger.error('Error creating email transporter:', error);
+    return null;
+  }
+};
 
 const sendViaResend = async (mailOptions) => {
   const client = getResendClient();
@@ -74,7 +92,8 @@ const sendViaSMTP = async (mailOptions) => {
 };
 
 const sendEmail = async (mailOptions) => {
-  if (getResendClient()) {
+  if (isResendConfigured && getResendClient()) {
+    logger.info(`Sending email via Resend (subject: ${mailOptions.subject})`);
     const success = await sendViaResend(mailOptions);
     if (success) {
       return true;
@@ -83,19 +102,6 @@ const sendEmail = async (mailOptions) => {
   }
 
   return await sendViaSMTP(mailOptions);
-};
-
-  if (!emailConfig.auth.user || !emailConfig.auth.pass) {
-    logger.warn('SMTP credentials not configured. Password reset emails will not be sent.');
-    return null;
-  }
-
-  try {
-    return nodemailer.createTransport(emailConfig);
-  } catch (error) {
-    logger.error('Error creating email transporter:', error);
-    return null;
-  }
 };
 
 export const sendPasswordResetEmail = async (email, resetToken, fullName = null) => {
