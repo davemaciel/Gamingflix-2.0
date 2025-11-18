@@ -34,7 +34,7 @@ export const TransactionsManagement = () => {
   });
   const [loading, setLoading] = useState(true);
   const [searchEmail, setSearchEmail] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
   const limit = 20;
@@ -44,7 +44,7 @@ export const TransactionsManagement = () => {
     try {
       setLoading(true);
       const params: any = { limit, offset: currentPage * limit };
-      if (statusFilter) params.status = statusFilter;
+      if (statusFilter && statusFilter !== 'all') params.status = statusFilter;
       if (searchEmail) params.email = searchEmail;
 
       console.log('Carregando transações com params:', params);
@@ -214,7 +214,7 @@ export const TransactionsManagement = () => {
                   <SelectValue placeholder="Todos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="all">Todos</SelectItem>
                   <SelectItem value="paid">Pago</SelectItem>
                   <SelectItem value="pending">Pendente</SelectItem>
                   <SelectItem value="failed">Falhou</SelectItem>
