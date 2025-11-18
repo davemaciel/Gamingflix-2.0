@@ -16,6 +16,80 @@ interface Release {
 
 const releases: Release[] = [
   {
+    version: 'v1.3.0',
+    date: '18 de Novembro, 2025',
+    changes: [
+      {
+        type: 'feature',
+        description: 'Integração completa com GGCheckout - pagamentos via PIX e Cartão de Crédito',
+      },
+      {
+        type: 'feature',
+        description: 'Sistema de webhook automático para confirmação de pagamentos em tempo real',
+      },
+      {
+        type: 'feature',
+        description: 'Redirecionamento automático pós-pagamento para página do catálogo',
+      },
+      {
+        type: 'feature',
+        description: 'Sistema de polling inteligente - verifica automaticamente quando o pagamento é aprovado',
+      },
+      {
+        type: 'feature',
+        description: 'Emails transacionais profissionais com branding GamingFlix (cor vermelha)',
+      },
+      {
+        type: 'feature',
+        description: 'Sistema unificado de envio de emails - Resend API com fallback SMTP',
+      },
+      {
+        type: 'feature',
+        description: 'Templates de email para: assinatura criada, expirando (7 e 3 dias), expirada, cancelada e renovada',
+      },
+      {
+        type: 'feature',
+        description: 'Email de recuperação de senha com design moderno e instruções de segurança',
+      },
+      {
+        type: 'feature',
+        description: 'Sistema de logs detalhados para debug completo do fluxo de pagamento',
+      },
+      {
+        type: 'feature',
+        description: 'Endpoint de teste de webhook para simulação de pagamentos em desenvolvimento',
+      },
+      {
+        type: 'improvement',
+        description: 'Documentação completa do GGCheckout em CHECKOUT-SETUP.md e GGCHECKOUT-REDIRECT.md',
+      },
+      {
+        type: 'improvement',
+        description: 'Guia de debug de webhooks em DEBUG-WEBHOOK.md com instruções detalhadas',
+      },
+      {
+        type: 'improvement',
+        description: 'Plano "Ultimate Founders" criado automaticamente no primeiro pagamento',
+      },
+      {
+        type: 'improvement',
+        description: 'Usuários marcados como Founders automaticamente após primeiro pagamento',
+      },
+      {
+        type: 'security',
+        description: 'Validação de webhooks com verificação de origem e tipo de evento',
+      },
+      {
+        type: 'security',
+        description: 'Cancelamento automático de assinaturas antigas ao criar nova assinatura',
+      },
+      {
+        type: 'bugfix',
+        description: 'Corrigido erro de valor vazio em SelectItem do filtro de transações',
+      },
+    ],
+  },
+  {
     version: 'v1.2.0',
     date: '14 de Novembro, 2025',
     changes: [
