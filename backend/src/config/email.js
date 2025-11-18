@@ -99,7 +99,7 @@ const sendViaSMTP = async (mailOptions) => {
   }
 };
 
-const sendEmail = async (mailOptions) => {
+export const sendEmail = async (mailOptions) => {
   if (isResendConfigured && getResendClient()) {
     logger.info(`Sending email via Resend (subject: ${mailOptions.subject})`);
     const success = await sendViaResend(mailOptions);

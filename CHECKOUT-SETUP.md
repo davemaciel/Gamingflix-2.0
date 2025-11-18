@@ -51,7 +51,20 @@ GG_CHECKOUT_WEBHOOK_SECRET=seu-secret-aqui
 
 # URL do frontend (já configurado)
 FRONTEND_URL=https://ultimate.gamingflix.space
+
+# Resend para envio de emails (RECOMENDADO)
+RESEND_API_KEY=re_sua_chave_api_aqui
+RESEND_FROM=GamingFlix <noreply@gamingflix.space>
+EMAIL_FROM_NAME=GamingFlix
 ```
+
+### Como obter API Key do Resend:
+
+1. Acesse [resend.com](https://resend.com) e crie uma conta gratuita
+2. Adicione seu domínio (`gamingflix.space`) e configure DNS
+3. Crie uma API Key em Settings → API Keys
+4. Adicione as variáveis acima no Render com sua API key
+5. Pronto! Emails serão enviados via Resend (100 emails/dia grátis)
 
 ## Configuração do Webhook no GGCheckout
 
