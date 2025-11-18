@@ -156,6 +156,41 @@ Faça um pagamento de teste e verifique:
 - Collection `checkout_transactions` no MongoDB
 - Assinatura criada para o usuário
 
+## Configuração de Back Redirect no GGCheckout
+
+### Recuperação de Checkout Abandonado
+
+Para melhorar a conversão e recuperar checkouts abandonados, configure o **Back Redirect** no painel do GGCheckout:
+
+1. **Acesse**: Menu → Produtos → Checkout → Editar Checkout
+2. **Encontre**: Seção "Back Redirect" 
+3. **Configure**:
+   ```
+   URL de Redirecionamento:
+   https://ultimate.gamingflix.space/?checkout=abandoned
+   ```
+
+### Como Funciona
+
+Quando o usuário:
+- Clica em "Voltar" no checkout
+- Fecha a janela de pagamento
+- Cancela o pagamento
+
+Ele será redirecionado para o site com o parâmetro `?checkout=abandoned`, o que automaticamente:
+
+✅ **Exibe modal de recuperação** com benefícios destacados  
+✅ **Oferece botão para retornar ao checkout** rapidamente  
+✅ **Cria senso de urgência** (vagas limitadas, preço vitalício)  
+✅ **Melhora taxa de conversão** ao engajar usuários que abandonaram
+
+### Benefícios
+
+- **Experiência profissional**: Em vez de ficar na página do GGCheckout, volta para seu site
+- **Recuperação ativa**: Modal persuasivo incentiva conclusão da compra
+- **Tracking**: Rastreia quantos usuários abandonam o checkout
+- **Segunda chance**: Oferece nova oportunidade de conversão
+
 ## Rollback
 
 Se necessário reverter para versão estável:

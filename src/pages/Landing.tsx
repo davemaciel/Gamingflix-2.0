@@ -12,6 +12,7 @@ import { LanguageSelector } from '@/components/LanguageSelector';
 import { getFoundersPricing } from '@/config/founders';
 import { checkoutApi } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
+import { CheckoutAbandonedModal } from '@/components/CheckoutAbandonedModal';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -119,6 +120,7 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <CheckoutAbandonedModal />
       {/* Header */}
       <header className="border-b border-border sticky top-0 bg-background/95 backdrop-blur z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
