@@ -1,11 +1,12 @@
 /**
  * Templates de Email para Sistema de Assinaturas
  * GamingFlix - Catálogo de Jogos
+ * Branding atualizado com cores oficiais da marca
  */
 
 const baseStyle = `
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #0f0f0f;
+  background-color: #0a0a0a;
   color: #ffffff;
   padding: 0;
   margin: 0;
@@ -14,42 +15,46 @@ const baseStyle = `
 const containerStyle = `
   max-width: 600px;
   margin: 0 auto;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  background-color: #1a1a1a;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.1);
 `;
 
 const headerStyle = `
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  padding: 32px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  padding: 40px 32px;
   text-align: center;
+  border-bottom: 3px solid #b91c1c;
 `;
 
 const contentStyle = `
   padding: 32px;
   line-height: 1.6;
+  background-color: #1a1a1a;
 `;
 
 const buttonStyle = `
   display: inline-block;
   padding: 14px 32px;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
   text-decoration: none;
   border-radius: 8px;
   font-weight: bold;
   margin: 16px 0;
-  transition: transform 0.2s;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  border: 1px solid rgba(239, 68, 68, 0.5);
 `;
 
 const footerStyle = `
-  padding: 24px;
+  padding: 24px 32px;
   text-align: center;
   background-color: #0a0a0a;
-  color: #888;
-  font-size: 14px;
-  border-top: 1px solid #333;
+  color: #666;
+  font-size: 13px;
+  border-top: 1px solid #262626;
 `;
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:8080';
@@ -79,19 +84,19 @@ export const subscriptionCreatedTemplate = (userName, planName, expiresAt) => {
         </div>
         
         <div style="${contentStyle}">
-          <h2 style="color: #6366f1; margin-top: 0;">Olá, ${userName}! 👋</h2>
+          <h2 style="color: #ef4444; margin-top: 0; font-size: 24px;">Olá, ${userName}! 👋</h2>
           
-          <p style="font-size: 16px; color: #e0e0e0;">
-            Sua assinatura foi <strong style="color: #8b5cf6;">ativada com sucesso</strong>! 🎉
+          <p style="font-size: 16px; color: #e5e5e5; line-height: 1.8;">
+            Sua assinatura foi <strong style="color: #ef4444;">ativada com sucesso</strong>! 🎉
           </p>
           
-          <div style="background-color: #1a1a2e; border-left: 4px solid #6366f1; padding: 16px; margin: 24px 0; border-radius: 8px;">
-            <p style="margin: 0; font-size: 14px; color: #aaa;">Plano Atual</p>
-            <p style="margin: 8px 0 0 0; font-size: 20px; font-weight: bold; color: #8b5cf6;">${planName}</p>
-            <p style="margin: 8px 0 0 0; font-size: 14px; color: #888;">Válido até: <strong style="color: #6366f1;">${expirationDate}</strong></p>
+          <div style="background-color: #0a0a0a; border-left: 4px solid #ef4444; padding: 20px; margin: 24px 0; border-radius: 12px; border: 1px solid #262626;">
+            <p style="margin: 0; font-size: 13px; color: #999; text-transform: uppercase; letter-spacing: 0.5px;">Plano Atual</p>
+            <p style="margin: 12px 0 8px 0; font-size: 22px; font-weight: bold; color: #ef4444;">${planName}</p>
+            <p style="margin: 0; font-size: 14px; color: #888;">Válido até: <strong style="color: #fff;">${expirationDate}</strong></p>
           </div>
           
-          <h3 style="color: #8b5cf6; margin-top: 32px;">O que você pode fazer agora:</h3>
+          <h3 style="color: #ef4444; margin-top: 32px; font-size: 18px;">O que você pode fazer agora:</h3>
           <ul style="color: #e0e0e0; padding-left: 20px;">
             <li style="margin: 12px 0;">✅ Acessar nosso catálogo completo de jogos</li>
             <li style="margin: 12px 0;">✅ Selecionar seus jogos favoritos</li>
@@ -105,14 +110,14 @@ export const subscriptionCreatedTemplate = (userName, planName, expiresAt) => {
             </a>
           </div>
           
-          <p style="font-size: 14px; color: #888; margin-top: 32px; text-align: center;">
-            Dúvidas? Responda este email ou entre em contato conosco!
+          <p style="font-size: 14px; color: #888; margin-top: 32px; text-align: center; line-height: 1.6;">
+            Dúvidas? Respondaeste email ou entre em contato conosco!
           </p>
         </div>
         
         <div style="${footerStyle}">
-          <p style="margin: 0;">© 2025 GamingFlix - Seu catálogo de jogos</p>
-          <p style="margin: 8px 0 0 0; font-size: 12px;">Este é um email automático, por favor não responda.</p>
+          <p style="margin: 0; color: #666;">🎮 <strong style="color: #ef4444;">GamingFlix</strong> - Seu Catálogo de Jogos</p>
+          <p style="margin: 12px 0 0 0; font-size: 12px; color: #555;">Este é um email automático. Por favor, não responda.</p>
         </div>
       </div>
     </body>

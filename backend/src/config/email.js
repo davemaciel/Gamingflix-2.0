@@ -120,74 +120,82 @@ export const sendPasswordResetEmail = async (email, resetToken, fullName = null)
     to: email,
     subject: '🔑 Recuperação de Senha - GamingFlix',
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
-        <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 40px; border-radius: 12px 12px 0 0; text-align: center;">
-          <h1 style="color: white; margin: 0; font-size: 32px;">🔑 GamingFlix</h1>
-          <p style="color: white; margin: 10px 0 0 0; font-size: 18px;">Recuperação de Senha</p>
+      <!DOCTYPE html>
+      <html lang="pt-BR">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Recuperação de Senha - GamingFlix</title>
+      </head>
+      <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0a0a0a; color: #ffffff; padding: 0; margin: 0;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #1a1a1a; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 32px rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.1);">
+          <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); padding: 40px 32px; text-align: center; border-bottom: 3px solid #b91c1c;">
+            <h1 style="color: white; margin: 0; font-size: 32px;">🔑 GamingFlix</h1>
+            <p style="color: white; margin: 10px 0 0 0; font-size: 18px; opacity: 0.95;">Recuperação de Senha</p>
+          </div>
+          
+          <div style="padding: 32px; line-height: 1.6; background-color: #1a1a1a;">
+            <h2 style="color: #ef4444; margin-top: 0; font-size: 24px;">Olá${fullName ? `, ${fullName}` : ''}! 👋</h2>
+            
+            <p style="color: #e5e5e5; font-size: 16px; line-height: 1.8;">
+              Recebemos uma solicitação para <strong style="color: #ef4444;">redefinir a senha</strong> da sua conta GamingFlix.
+            </p>
+            
+            <div style="background-color: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; padding: 16px; border-radius: 8px; margin: 24px 0; border: 1px solid rgba(239, 68, 68, 0.2);">
+              <p style="color: #ef4444; margin: 0; font-size: 14px;">
+                <strong>⏰ Atenção:</strong> Este link expira em <strong>1 hora</strong> por segurança.
+              </p>
+            </div>
+            
+            <p style="color: #e5e5e5; font-size: 16px; line-height: 1.8;">
+              Para criar uma nova senha, clique no botão abaixo:
+            </p>
+            
+            <div style="text-align: center; margin: 32px 0;">
+              <a href="${resetUrl}" 
+                 style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); border: 1px solid rgba(239, 68, 68, 0.5); font-size: 16px;">
+                🔑 Redefinir Minha Senha
+              </a>
+            </div>
+            
+            <div style="background-color: #0a0a0a; padding: 20px; border-radius: 12px; margin: 24px 0; border: 1px solid #262626;">
+              <p style="color: #999; margin: 0 0 8px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">
+                Ou copie e cole este link no navegador:
+              </p>
+              <p style="color: #ef4444; margin: 0; font-size: 12px; word-break: break-all; line-height: 1.6;">
+                ${resetUrl}
+              </p>
+            </div>
+            
+            <div style="background-color: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; padding: 16px; border-radius: 8px; margin: 24px 0; border: 1px solid rgba(239, 68, 68, 0.2);">
+              <p style="color: #ef4444; margin: 0; font-size: 14px; line-height: 1.6;">
+                <strong>⚠️ Não foi você?</strong><br>
+                <span style="color: #ccc;">Se você não solicitou a recuperação de senha, ignore este email. Sua senha permanecerá inalterada.</span>
+              </p>
+            </div>
+            
+            <div style="background-color: #0a0a0a; padding: 20px; border-radius: 12px; margin: 24px 0; border: 1px solid #262626;">
+              <h3 style="color: #ef4444; margin-top: 0; font-size: 16px;">🛡️ Dicas de Segurança:</h3>
+              <ul style="color: #ccc; line-height: 1.8; margin: 0; padding-left: 20px; font-size: 14px;">
+                <li>Nunca compartilhe sua senha com ninguém</li>
+                <li>Use uma senha forte com letras, números e símbolos</li>
+                <li>Não use a mesma senha em múltiplos sites</li>
+                <li>Altere sua senha regularmente</li>
+              </ul>
+            </div>
+            
+            <p style="font-size: 14px; color: #888; margin-top: 32px; text-align: center; line-height: 1.6;">
+              Precisa de ajuda? Entre em contato conosco!
+            </p>
+          </div>
+          
+          <div style="padding: 24px 32px; text-align: center; background-color: #0a0a0a; color: #666; font-size: 13px; border-top: 1px solid #262626;">
+            <p style="margin: 0; color: #666;">🎮 <strong style="color: #ef4444;">GamingFlix</strong> - Seu Catálogo de Jogos</p>
+            <p style="margin: 12px 0 0 0; font-size: 12px; color: #555;">Este é um email automático de segurança. Por favor, não responda.</p>
+          </div>
         </div>
-        
-        <div style="background-color: white; padding: 40px; border-radius: 0 0 12px 12px;">
-          <h2 style="color: #333; margin-top: 0;">Olá${fullName ? `, ${fullName}` : ''}! 👋</h2>
-          
-          <p style="color: #666; font-size: 16px; line-height: 1.6;">
-            Recebemos uma solicitação para <strong>redefinir a senha</strong> da sua conta GamingFlix.
-          </p>
-          
-          <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; border-radius: 4px; margin: 24px 0;">
-            <p style="color: #92400e; margin: 0; font-size: 14px;">
-              <strong>⏰ Atenção:</strong> Este link expira em <strong>1 hora</strong> por segurança.
-            </p>
-          </div>
-          
-          <p style="color: #666; font-size: 16px; line-height: 1.6;">
-            Para criar uma nova senha, clique no botão abaixo:
-          </p>
-          
-          <div style="text-align: center; margin: 32px 0;">
-            <a href="${resetUrl}" 
-               style="display: inline-block; padding: 16px 40px; background-color: #f59e0b; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
-              🔑 Redefinir Minha Senha
-            </a>
-          </div>
-          
-          <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 24px 0;">
-            <p style="color: #666; margin: 0 0 8px 0; font-size: 14px;">
-              <strong>Ou copie e cole este link no navegador:</strong>
-            </p>
-            <p style="color: #6366f1; margin: 0; font-size: 12px; word-break: break-all;">
-              ${resetUrl}
-            </p>
-          </div>
-          
-          <div style="background-color: #fee2e2; border-left: 4px solid #ef4444; padding: 16px; border-radius: 4px; margin: 24px 0;">
-            <p style="color: #991b1b; margin: 0; font-size: 14px;">
-              <strong>⚠️ Não foi você?</strong><br>
-              Se você não solicitou a recuperação de senha, ignore este email. Sua senha permanecerá inalterada.
-            </p>
-          </div>
-          
-          <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 24px 0;">
-            <h3 style="color: #6366f1; margin-top: 0;">🛡️ Dicas de Segurança:</h3>
-            <ul style="color: #666; line-height: 1.8; margin: 0; padding-left: 20px; font-size: 14px;">
-              <li>Nunca compartilhe sua senha com ninguém</li>
-              <li>Use uma senha forte com letras, números e símbolos</li>
-              <li>Não use a mesma senha em múltiplos sites</li>
-              <li>Altere sua senha regularmente</li>
-            </ul>
-          </div>
-          
-          <hr style="margin: 32px 0; border: none; border-top: 1px solid #e5e5e5;">
-          
-          <p style="color: #999; font-size: 14px; text-align: center; margin: 0;">
-            © 2025 GamingFlix - Todos os direitos reservados<br>
-            <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}" style="color: #6366f1; text-decoration: none;">gamingflix.com</a>
-          </p>
-          
-          <p style="color: #999; font-size: 12px; text-align: center; margin-top: 16px;">
-            Este é um email automático de segurança. Por favor, não responda.
-          </p>
-        </div>
-      </div>
+      </body>
+      </html>
     `
   };
 
