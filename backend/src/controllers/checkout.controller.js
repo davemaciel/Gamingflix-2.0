@@ -29,14 +29,15 @@ export const handleWebhook = async (req, res) => {
   try {
     const payload = req.body;
     
+    logger.info('=== WEBHOOK RECEBIDO ===');
+    logger.info('Headers:', JSON.stringify(req.headers, null, 2));
+    logger.info('Body:', JSON.stringify(payload, null, 2));
+    
     // Validação opcional do secret (se configurado)
     if (WEBHOOK_SECRET) {
       const signature = req.headers['x-ggcheckout-signature'] || req.headers['x-webhook-signature'];
-      // TODO: implementar validação de assinatura quando GGCheckout fornecer detalhes
-      logger.info('Webhook signature validation (if provided):', signature);
+      logger.info('Webhook signature (if provided):', signature);
     }
-
-    logger.info('Received GGCheckout webhook:', JSON.stringify(payload, null, 2));
 
     const { event, customer, payment, products } = payload;
     
@@ -74,14 +75,21 @@ export const handleWebhook = async (req, res) => {
 
     // Processar evento de pagamento
     if (event === 'pix.paid' || event === 'card.paid') {
+      logger.info(`🎉 Evento de pagamento bem-sucedido detectado: ${event}`);
       await handlePaymentSuccess(customer, payment, transactionId);
+      logger.info('✅ Pagamento processado com sucesso!');
     } else if (event === 'card.failed' || event === 'pix.failed' || event === 'card.refunded') {
+      logger.info(`❌ Evento de falha de pagamento detectado: ${event}`);
       await handlePaymentFailed(customer, transactionId);
+    } else {
+      logger.info(`ℹ️ Evento informativo recebido: ${event}`);
     }
 
+    logger.info('=== WEBHOOK PROCESSADO COM SUCESSO ===');
     res.status(200).json({ received: true });
   } catch (error) {
-    logger.error('Error processing webhook:', error);
+    logger.error('❌ ERROR PROCESSING WEBHOOK:', error);
+    logger.error('Stack trace:', error.stack);
     res.status(500).json({ error: 'Erro ao processar webhook' });
   }
 };
@@ -108,10 +116,17 @@ function getStatusFromEvent(event) {
  */
 async function handlePaymentSuccess(customer, payment, transactionId) {
   try {
+    logger.info('=== PROCESSANDO PAGAMENTO BEM-SUCEDIDO ===');
+    logger.info('Customer:', JSON.stringify(customer, null, 2));
+    logger.info('Payment:', JSON.stringify(payment, null, 2));
+    logger.info('Transaction ID:', transactionId);
+    
     const email = customer.email;
+    logger.info(`Buscando usuário com email: ${email}`);
     
     // Buscar usuário por email
     let user = await collections.profiles().findOne({ email });
+    logger.info('Usuário encontrado:', user ? `ID: ${user.id}` : 'NÃO ENCONTRADO');
     
     if (!user) {
       logger.warn(`User not found for email ${email}, creating placeholder`);
@@ -189,22 +204,26 @@ async function handlePaymentSuccess(customer, payment, transactionId) {
     };
 
     await collections.subscriptions().insertOne(subscription);
+    logger.info('✅ Assinatura criada com sucesso:', subscription.id);
 
     // Marcar usuário como Founder
     await collections.profiles().updateOne(
       { id: user.id },
       { $set: { is_founder: true, updated_at: new Date() } }
     );
+    logger.info('✅ Usuário marcado como Founder');
 
-    logger.info(`Subscription created for user ${user.id} (${email}): expires ${expiresAt}`);
+    logger.info(`✅ Subscription created for user ${user.id} (${email}): expires ${expiresAt}`);
 
     // Enviar email de boas-vindas
-    await sendSubscriptionCreatedEmail(
+    logger.info('📧 Enviando email de boas-vindas...');
+    const emailSent = await sendSubscriptionCreatedEmail(
       email,
       user.full_name || email,
       foundersPlan.name,
       expiresAt
     );
+    logger.info(emailSent ? '✅ Email enviado com sucesso' : '❌ Falha ao enviar email');
 
   } catch (error) {
     logger.error('Error handling payment success:', error);
