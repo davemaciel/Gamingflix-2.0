@@ -11,10 +11,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Pencil, Trash2, Plus, Copy, Users, Gamepad2, MessageSquare } from 'lucide-react';
+import { Pencil, Trash2, Plus, Copy, Users, Gamepad2, MessageSquare, DollarSign } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { UsersManagement } from '@/components/admin/UsersManagement';
+import { TransactionsManagement } from '@/components/admin/TransactionsManagement';
 
 type ContentLanguage = 'pt' | 'en' | 'es';
 
@@ -359,7 +360,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="games" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 max-w-2xl mb-6">
+          <TabsList className="grid w-full grid-cols-3 max-w-3xl mb-6">
             <TabsTrigger value="games" className="flex items-center gap-2">
               <Gamepad2 className="h-4 w-4" />
               Jogos
@@ -367,6 +368,10 @@ const Admin = () => {
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               Usuários
+            </TabsTrigger>
+            <TabsTrigger value="transactions" className="flex items-center gap-2">
+              <DollarSign className="h-4 w-4" />
+              Transações
             </TabsTrigger>
             {/* <TabsTrigger value="support" className="flex items-center gap-2">
               <MessageSquare className="h-4 w-4" />
@@ -614,6 +619,10 @@ const Admin = () => {
 
           <TabsContent value="users">
             <UsersManagement />
+          </TabsContent>
+
+          <TabsContent value="transactions">
+            <TransactionsManagement />
           </TabsContent>
         </Tabs>
       </div>

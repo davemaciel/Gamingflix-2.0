@@ -487,7 +487,7 @@ export const translations: Record<Language, Translations> = {
 
     features: {
       unlimitedAccess: 'Acesso ILIMITADO a todos os jogos',
-      lifetimePrice: 'Preço vitalício de R$ 67,90/mês (nunca aumenta)',
+      lifetimePrice: 'Preço vitalício de R$ 59,90/mês (nunca aumenta)',
       founderBadge: 'Badge exclusivo de FOUNDER no seu perfil',
       unlimitedSwap: 'Troca ilimitada de jogos',
       allNewReleases: 'TODOS OS LANÇAMENTOS NOVOS inclusos',
@@ -502,15 +502,15 @@ export const translations: Record<Language, Translations> = {
     faqs: {
       foundersProgram: {
         question: 'O que é o programa Founders?',
-        answer: 'Os primeiros 100 assinantes do GamingFlix Ultimate ganham o status de FOUNDER: preço vitalício de R$ 67,90/mês (mesmo quando o preço normal subir para R$ 87,90), badge exclusivo e benefícios permanentes.',
+        answer: 'Os primeiros 100 assinantes do GamingFlix Ultimate ganham o status de FOUNDER: preço vitalício de R$ 59,90/mês (mesmo quando o preço normal subir para R$ 87,90), badge exclusivo e benefícios permanentes.',
       },
       whatsappPurchase: {
         question: 'Como funciona a compra via WhatsApp?',
         answer: 'Clique no botão de WhatsApp, envie a mensagem automática e nossa equipe responderá imediatamente com os dados para pagamento (Pix, cartão ou transferência). Após confirmação do pagamento, você recebe suas credenciais na hora.',
       },
       lifetimePrice: {
-        question: 'O preço de R$ 67,90 é realmente vitalício?',
-        answer: 'Sim! Founders pagam R$ 67,90/mês para sempre, mesmo quando o preço regular aumentar para R$ 87,90. É um benefício exclusivo e permanente registrado no seu perfil.',
+        question: 'O preço de R$ 59,90 é realmente vitalício?',
+        answer: 'Sim! Founders pagam R$ 59,90/mês para sempre, mesmo quando o preço regular aumentar para R$ 87,90. É um benefício exclusivo e permanente registrado no seu perfil.',
       },
       international: {
         question: 'Consigo acessar mesmo não morando no Brasil?',
@@ -566,7 +566,7 @@ export const translations: Record<Language, Translations> = {
     removeGame: 'Remover Jogo',
     upgradeRequired: 'Faça upgrade para acessar',
 
-    whatsappMessage: '🎮 Olá! Quero garantir minha vaga como FOUNDER do GamingFlix Ultimate por R$ 67,90/mês vitalício!',
+    whatsappMessage: '🎮 Olá! Quero garantir minha vaga como FOUNDER do GamingFlix Ultimate por R$ 59,90/mês vitalício!',
 
     whatYoureBuying: 'O que Você Está Comprando?',
     sharedAccountTitle: 'Conta Compartilhada',

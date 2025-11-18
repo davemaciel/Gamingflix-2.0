@@ -47,6 +47,7 @@ export const collections = {
   profiles: () => getDatabase().collection('profiles'),
   subscriptions: () => getDatabase().collection('subscriptions'),
   subscriptionPlans: () => getDatabase().collection('subscription_plans'),
+  transactions: () => getDatabase().collection('checkout_transactions'),
   userGameSelections: () => getDatabase().collection('user_game_selections'),
   userRoles: () => getDatabase().collection('user_roles'),
 };

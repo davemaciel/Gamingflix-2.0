@@ -209,3 +209,59 @@ export const usersApi = {
   renewSubscription: (id: string, duration_months: number) =>
     apiClient.put(`/users/${id}/subscription/renew`, { duration_months }),
 };
+
+export interface CheckoutSession {
+  checkout_url: string;
+  plan: string;
+  price: number;
+}
+
+export interface Transaction {
+  id: string;
+  event: string;
+  status: 'pending' | 'paid' | 'failed' | 'refunded' | 'unknown';
+  payment_method: string;
+  amount: number;
+  customer_email: string;
+  customer_name: string;
+  customer_phone: string;
+  products: any[];
+  raw_payload: any;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TransactionsResponse {
+  transactions: Transaction[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface TransactionStats {
+  total: number;
+  paid: number;
+  pending: number;
+  failed: number;
+  refunded: number;
+  revenue: number;
+}
+
+export const checkoutApi = {
+  getSession: () => apiClient.get<CheckoutSession>('/checkout/session'),
+};
+
+export const transactionsApi = {
+  getAll: (params?: { status?: string; email?: string; limit?: number; offset?: number }) => {
+    const query = new URLSearchParams();
+    if (params?.status) query.append('status', params.status);
+    if (params?.email) query.append('email', params.email);
+    if (params?.limit) query.append('limit', params.limit.toString());
+    if (params?.offset) query.append('offset', params.offset.toString());
+    return apiClient.get<TransactionsResponse>(`/transactions?${query.toString()}`);
+  },
+  
+  getById: (id: string) => apiClient.get<Transaction>(`/transactions/${id}`),
+  
+  getStats: () => apiClient.get<TransactionStats>('/transactions/stats'),
+};
