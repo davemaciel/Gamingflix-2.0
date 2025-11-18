@@ -63,17 +63,17 @@ export const UpgradeModal = ({ open, onOpenChange }: UpgradeModalProps) => {
               ))}
             </ul>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="flex-1 rounded-2xl"
+              className="w-full rounded-2xl text-sm sm:text-base"
             >
               {t.upgradeBack}
             </Button>
             <Button
               onClick={handleUpgrade}
-              className="flex-1 rounded-2xl gap-2 bg-primary hover:bg-primary/90"
+              className="w-full rounded-2xl gap-2 bg-primary hover:bg-primary/90 text-sm sm:text-base"
             >
               <MessageCircle className="h-4 w-4" />
               {t.upgradeViewPlans}
