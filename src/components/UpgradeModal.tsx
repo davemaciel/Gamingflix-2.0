@@ -3,9 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Crown, Check, ShoppingCart } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { getFoundersPricing } from '@/config/founders';
-import { checkoutApi } from '@/lib/api';
+import { checkoutApi, subscriptionsApi } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface UpgradeModalProps {
   open: boolean;
@@ -15,16 +16,93 @@ interface UpgradeModalProps {
 export const UpgradeModal = ({ open, onOpenChange }: UpgradeModalProps) => {
   const { t, language } = useLanguage();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [waitingPayment, setWaitingPayment] = useState(false);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const { founders: foundersPrice } = getFoundersPricing(language);
   const foundersHighlight = t.foundersLimitedSpotsHighlight.replace('{{price}}', foundersPrice);
+
+  // Limpar polling quando o componente desmontar
+  useEffect(() => {
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+    };
+  }, []);
+
+  // Verificar status de assinatura
+  const checkSubscriptionStatus = async () => {
+    try {
+      const subscription = await subscriptionsApi.getMySubscription();
+      if (subscription && subscription.status === 'active') {
+        // Pagamento confirmado! Redirecionar para o catálogo
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current);
+        }
+        setWaitingPayment(false);
+        onOpenChange(false);
+        
+        toast({
+          title: '🎉 Pagamento confirmado!',
+          description: 'Bem-vindo ao Ultimate Founders! Redirecionando...',
+        });
+        
+        setTimeout(() => {
+          navigate('/catalogo');
+        }, 1000);
+        
+        return true;
+      }
+      return false;
+    } catch (error) {
+      // Erro ao verificar (pode ser que o usuário não esteja logado ainda)
+      return false;
+    }
+  };
 
   const handleUpgrade = async () => {
     try {
       setLoading(true);
       const session = await checkoutApi.getSession();
+      
+      // Abrir checkout em nova aba
       window.open(session.checkout_url, '_blank');
+      
+      // Iniciar polling para verificar pagamento
+      setWaitingPayment(true);
+      
+      toast({
+        title: '🔄 Aguardando pagamento...',
+        description: 'Complete o pagamento na aba aberta. Detectaremos automaticamente quando for confirmado.',
+      });
+      
+      // Verificar a cada 5 segundos por até 5 minutos
+      let attempts = 0;
+      const maxAttempts = 60; // 5 minutos (60 * 5s)
+      
+      pollingIntervalRef.current = setInterval(async () => {
+        attempts++;
+        
+        const hasActiveSubscription = await checkSubscriptionStatus();
+        
+        if (hasActiveSubscription || attempts >= maxAttempts) {
+          if (pollingIntervalRef.current) {
+            clearInterval(pollingIntervalRef.current);
+          }
+          setWaitingPayment(false);
+          
+          if (!hasActiveSubscription && attempts >= maxAttempts) {
+            toast({
+              title: 'Tempo esgotado',
+              description: 'Não detectamos o pagamento. Se você já pagou, aguarde alguns minutos e recarregue a página.',
+            });
+          }
+        }
+      }, 5000); // Verificar a cada 5 segundos
+      
       onOpenChange(false);
     } catch (error: any) {
       toast({
@@ -32,6 +110,7 @@ export const UpgradeModal = ({ open, onOpenChange }: UpgradeModalProps) => {
         title: 'Erro ao abrir checkout',
         description: error.message || 'Tente novamente',
       });
+      setWaitingPayment(false);
     } finally {
       setLoading(false);
     }

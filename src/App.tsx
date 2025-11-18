@@ -18,6 +18,7 @@ import Releases from "./pages/Releases";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import { SteamGuard } from "./pages/SteamGuard";
+import { CheckoutSuccess } from "./pages/CheckoutSuccess";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/checkout/success" element={<CheckoutSuccess />} />
             <Route path="/game/:id" element={<GameDetail />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/profile" element={<Profile />} />
