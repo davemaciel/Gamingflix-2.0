@@ -64,20 +64,27 @@ export const useAuth = () => {
         setIsAdmin(cached.isAdmin);
         setLoading(false);
         
-        // Revalida em background
+        // Revalida em background (sem deslogar em erro)
         authApi.getMe()
           .then(({ user: userData }) => {
             setUser(userData);
             authApi.checkRole().then(({ isAdmin: adminStatus }) => {
               setIsAdmin(adminStatus);
               setCachedUser(userData, adminStatus);
+            }).catch(err => {
+              console.warn('Erro ao verificar role (ignorado):', err);
             });
           })
-          .catch(() => {
-            clearCachedUser();
-            apiClient.setToken(null);
-            setUser(null);
-            setIsAdmin(false);
+          .catch((err) => {
+            // Só desloga se for erro de autenticação
+            if (err.message?.includes('Sessão expirada') || err.message?.includes('401')) {
+              clearCachedUser();
+              apiClient.setToken(null);
+              setUser(null);
+              setIsAdmin(false);
+            } else {
+              console.warn('Erro ao revalidar usuário (mantendo sessão):', err);
+            }
           });
         return;
       }
@@ -101,7 +108,35 @@ export const useAuth = () => {
     };
 
     loadUser();
-  }, []);
+
+    // Listener para eventos de token expirado/inválido
+    const handleTokenExpired = () => {
+      console.log('Token expirado detectado, fazendo logout...');
+      setUser(null);
+      setIsAdmin(false);
+      clearCachedUser();
+      toast({
+        title: 'Sessão expirada',
+        description: 'Por favor, faça login novamente.',
+        variant: 'destructive',
+      });
+    };
+
+    const handleUnauthorized = () => {
+      console.log('401 Unauthorized detectado, fazendo logout...');
+      setUser(null);
+      setIsAdmin(false);
+      clearCachedUser();
+    };
+
+    window.addEventListener('auth:token-expired', handleTokenExpired);
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
+
+    return () => {
+      window.removeEventListener('auth:token-expired', handleTokenExpired);
+      window.removeEventListener('auth:unauthorized', handleUnauthorized);
+    };
+  }, [toast]);
 
   const signIn = async (email: string, password: string) => {
     try {

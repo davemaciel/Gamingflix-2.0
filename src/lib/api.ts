@@ -6,13 +6,32 @@ interface RequestOptions extends RequestInit {
 
 class ApiClient {
   private token: string | null = null;
+  private tokenExpiryTime: number | null = null;
 
   constructor() {
     this.token = localStorage.getItem('auth_token');
+    this.tokenExpiryTime = this.getTokenExpiry(this.token);
+  }
+
+  private getTokenExpiry(token: string | null): number | null {
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.exp * 1000; // Convert to milliseconds
+    } catch {
+      return null;
+    }
+  }
+
+  private isTokenExpired(): boolean {
+    if (!this.tokenExpiryTime) return true;
+    // Considera expirado se falta menos de 1 minuto
+    return Date.now() >= (this.tokenExpiryTime - 60000);
   }
 
   setToken(token: string | null) {
     this.token = token;
+    this.tokenExpiryTime = this.getTokenExpiry(token);
     if (token) {
       localStorage.setItem('auth_token', token);
     } else {
@@ -26,6 +45,15 @@ class ApiClient {
 
   private async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
     const { requireAuth = true, ...fetchOptions } = options;
+
+    // Verifica se o token expirou
+    if (requireAuth && this.token && this.isTokenExpired()) {
+      console.warn('Token expirado, limpando...');
+      this.setToken(null);
+      // Dispara evento customizado para forçar logout
+      window.dispatchEvent(new Event('auth:token-expired'));
+      throw new Error('Sessão expirada. Faça login novamente.');
+    }
 
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
@@ -42,6 +70,14 @@ class ApiClient {
     });
 
     if (!response.ok) {
+      // Tratamento especial para 401
+      if (response.status === 401 && requireAuth) {
+        console.warn('401 Unauthorized - Token inválido');
+        this.setToken(null);
+        window.dispatchEvent(new Event('auth:unauthorized'));
+        throw new Error('Sessão expirada. Faça login novamente.');
+      }
+
       const error = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
       throw new Error(error.error || `HTTP error! status: ${response.status}`);
     }
