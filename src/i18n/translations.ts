@@ -654,7 +654,7 @@ export const translations: Record<Language, Translations> = {
     upgradeDescription: 'Desbloqueie acesso ilimitado ao catálogo completo, trocas livres e preço vitalício garantido para os primeiros 100 Founders.',
     upgradeBenefitsTitle: 'Ao entrar no Ultimate Founders você recebe:',
     upgradeBack: 'Agora não',
-    upgradeViewPlans: 'Falar com especialista',
+    upgradeViewPlans: 'Assinar agora',
     gameDetail: {
       errorTitle: 'Erro',
       errorDescription: 'Não foi possível carregar o jogo',
@@ -1124,7 +1124,7 @@ export const translations: Record<Language, Translations> = {
     upgradeDescription: 'Unlock unlimited access to the full catalog, free swaps and lifetime pricing reserved for the first 100 Founders.',
     upgradeBenefitsTitle: 'With the Ultimate Founders plan you get:',
     upgradeBack: 'Maybe later',
-    upgradeViewPlans: 'Talk to a specialist',
+    upgradeViewPlans: 'Subscribe now',
     gameDetail: {
       errorTitle: 'Error',
       errorDescription: 'Could not load the game',
@@ -1597,7 +1597,7 @@ export const translations: Record<Language, Translations> = {
     upgradeDescription: 'Desbloquea acceso ilimitado al catálogo completo, cambios libres y precio vitalicio reservado para los primeros 100 Founders.',
     upgradeBenefitsTitle: 'Con el plan Ultimate Founders obtienes:',
     upgradeBack: 'Tal vez después',
-    upgradeViewPlans: 'Hablar con un especialista',
+    upgradeViewPlans: 'Suscribirse ahora',
 
     gameDetail: {
       errorTitle: 'Error',
