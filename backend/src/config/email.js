@@ -7,10 +7,18 @@ const nodemailer = pkg.default || pkg;
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_FROM = process.env.RESEND_FROM;
+const EMAIL_FROM_NAME = process.env.EMAIL_FROM_NAME || 'GamingFlix';
 const isResendConfigured = Boolean(RESEND_API_KEY && RESEND_FROM);
 let resendClient = null;
 
-const getFromAddress = () => RESEND_FROM || process.env.SMTP_FROM || process.env.SMTP_USER;
+const formatFromAddress = (address) => {
+  if (!address) return null;
+  return address.includes('<') ? address : `${EMAIL_FROM_NAME} <${address}>`;
+};
+
+const getRawFromAddress = () => RESEND_FROM || process.env.SMTP_FROM || process.env.SMTP_USER;
+
+const getFromAddress = () => formatFromAddress(getRawFromAddress());
 
 const getResendClient = () => {
   if (!RESEND_API_KEY) return null;
@@ -108,7 +116,7 @@ export const sendPasswordResetEmail = async (email, resetToken, fullName = null)
   const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}`;
 
   const mailOptions = {
-    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    from: getFromAddress(),
     to: email,
     subject: '🔑 Recuperação de Senha - GamingFlix',
     html: `
@@ -195,7 +203,7 @@ export const sendPasswordResetEmail = async (email, resetToken, fullName = null)
 
 export const sendWelcomeEmail = async (email, fullName) => {
   const mailOptions = {
-    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    from: getFromAddress(),
     to: email,
     subject: '🎮 Bem-vindo ao GamingFlix!',
     html: `
@@ -282,7 +290,7 @@ export const sendSubscriptionActivatedEmail = async (email, fullName, planName, 
   }) : 'Vitalício';
 
   const mailOptions = {
-    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    from: getFromAddress(),
     to: email,
     subject: '🎉 Assinatura Ativada - GamingFlix',
     html: `
@@ -379,10 +387,7 @@ export const sendPasswordChangedEmail = async (email, fullName) => {
   });
 
   const mailOptions = {
-    from: {
-      name: 'GamingFlix - Segurança',
-      address: process.env.SMTP_FROM || process.env.SMTP_USER
-    },
+    from: getFromAddress(),
     to: email,
     subject: '🔒 Senha Alterada com Sucesso - GamingFlix',
     html: `
@@ -486,7 +491,7 @@ export const sendSubscriptionExpiringEmail = async (email, fullName, planName, d
   const urgencyText = daysRemaining <= 3 ? '#991b1b' : '#92400e';
 
   const mailOptions = {
-    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    from: getFromAddress(),
     to: email,
     subject: `⏰ Seu plano expira em ${daysRemaining} ${daysRemaining === 1 ? 'dia' : 'dias'} - GamingFlix`,
     html: `
