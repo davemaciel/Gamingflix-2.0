@@ -24,7 +24,14 @@ import { useToast } from '@/hooks/use-toast';
 
 export const TransactionsManagement = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [stats, setStats] = useState<TransactionStats | null>(null);
+  const [stats, setStats] = useState<TransactionStats>({
+    total: 0,
+    paid: 0,
+    pending: 0,
+    failed: 0,
+    refunded: 0,
+    revenue: 0
+  });
   const [loading, setLoading] = useState(true);
   const [searchEmail, setSearchEmail] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
@@ -142,7 +149,7 @@ export const TransactionsManagement = () => {
               <CreditCard className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.total || 0}</div>
+              <div className="text-2xl font-bold">{stats.total}</div>
             </CardContent>
           </Card>
 
@@ -152,7 +159,7 @@ export const TransactionsManagement = () => {
               <DollarSign className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{stats?.paid || 0}</div>
+              <div className="text-2xl font-bold text-green-600">{stats.paid}</div>
             </CardContent>
           </Card>
 
@@ -162,7 +169,7 @@ export const TransactionsManagement = () => {
               <Clock className="h-4 w-4 text-yellow-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-yellow-600">{stats?.pending || 0}</div>
+              <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
             </CardContent>
           </Card>
 
@@ -172,7 +179,7 @@ export const TransactionsManagement = () => {
               <DollarSign className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-primary">{formatCurrency(stats?.revenue || 0)}</div>
+              <div className="text-2xl font-bold text-primary">{formatCurrency(stats.revenue)}</div>
             </CardContent>
           </Card>
         </div>
