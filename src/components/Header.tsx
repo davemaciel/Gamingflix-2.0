@@ -6,7 +6,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, LogOut, Settings, Crown, User } from 'lucide-react';
+import { Search, LogOut, Settings, Crown, User, FileText } from 'lucide-react';
 import { LanguageSelector, LanguageSelectorCompact } from '@/components/LanguageSelector';
 import logo from '@/assets/logo.png';
 
@@ -58,11 +58,10 @@ export const Header = ({ onSearch }: HeaderProps) => {
                 {hasActiveSubscription && subscription && (
                   <Badge
                     variant="secondary"
-                    className={`flex items-center gap-1 ${
-                      isFounder
+                    className={`flex items-center gap-1 ${isFounder
                         ? 'bg-gradient-to-r from-yellow-600/20 to-amber-600/20 border-yellow-600/50 text-yellow-600'
                         : ''
-                    }`}
+                      }`}
                   >
                     <Crown className="h-3 w-3" />
                     {subscription.plan.name}
@@ -75,9 +74,9 @@ export const Header = ({ onSearch }: HeaderProps) => {
                     {t.subscribe}
                   </Button>
                 )}
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={(e) => {
                     e.preventDefault();
                     console.log('Botão clicado! User:', user);
@@ -92,6 +91,10 @@ export const Header = ({ onSearch }: HeaderProps) => {
                 >
                   <User className="mr-2 h-4 w-4" />
                   {user.username || user.email}
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/invoices')}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  Faturas
                 </Button>
                 {isAdmin && (
                   <Button variant="ghost" size="sm" onClick={() => navigate('/admin')}>
@@ -140,11 +143,10 @@ export const Header = ({ onSearch }: HeaderProps) => {
                   {hasActiveSubscription && subscription && (
                     <Badge
                       variant="secondary"
-                      className={`flex items-center gap-1 h-8 px-2 ${
-                        isFounder
+                      className={`flex items-center gap-1 h-8 px-2 ${isFounder
                           ? 'bg-gradient-to-r from-yellow-600/20 to-amber-600/20 border-yellow-600/50 text-yellow-600'
                           : ''
-                      }`}
+                        }`}
                     >
                       <Crown className="h-3 w-3" />
                     </Badge>
@@ -166,6 +168,14 @@ export const Header = ({ onSearch }: HeaderProps) => {
                     className="h-8 px-2"
                   >
                     <User className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate('/invoices')}
+                    className="h-8 px-2"
+                  >
+                    <FileText className="h-4 w-4" />
                   </Button>
                   {isAdmin && (
                     <Button

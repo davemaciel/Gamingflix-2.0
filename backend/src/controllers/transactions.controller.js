@@ -101,3 +101,38 @@ export const getTransactionsStats = async (req, res) => {
     res.status(500).json({ error: 'Erro ao buscar estatísticas' });
   }
 };
+
+/**
+ * Lista transações do usuário logado
+ */
+export const getMyTransactions = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { limit = 50, offset = 0 } = req.query;
+    
+    // Primeiro busca o email do usuário para filtrar as transações
+    const user = await collections.profiles().findOne({ id: userId });
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+
+    const transactions = await collections.transactions()
+      .find({ customer_email: user.email })
+      .sort({ created_at: -1 })
+      .skip(parseInt(offset))
+      .limit(parseInt(limit))
+      .toArray();
+
+    const total = await collections.transactions().countDocuments({ customer_email: user.email });
+
+    res.json({
+      transactions,
+      total,
+      limit: parseInt(limit),
+      offset: parseInt(offset)
+    });
+  } catch (error) {
+    logger.error('Error fetching user transactions:', error);
+    res.status(500).json({ error: 'Erro ao buscar minhas transações' });
+  }
+};

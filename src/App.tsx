@@ -20,6 +20,7 @@ import Privacy from "./pages/Privacy";
 import { SteamGuard } from "./pages/SteamGuard";
 import { CheckoutSuccess } from "./pages/CheckoutSuccess";
 import NotFound from "./pages/NotFound";
+import Invoices from "./pages/Invoices";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="/game/:id" element={<GameDetail />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/invoices" element={<Invoices />} />
             <Route path="/releases" element={<Releases />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />

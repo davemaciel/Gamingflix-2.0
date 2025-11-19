@@ -28,11 +28,11 @@ export const getCheckoutSession = async (req, res) => {
 export const handleWebhook = async (req, res) => {
   try {
     const payload = req.body;
-    
+
     logger.info('=== WEBHOOK RECEBIDO ===');
     logger.info('Headers:', JSON.stringify(req.headers, null, 2));
     logger.info('Body:', JSON.stringify(payload, null, 2));
-    
+
     // Validação opcional do secret (se configurado)
     if (WEBHOOK_SECRET) {
       const signature = req.headers['x-ggcheckout-signature'] || req.headers['x-webhook-signature'];
@@ -40,7 +40,7 @@ export const handleWebhook = async (req, res) => {
     }
 
     const { event, customer, payment, products } = payload;
-    
+
     if (!event || !customer || !payment) {
       logger.warn('Invalid webhook payload - missing required fields');
       return res.status(400).json({ error: 'Payload inválido' });
@@ -128,14 +128,14 @@ async function handlePaymentSuccess(customer, payment, transactionId) {
     logger.info('Customer:', JSON.stringify(customer, null, 2));
     logger.info('Payment:', JSON.stringify(payment, null, 2));
     logger.info('Transaction ID:', transactionId);
-    
+
     const email = customer.email;
     logger.info(`Buscando usuário com email: ${email}`);
-    
+
     // Buscar usuário por email
     let user = await collections.profiles().findOne({ email });
     logger.info('Usuário encontrado:', user ? `ID: ${user.id}` : 'NÃO ENCONTRADO');
-    
+
     if (!user) {
       logger.warn(`User not found for email ${email}, creating placeholder`);
       // Criar perfil placeholder (usuário deve completar cadastro depois)
@@ -149,7 +149,7 @@ async function handlePaymentSuccess(customer, payment, transactionId) {
         needs_password_setup: true
       };
       await collections.profiles().insertOne(user);
-      
+
       // Criar role padrão
       await collections.userRoles().insertOne({
         id: crypto.randomUUID(),
@@ -161,7 +161,7 @@ async function handlePaymentSuccess(customer, payment, transactionId) {
 
     // Buscar plano Founders (assumindo que já existe)
     let foundersPlan = await collections.subscriptionPlans().findOne({ slug: 'ultimate-founders' });
-    
+
     if (!foundersPlan) {
       logger.warn('Founders plan not found, creating it');
       foundersPlan = {
@@ -246,7 +246,7 @@ async function handlePaymentFailed(customer, transactionId) {
   try {
     const email = customer.email;
     const user = await collections.profiles().findOne({ email });
-    
+
     if (!user) {
       logger.warn(`User not found for email ${email} on payment failure`);
       return;
@@ -264,3 +264,93 @@ async function handlePaymentFailed(customer, transactionId) {
     throw error;
   }
 }
+
+/**
+ * Gera uma fatura manual para o usuário
+ */
+export const createInvoice = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const user = await collections.profiles().findOne({ id: userId });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+
+    // Busca a última assinatura (ativa ou expirada) para saber o plano
+    const lastSub = await collections.subscriptions().findOne(
+      { user_id: userId },
+      { sort: { created_at: -1 } }
+    );
+
+    let planId;
+    if (lastSub) {
+      planId = lastSub.plan_id;
+    } else {
+      // Se nunca teve assinatura, assume o plano padrão (Founders)
+      const defaultPlan = await collections.subscriptionPlans().findOne({ slug: 'ultimate-founders' });
+      if (defaultPlan) planId = defaultPlan.id;
+    }
+
+    if (!planId) {
+      return res.status(400).json({ error: 'Plano não encontrado para gerar fatura' });
+    }
+
+    const plan = await collections.subscriptionPlans().findOne({ id: planId });
+    if (!plan) {
+      return res.status(404).json({ error: 'Plano não encontrado' });
+    }
+
+    // VERIFICAÇÃO ANTI-DUPLICIDADE
+    // Verifica se já existe uma fatura PENDENTE para este usuário e este plano
+    // criada nas últimas 24 horas (ou sem limite de tempo, dependendo da regra de negócio)
+    const existingPendingTransaction = await collections.transactions().findOne({
+      customer_email: user.email,
+      status: 'pending',
+      'products.id': plan.id
+    });
+
+    if (existingPendingTransaction) {
+      logger.info(`Returning existing pending invoice ${existingPendingTransaction.id} for user ${user.email}`);
+      return res.status(200).json({
+        message: 'Já existe uma fatura pendente para este plano',
+        transaction: existingPendingTransaction,
+        checkout_url: CHECKOUT_URL
+      });
+    }
+
+    // Cria transação pendente
+    const transactionId = crypto.randomUUID();
+    const transaction = {
+      id: transactionId,
+      event: 'invoice.manual',
+      status: 'pending',
+      payment_method: 'unknown',
+      amount: plan.price,
+      customer_email: user.email,
+      customer_name: user.full_name || '',
+      products: [{
+        id: plan.id,
+        name: plan.name,
+        price: plan.price
+      }],
+      created_at: new Date(),
+      updated_at: new Date(),
+      is_manual: true
+    };
+
+    await collections.transactions().insertOne(transaction);
+    logger.info(`Manual invoice ${transactionId} generated for user ${user.email}`);
+
+    res.status(201).json({
+      message: 'Fatura gerada com sucesso',
+      transaction,
+      checkout_url: CHECKOUT_URL
+    });
+
+  } catch (error) {
+    logger.error('Error creating invoice:', error);
+    res.status(500).json({ error: 'Erro ao gerar fatura' });
+  }
+};
+

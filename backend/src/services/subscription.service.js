@@ -13,7 +13,7 @@ import {
 export async function checkExpiredSubscriptions() {
   try {
     const now = new Date();
-    
+
     // Busca assinaturas expiradas para enviar email antes de atualizar
     const expiredSubs = await collections.subscriptions().find({
       status: 'active',
@@ -24,12 +24,12 @@ export async function checkExpiredSubscriptions() {
     for (const sub of expiredSubs) {
       const user = await collections.profiles().findOne({ id: sub.user_id });
       const plan = await collections.subscriptionPlans().findOne({ id: sub.plan_id });
-      
+
       if (user && plan) {
         await sendSubscriptionExpiredEmail(user.email, user.full_name || user.email, plan.name);
       }
     }
-    
+
     // Atualiza status para expired
     const result = await collections.subscriptions().updateMany(
       {
@@ -63,7 +63,7 @@ export async function checkExpiredSubscriptions() {
 export async function hasActiveSubscription(userId) {
   try {
     const now = new Date();
-    
+
     const subscription = await collections.subscriptions().findOne({
       user_id: userId,
       status: 'active',
@@ -72,6 +72,9 @@ export async function hasActiveSubscription(userId) {
         { expires_at: { $gt: now } } // Assinatura ainda válida
       ]
     });
+
+    // Se não tiver assinatura ativa, verifica se tem alguma "grace period" ou lógica extra aqui se necessário
+    // Por enquanto, mantemos estrito: tem que estar active E não expirada
 
     return !!subscription;
   } catch (error) {
@@ -104,7 +107,16 @@ export async function hasGameAccess(userId) {
   const founder = await isFounder(userId);
   if (founder) return true;
 
-  return await hasActiveSubscription(userId);
+  // Verificação estrita de assinatura
+  const hasSubscription = await hasActiveSubscription(userId);
+  if (!hasSubscription) return false;
+
+  // Verificação adicional: se tiver fatura vencida (pending com data passada), bloqueia?
+  // Por enquanto, a lógica de hasActiveSubscription já cobre expiração.
+  // Se quisermos bloquear por falta de pagamento de renovação, o status da sub deve mudar para 'past_due' ou similar.
+  // O sistema atual muda para 'expired' quando vence.
+
+  return true;
 }
 
 /**
@@ -115,7 +127,7 @@ export async function checkExpiring7DaysSubscriptions() {
     const now = new Date();
     const sevenDaysFromNow = new Date(now);
     sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
-    
+
     const eightDaysFromNow = new Date(now);
     eightDaysFromNow.setDate(eightDaysFromNow.getDate() + 8);
 
@@ -131,19 +143,54 @@ export async function checkExpiring7DaysSubscriptions() {
     }).toArray();
 
     let emailsSent = 0;
-    
+
     for (const sub of expiringSubs) {
       const user = await collections.profiles().findOne({ id: sub.user_id });
       const plan = await collections.subscriptionPlans().findOne({ id: sub.plan_id });
-      
+
       if (user && plan) {
+        // Verifica se JÁ EXISTE uma fatura pendente para este usuário antes de gerar outra
+        const existingPending = await collections.transactions().findOne({
+          customer_email: user.email,
+          status: 'pending',
+          'products.id': plan.id
+        });
+
+        if (!existingPending) {
+          // Gera fatura pendente (transação) para renovação
+          const transactionId = crypto.randomUUID();
+          const transaction = {
+            id: transactionId,
+            event: 'invoice.generated',
+            status: 'pending',
+            payment_method: 'unknown',
+            amount: plan.price,
+            customer_email: user.email,
+            customer_name: user.full_name || '',
+            products: [{
+              id: plan.id,
+              name: plan.name,
+              price: plan.price
+            }],
+            created_at: new Date(),
+            updated_at: new Date(),
+            is_auto_generated: true,
+            subscription_id: sub.id
+          };
+
+          await collections.transactions().insertOne(transaction);
+          logger.info(`Generated pending invoice ${transactionId} for user ${user.email}`);
+        } else {
+          logger.info(`Skipped invoice generation for user ${user.email}: Pending invoice already exists (${existingPending.id})`);
+        }
+
         const sent = await sendSubscriptionExpiring7DaysEmail(
           user.email,
           user.full_name || user.email,
           plan.name,
           sub.expires_at
         );
-        
+
         if (sent) {
           // Marca como notificado
           await collections.subscriptions().updateOne(
@@ -174,7 +221,7 @@ export async function checkExpiring3DaysSubscriptions() {
     const now = new Date();
     const threeDaysFromNow = new Date(now);
     threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
-    
+
     const fourDaysFromNow = new Date(now);
     fourDaysFromNow.setDate(fourDaysFromNow.getDate() + 4);
 
@@ -190,11 +237,11 @@ export async function checkExpiring3DaysSubscriptions() {
     }).toArray();
 
     let emailsSent = 0;
-    
+
     for (const sub of expiringSubs) {
       const user = await collections.profiles().findOne({ id: sub.user_id });
       const plan = await collections.subscriptionPlans().findOne({ id: sub.plan_id });
-      
+
       if (user && plan) {
         const sent = await sendSubscriptionExpiring3DaysEmail(
           user.email,
@@ -202,7 +249,7 @@ export async function checkExpiring3DaysSubscriptions() {
           plan.name,
           sub.expires_at
         );
-        
+
         if (sent) {
           // Marca como notificado
           await collections.subscriptions().updateOne(
@@ -230,11 +277,11 @@ export async function checkExpiring3DaysSubscriptions() {
  */
 export async function runAllSubscriptionChecks() {
   logger.info('Running subscription checks...');
-  
+
   await checkExpiredSubscriptions();
   await checkExpiring7DaysSubscriptions();
   await checkExpiring3DaysSubscriptions();
-  
+
   logger.info('Subscription checks completed');
 }
 

@@ -1,5 +1,5 @@
 import express from 'express';
-import { getCheckoutSession, handleWebhook } from '../controllers/checkout.controller.js';
+import { getCheckoutSession, handleWebhook, createInvoice } from '../controllers/checkout.controller.js';
 import { authenticateToken } from '../middleware/jwtAuth.js';
 import { logger } from '../utils/logger.js';
 
@@ -7,6 +7,9 @@ const router = express.Router();
 
 // Endpoint para obter URL do checkout
 router.get('/session', authenticateToken, getCheckoutSession);
+
+// Endpoint para gerar fatura manual
+router.post('/invoice', authenticateToken, createInvoice);
 
 // Webhook do GGCheckout (sem autenticação JWT, usa secret do webhook)
 router.post('/webhook', handleWebhook);
@@ -17,11 +20,11 @@ router.post('/webhook/test', authenticateToken, async (req, res) => {
     logger.info('=== TESTE DE WEBHOOK INICIADO ===');
     logger.info('User ID:', req.user.id);
     logger.info('User email:', req.user.email);
-    
+
     // Determinar tipo de evento baseado no input (padrão: pix)
     const eventType = req.body.type === 'card' ? 'card.paid' : 'pix.paid';
     const paymentMethod = req.body.type === 'card' ? 'credit_card' : 'pix';
-    
+
     logger.info(`Simulando evento: ${eventType}`);
 
     // Simular payload
@@ -48,13 +51,13 @@ router.post('/webhook/test', authenticateToken, async (req, res) => {
         type: 'main'
       }]
     };
-    
+
     logger.info('Payload de teste:', JSON.stringify(testPayload, null, 2));
-    
+
     // Processar como se fosse um webhook real
     req.body = testPayload;
     await handleWebhook(req, res);
-    
+
   } catch (error) {
     logger.error('Erro no teste de webhook:', error);
     res.status(500).json({ error: error.message });

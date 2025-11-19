@@ -227,21 +227,21 @@ export const subscriptionsApi = {
 
 export const usersApi = {
   getAll: () => apiClient.get<User[]>('/users'),
-  
+
   getById: (id: string) => apiClient.get<User>(`/users/${id}`),
-  
+
   update: (id: string, data: Partial<User>) => apiClient.put(`/users/${id}`, data),
-  
-  updateRole: (id: string, role: 'admin' | 'client') => 
+
+  updateRole: (id: string, role: 'admin' | 'client') =>
     apiClient.put(`/users/${id}/role`, { role }),
-  
+
   delete: (id: string) => apiClient.delete(`/users/${id}`),
-  
+
   createSubscription: (id: string, plan_id: string, duration_months: number) =>
     apiClient.post(`/users/${id}/subscription`, { plan_id, duration_months }),
-  
+
   cancelSubscription: (id: string) => apiClient.delete(`/users/${id}/subscription`),
-  
+
   renewSubscription: (id: string, duration_months: number) =>
     apiClient.put(`/users/${id}/subscription/renew`, { duration_months }),
 };
@@ -285,6 +285,7 @@ export interface TransactionStats {
 
 export const checkoutApi = {
   getSession: () => apiClient.get<CheckoutSession>('/checkout/session'),
+  createInvoice: () => apiClient.post<{ message: string; transaction: Transaction; checkout_url?: string }>('/checkout/invoice'),
 };
 
 export const transactionsApi = {
@@ -296,8 +297,15 @@ export const transactionsApi = {
     if (params?.offset) query.append('offset', params.offset.toString());
     return apiClient.get<TransactionsResponse>(`/transactions?${query.toString()}`);
   },
-  
+
   getById: (id: string) => apiClient.get<Transaction>(`/transactions/${id}`),
-  
+
   getStats: () => apiClient.get<TransactionStats>('/transactions/stats'),
+
+  getMyTransactions: (params?: { limit?: number; offset?: number }) => {
+    const query = new URLSearchParams();
+    if (params?.limit) query.append('limit', params.limit.toString());
+    if (params?.offset) query.append('offset', params.offset.toString());
+    return apiClient.get<TransactionsResponse>(`/transactions/my-invoices?${query.toString()}`);
+  },
 };
