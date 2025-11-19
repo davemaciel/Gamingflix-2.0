@@ -18,9 +18,15 @@ router.post('/webhook/test', authenticateToken, async (req, res) => {
     logger.info('User ID:', req.user.id);
     logger.info('User email:', req.user.email);
     
-    // Simular payload de pix.paid
+    // Determinar tipo de evento baseado no input (padrão: pix)
+    const eventType = req.body.type === 'card' ? 'card.paid' : 'pix.paid';
+    const paymentMethod = req.body.type === 'card' ? 'credit_card' : 'pix';
+    
+    logger.info(`Simulando evento: ${eventType}`);
+
+    // Simular payload
     const testPayload = {
-      event: 'pix.paid',
+      event: eventType,
       customer: {
         email: req.user.email,
         name: req.user.full_name || 'Test User',
@@ -30,9 +36,9 @@ router.post('/webhook/test', authenticateToken, async (req, res) => {
       },
       payment: {
         id: `test-${Date.now()}`,
-        amount: 1.00,
-        method: 'pix',
-        paymentMethod: 'pix',
+        amount: 59.90,
+        method: paymentMethod,
+        paymentMethod: paymentMethod,
         status: 'paid',
         gateway: 'mercadopago'
       },

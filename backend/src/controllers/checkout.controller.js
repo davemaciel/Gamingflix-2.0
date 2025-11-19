@@ -74,11 +74,14 @@ export const handleWebhook = async (req, res) => {
     logger.info(`Transaction ${transactionId} saved with status: ${transaction.status}`);
 
     // Processar evento de pagamento
-    if (event === 'pix.paid' || event === 'card.paid') {
+    const successEvents = ['pix.paid', 'card.paid', 'card.approved', 'payment.succeeded', 'payment.paid'];
+    const failureEvents = ['card.failed', 'pix.failed', 'card.refunded', 'payment.failed', 'payment.refunded'];
+
+    if (successEvents.includes(event)) {
       logger.info(`🎉 Evento de pagamento bem-sucedido detectado: ${event}`);
       await handlePaymentSuccess(customer, payment, transactionId);
       logger.info('✅ Pagamento processado com sucesso!');
-    } else if (event === 'card.failed' || event === 'pix.failed' || event === 'card.refunded') {
+    } else if (failureEvents.includes(event)) {
       logger.info(`❌ Evento de falha de pagamento detectado: ${event}`);
       await handlePaymentFailed(customer, transactionId);
     } else {
@@ -104,9 +107,14 @@ function getStatusFromEvent(event) {
     'pix.failed': 'failed',
     'card.generated': 'pending',
     'card.paid': 'paid',
+    'card.approved': 'paid', // Adicionado
     'card.failed': 'failed',
     'card.refunded': 'refunded',
-    'card.pending': 'pending'
+    'card.pending': 'pending',
+    'payment.succeeded': 'paid', // Adicionado
+    'payment.paid': 'paid', // Adicionado
+    'payment.failed': 'failed', // Adicionado
+    'payment.refunded': 'refunded' // Adicionado
   };
   return eventMap[event] || 'unknown';
 }
