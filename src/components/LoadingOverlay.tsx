@@ -29,7 +29,7 @@ export const LoadingOverlay = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur">
-      <div className="w-full max-w-md rounded-3xl border border-primary/40 bg-background/90 p-8 shadow-2xl">
+      <div className="mx-6 w-full max-w-[320px] rounded-2xl border border-primary/40 bg-background/90 p-8 shadow-2xl">
         <div className="flex flex-col items-center gap-5 text-center">
           <div className="relative flex items-center justify-center">
             <div className="absolute h-20 w-20 rounded-full bg-primary/10 animate-pulse" />

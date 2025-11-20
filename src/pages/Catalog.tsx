@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -26,10 +27,13 @@ const Index = () => {
   const { hasCatalogAccess, loading: subscriptionLoading } = useSubscription();
   const { t } = useLanguage();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [games, setGames] = useState<Game[]>([]);
   const [filteredGames, setFilteredGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const initializedRef = useRef(false);
+
+  const urlQuery = searchParams.get('q') || '';
 
   useEffect(() => {
     let cancelled = false;
@@ -41,7 +45,7 @@ const Index = () => {
         catalogCache.games.length > 0
       ) {
         setGames(catalogCache.games);
-        setFilteredGames(catalogCache.games);
+        // O filtro será aplicado pelo useEffect abaixo
         setLoading(false);
         return true;
       }
@@ -63,7 +67,6 @@ const Index = () => {
         const fetchedGames = await promise;
         if (!cancelled) {
           setGames(fetchedGames);
-          setFilteredGames(fetchedGames);
           setLoading(false);
         }
       } catch (error) {
@@ -107,7 +110,6 @@ const Index = () => {
           const list = data ?? [];
           catalogCache = { games: list, timestamp: Date.now() };
           setGames(list);
-          setFilteredGames(list);
         })
         .catch((error) => {
           console.error('Error refreshing games for authenticated user:', error);
@@ -115,7 +117,25 @@ const Index = () => {
     }
   }, [user]);
 
+  // Aplica o filtro quando 'games' ou 'urlQuery' mudam
+  useEffect(() => {
+    if (urlQuery.trim()) {
+      const filtered = games.filter((game) =>
+        game.title.toLowerCase().includes(urlQuery.toLowerCase())
+      );
+      setFilteredGames(filtered);
+    } else {
+      setFilteredGames(games);
+    }
+  }, [games, urlQuery]);
+
   const handleSearch = (query: string) => {
+    // Atualiza a URL sem recarregar a página se já estivermos no catálogo
+    // Mas como o Header já gerencia a navegação para /catalogo?q=..., 
+    // aqui só precisamos filtrar localmente se a prop onSearch for chamada diretamente
+    // ou se quisermos atualizar a URL para refletir a busca em tempo real.
+
+    // Para simplificar e manter compatibilidade com o Header atual:
     if (!query.trim()) {
       setFilteredGames(games);
       return;
@@ -146,7 +166,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
-      <Header onSearch={handleSearch} />
+      <Header onSearch={handleSearch} initialQuery={urlQuery} />
 
       <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
         <div className="mb-6 sm:mb-8">
@@ -163,9 +183,9 @@ const Index = () => {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
             {filteredGames.map((game) => (
-              <GameCard 
-                key={game.id} 
-                game={game} 
+              <GameCard
+                key={game.id}
+                game={game}
                 user={user}
                 hasCatalogAccess={hasCatalogAccess}
                 subscriptionLoading={subscriptionLoading}
