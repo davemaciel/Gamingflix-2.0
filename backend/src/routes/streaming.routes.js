@@ -11,8 +11,12 @@ import {
     getMyProfileForService,
     assignProfile
 } from '../controllers/streaming.controller.js';
+import { handleStreamingPayment } from '../controllers/webhook-streaming.controller.js';
 
 const router = express.Router();
+
+// Webhooks (Public but secured by signature)
+router.post('/webhook/payment', handleStreamingPayment);
 
 // Public/Auth (Services List)
 router.get('/services', getAllServices);
