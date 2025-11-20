@@ -8,7 +8,7 @@ import { Check, Gamepad2, Shield, Clock, Repeat, Zap, LogOut, ShoppingCart } fro
 import logo from '@/assets/logo.png';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/hooks/useLanguage';
-import { LanguageSelector } from '@/components/LanguageSelector';
+import { LanguageSelector, LanguageSelectorCompact } from '@/components/LanguageSelector';
 import { getFoundersPricing } from '@/config/founders';
 import { checkoutApi } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
@@ -31,7 +31,7 @@ const Landing = () => {
       navigate('/auth');
       return;
     }
-    
+
     try {
       setLoading(true);
       const session = await checkoutApi.getSession();
@@ -124,11 +124,17 @@ const Landing = () => {
       {/* Header */}
       <header className="border-b border-border sticky top-0 bg-background/95 backdrop-blur z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <img src={logo} alt="Logo" className="h-8" />
+          <Link to="/" className="flex items-center gap-2 flex-shrink-0">
+            <img src={logo} alt="Logo" className="h-6 md:h-8 w-auto max-w-[120px] md:max-w-[160px] object-contain" />
           </Link>
           <nav className="flex items-center gap-2 md:gap-4">
-            <LanguageSelector />
+            <div className="hidden md:block">
+              <LanguageSelector />
+            </div>
+            <div className="md:hidden">
+              <LanguageSelectorCompact />
+            </div>
+
             <Link to="/catalogo" className="hidden md:inline-flex">
               <Button variant="ghost" className="gap-2">
                 <Gamepad2 className="h-4 w-4" />
@@ -137,22 +143,23 @@ const Landing = () => {
             </Link>
             <Link to="/catalogo" className="md:hidden">
               <Button
-                variant="ghost"
+                variant="outline"
                 size="icon"
-                className="h-9 w-9 rounded-full"
+                className="h-10 w-10 rounded-full border-input"
                 aria-label={t.viewCatalog}
               >
-                <Gamepad2 className="h-4 w-4" />
+                <Gamepad2 className="h-5 w-5" />
               </Button>
             </Link>
             {user ? (
               <Button
                 onClick={handleSignOut}
                 variant="ghost"
+                size={window.innerWidth < 768 ? "icon" : "default"}
                 aria-label={t.logout}
-                className="gap-2"
+                className="gap-2 md:h-10 md:px-4 md:w-auto h-10 w-10 rounded-full md:rounded-md border border-input md:border-transparent"
               >
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-5 w-5 md:h-4 md:w-4" />
                 <span className="hidden md:inline">{t.logout}</span>
               </Button>
             ) : (
@@ -177,9 +184,9 @@ const Landing = () => {
             {t.heroSubtitle}
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
-            <Button 
-              size="lg" 
-              className="text-lg px-8 gap-2 bg-primary hover:bg-primary/90" 
+            <Button
+              size="lg"
+              className="text-lg px-8 gap-2 bg-primary hover:bg-primary/90"
               onClick={handleCheckout}
               disabled={loading}
             >
@@ -340,7 +347,7 @@ const Landing = () => {
                 <CardDescription className="text-sm min-h-[40px]">
                   {t.lifetimePriceDescription}
                 </CardDescription>
-                
+
                 <div className="mt-4">
                   <div className="text-lg text-muted-foreground line-through mb-1">
                     {t.regularPriceLabel} {regularPrice}
@@ -357,7 +364,7 @@ const Landing = () => {
                   </div>
                 </div>
               </CardHeader>
-              
+
               <CardContent>
                 <ul className="space-y-3">
                   {foundersFeatures.map((feature, index) => (
@@ -368,10 +375,10 @@ const Landing = () => {
                   ))}
                 </ul>
               </CardContent>
-              
+
               <CardFooter className="flex flex-col gap-3">
-                <Button 
-                  className="w-full py-5 sm:py-6 text-sm sm:text-base gap-2 bg-primary hover:bg-primary/90" 
+                <Button
+                  className="w-full py-5 sm:py-6 text-sm sm:text-base gap-2 bg-primary hover:bg-primary/90"
                   onClick={handleCheckout}
                   disabled={loading}
                 >
@@ -384,7 +391,7 @@ const Landing = () => {
               </CardFooter>
             </Card>
           </div>
-          
+
           <div className="text-center mt-8">
             <p className="text-muted-foreground">
               {t.foundersFullAccessHighlight}
@@ -489,9 +496,9 @@ const Landing = () => {
             {t.secureSpotCTA} {foundersPrice}{t.perMonth}.
             <strong className="text-primary"> {t.limitedSpotsWarning}</strong>
           </p>
-          <Button 
-            size="lg" 
-            className="text-lg px-12 gap-2 bg-primary hover:bg-primary/90" 
+          <Button
+            size="lg"
+            className="text-lg px-12 gap-2 bg-primary hover:bg-primary/90"
             onClick={handleCheckout}
             disabled={loading}
           >

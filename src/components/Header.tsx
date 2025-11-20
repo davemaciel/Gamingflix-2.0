@@ -59,8 +59,8 @@ export const Header = ({ onSearch }: HeaderProps) => {
                   <Badge
                     variant="secondary"
                     className={`flex items-center gap-1 ${isFounder
-                        ? 'bg-gradient-to-r from-yellow-600/20 to-amber-600/20 border-yellow-600/50 text-yellow-600'
-                        : ''
+                      ? 'bg-gradient-to-r from-yellow-600/20 to-amber-600/20 border-yellow-600/50 text-yellow-600'
+                      : ''
                       }`}
                   >
                     <Crown className="h-3 w-3" />
@@ -79,14 +79,7 @@ export const Header = ({ onSearch }: HeaderProps) => {
                   size="sm"
                   onClick={(e) => {
                     e.preventDefault();
-                    console.log('Botão clicado! User:', user);
-                    console.log('Navigate function:', navigate);
-                    try {
-                      navigate('/profile');
-                      console.log('Navigate executado com sucesso');
-                    } catch (error) {
-                      console.error('Erro ao navegar:', error);
-                    }
+                    navigate('/profile');
                   }}
                 >
                   <User className="mr-2 h-4 w-4" />
@@ -122,78 +115,71 @@ export const Header = ({ onSearch }: HeaderProps) => {
         {/* Layout Mobile */}
         <div className="md:hidden space-y-3">
           {/* Linha 1: Logo e botoes de acao */}
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center justify-between gap-4">
             <Link to="/catalogo" className="flex-shrink-0">
-              <img src={logo} alt="GamingFlix" className="h-8 w-auto max-w-[160px]" />
+              <img src={logo} alt="GamingFlix" className="h-6 sm:h-8 w-auto max-w-[120px] sm:max-w-[160px] object-contain" />
             </Link>
 
-            <div className="ml-auto flex flex-wrap items-center justify-end gap-1 sm:gap-2">
+            <div className="flex flex-wrap items-center justify-end gap-2">
               {user ? (
                 <>
                   {!hasActiveSubscription && (
                     <Button
-                      variant="default"
-                      size="sm"
+                      variant="outline"
+                      size="icon"
                       onClick={() => navigate('/')}
-                      className="h-8 px-2"
+                      className="h-10 w-10 rounded-full border-input"
                     >
-                      <Crown className="h-4 w-4" />
+                      <Crown className="h-5 w-5" />
                     </Button>
                   )}
                   {hasActiveSubscription && subscription && (
-                    <Badge
-                      variant="secondary"
-                      className={`flex items-center gap-1 h-8 px-2 ${isFounder
-                          ? 'bg-gradient-to-r from-yellow-600/20 to-amber-600/20 border-yellow-600/50 text-yellow-600'
-                          : ''
+                    <div
+                      className={`flex items-center justify-center h-10 w-10 rounded-full border border-input bg-secondary text-secondary-foreground ${isFounder
+                        ? 'bg-gradient-to-r from-yellow-600/20 to-amber-600/20 border-yellow-600/50 text-yellow-600'
+                        : ''
                         }`}
                     >
-                      <Crown className="h-3 w-3" />
-                    </Badge>
+                      <Crown className="h-5 w-5" />
+                    </div>
                   )}
                   <LanguageSelectorCompact />
                   <Button
                     variant="outline"
-                    size="sm"
+                    size="icon"
                     onClick={(e) => {
                       e.preventDefault();
-                      console.log('Botão mobile clicado!');
-                      try {
-                        navigate('/profile');
-                        console.log('Navigate mobile executado');
-                      } catch (error) {
-                        console.error('Erro mobile:', error);
-                      }
+                      navigate('/profile');
                     }}
-                    className="h-8 px-2"
+                    className="h-10 w-10 rounded-full border-input"
                   >
-                    <User className="h-4 w-4" />
+                    <User className="h-5 w-5" />
                   </Button>
                   <Button
-                    variant="ghost"
-                    size="sm"
+                    variant="outline"
+                    size="icon"
                     onClick={() => navigate('/invoices')}
-                    className="h-8 px-2"
+                    className="h-10 w-10 rounded-full border-input"
                   >
-                    <FileText className="h-4 w-4" />
+                    <FileText className="h-5 w-5" />
                   </Button>
                   {isAdmin && (
                     <Button
-                      variant="ghost"
-                      size="sm"
+                      variant="outline"
+                      size="icon"
                       onClick={() => navigate('/admin')}
-                      className="h-8 px-2"
+                      className="h-10 w-10 rounded-full border-input"
                     >
-                      <Settings className="h-4 w-4" />
+                      <Settings className="h-5 w-5" />
                     </Button>
                   )}
                   <Button
-                    variant="ghost"
-                    size="sm"
+                    variant="outline"
+                    size="icon"
                     onClick={handleSignOut}
-                    className="h-8 px-2"
+                    className="h-10 w-10 rounded-full border-input"
                   >
-                    <LogOut className="h-4 w-4" />
+                    <LogOut className="h-5 w-5" />
                   </Button>
                 </>
               ) : (

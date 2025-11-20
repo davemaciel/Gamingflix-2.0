@@ -28,12 +28,19 @@ const LanguageToggle = ({ variant = 'default' }: { variant?: ToggleVariant }) =>
     es: t.languageToggle.switchToPortuguese,
   };
 
+  const isMobile = variant === 'compact';
+
   const buttonClasses = cn(
-    'inline-flex items-center justify-center rounded-full bg-transparent p-0 transition-transform hover:bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-    variant === 'compact' ? 'h-8' : 'h-9'
+    'inline-flex items-center justify-center bg-transparent transition-transform hover:bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+    isMobile
+      ? 'h-10 w-10 rounded-full border border-input p-0' // Mobile style: circular, bordered, larger
+      : 'h-9 rounded-full p-0' // Desktop style
   );
 
-  const flagClasses = variant === 'compact' ? 'h-6 w-auto object-contain' : 'h-7 w-auto object-contain';
+  // Flag size increased for mobile as requested
+  const flagClasses = isMobile
+    ? 'h-6 w-6 object-contain'
+    : 'h-7 w-auto object-contain';
 
   const handleToggle = () => {
     setLanguage(nextLanguage);
@@ -42,8 +49,8 @@ const LanguageToggle = ({ variant = 'default' }: { variant?: ToggleVariant }) =>
   return (
     <Button
       type="button"
-      variant="ghost"
-      size="sm"
+      variant={isMobile ? "outline" : "ghost"}
+      size={isMobile ? "icon" : "sm"}
       onClick={handleToggle}
       className={buttonClasses}
       aria-label={nextLanguageLabelMap[language]}
