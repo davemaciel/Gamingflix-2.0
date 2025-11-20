@@ -34,10 +34,26 @@ export const handleWebhook = async (req, res) => {
     logger.info('Headers:', JSON.stringify(req.headers, null, 2));
     logger.info('Body:', JSON.stringify(payload, null, 2));
 
-    // DETECÇÃO DE STREAMING: Se for payload de streaming, repassa para o controller específico
+    // DETECÇÃO DE STREAMING (Método 1): Payload novo com service_id
     if (payload.service_id && payload.user_id) {
-      logger.info('🔄 Redirecionando webhook para controller de Streaming...');
+      logger.info('🔄 Redirecionando webhook para controller de Streaming (formato novo)...');
       return handleStreamingPayment(req, res);
+    }
+
+    const { event, customer, payment, products } = payload;
+
+    // DETECÇÃO DE STREAMING (Método 2): Payload antigo, mas produto é de streaming
+    if (products && Array.isArray(products)) {
+      const streamingKeywords = ['netflix', 'disney', 'hbo', 'max', 'prime', 'paramount', 'apple tv', 'crunchyroll'];
+      const isStreamingProduct = products.some(p => {
+        const productName = (p.name || p.title || '').toLowerCase();
+        return streamingKeywords.some(keyword => productName.includes(keyword));
+      });
+
+      if (isStreamingProduct) {
+        logger.info('🎬 Produto de streaming detectado! Processando como streaming...');
+        return handleStreamingPurchaseFromProducts(req, res, { event, customer, payment, products });
+      }
     }
 
     // Validação opcional do secret (se configurado)
@@ -45,8 +61,6 @@ export const handleWebhook = async (req, res) => {
       const signature = req.headers['x-ggcheckout-signature'] || req.headers['x-webhook-signature'];
       logger.info('Webhook signature (if provided):', signature);
     }
-
-    const { event, customer, payment, products } = payload;
 
     if (!event || !customer || !payment) {
       logger.warn('Invalid webhook payload - missing required fields');
@@ -269,6 +283,158 @@ async function handlePaymentFailed(customer, transactionId) {
   } catch (error) {
     logger.error('Error handling payment failure:', error);
     throw error;
+  }
+}
+
+/**
+ * Processa compra de streaming quando payload é no formato antigo (products array)
+ */
+async function handleStreamingPurchaseFromProducts(req, res, { event, customer, payment, products }) {
+  try {
+    logger.info('=== PROCESSANDO COMPRA DE STREAMING (formato antigo) ===');
+
+    // Validar assinatura
+    if (WEBHOOK_SECRET) {
+      const signature = req.headers['x-ggcheckout-signature'];
+      if (!signature) {
+        logger.warn('Webhook de streaming sem assinatura');
+        return res.status(401).json({ error: 'Assinatura ausente' });
+      }
+
+      const hmac = crypto.createHmac('sha256', WEBHOOK_SECRET);
+      const digest = hmac.update(JSON.stringify(req.body)).digest('hex');
+
+      if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest))) {
+        logger.warn('Assinatura de webhook inválida');
+        return res.status(401).json({ error: 'Assinatura inválida' });
+      }
+      logger.info('✅ Assinatura validada');
+    }
+
+    // Validar se é evento de sucesso
+    const successEvents = ['pix.paid', 'card.paid', 'card.approved', 'payment.succeeded', 'payment.paid', 'payment.approved'];
+    if (!successEvents.includes(event)) {
+      logger.info(`Evento ${event} não é de pagamento aprovado. Ignorando.`);
+      return res.status(200).json({ received: true, status: 'ignored' });
+    }
+
+    // 1. Buscar ou criar usuário pelo email
+    const email = customer.email;
+    let user = await collections.profiles().findOne({ email });
+
+    if (!user) {
+      logger.warn(`Usuário ${email} não encontrado. Criando...`);
+      const userId = crypto.randomUUID();
+      user = {
+        id: userId,
+        email,
+        full_name: customer.name || '',
+        created_at: new Date(),
+        updated_at: new Date(),
+        needs_password_setup: true
+      };
+      await collections.profiles().insertOne(user);
+      await collections.userRoles().insertOne({
+        id: crypto.randomUUID(),
+        user_id: userId,
+        role: 'client',
+        created_at: new Date()
+      });
+    }
+
+    // 2. Identificar serviço de streaming pelo nome do produto
+    const productName = (products[0]?.name || products[0]?.title || '').toLowerCase();
+    logger.info(`Buscando serviço de streaming para produto: ${productName}`);
+
+    // Mapear nome do produto para nome do serviço no banco
+    let serviceName = '';
+    if (productName.includes('netflix')) serviceName = 'Netflix';
+    else if (productName.includes('disney')) serviceName = 'Disney+';
+    else if (productName.includes('hbo') || productName.includes('max')) serviceName = 'HBO Max';
+    else if (productName.includes('prime')) serviceName = 'Prime Video';
+    else if (productName.includes('paramount')) serviceName = 'Paramount+';
+    else if (productName.includes('apple')) serviceName = 'Apple TV+';
+    else if (productName.includes('crunchyroll')) serviceName = 'Crunchyroll';
+    else {
+      logger.error(`Não foi possível identificar serviço de streaming para: ${productName}`);
+      return res.status(400).json({ error: 'Serviço de streaming não identificado' });
+    }
+
+    const service = await collections.streamingServices().findOne({ name: serviceName });
+    if (!service) {
+      logger.error(`Serviço ${serviceName} não encontrado no banco de dados`);
+      return res.status(404).json({ error: 'Serviço não cadastrado' });
+    }
+
+    const transactionId = payment.id || crypto.randomUUID();
+
+    // 3. Verificar idempotência
+    const existingTransaction = await collections.transactions().findOne({ id: transactionId });
+    if (existingTransaction) {
+      logger.info(`Transação ${transactionId} já processada.`);
+      return res.status(200).json({ received: true, status: 'already_processed' });
+    }
+
+    // 4. Registrar transação
+    await collections.transactions().insertOne({
+      id: transactionId,
+      type: 'streaming_purchase',
+      event,
+      user_id: user.id,
+      service_id: service.id,
+      amount: payment.amount || 0,
+      status: 'paid',
+      raw_payload: req.body,
+      created_at: new Date(),
+      processed_at: new Date()
+    });
+
+    // 5. Verificar se usuário já tem perfil
+    const existingProfile = await collections.streamingProfiles().findOne({
+      service_id: service.id,
+      assigned_to: user.id
+    });
+
+    if (existingProfile) {
+      logger.warn(`Usuário ${user.id} já possui perfil de ${serviceName}`);
+      return res.status(200).json({ 
+        received: true, 
+        warning: 'Usuário já possui perfil neste serviço' 
+      });
+    }
+
+    // 6. Atribuir perfil disponível
+    const assignedProfile = await collections.streamingProfiles().findOneAndUpdate(
+      {
+        service_id: service.id,
+        status: 'available'
+      },
+      {
+        $set: {
+          status: 'assigned',
+          assigned_to: user.id,
+          assigned_at: new Date(),
+          transaction_id: transactionId
+        }
+      },
+      { returnDocument: 'after' }
+    );
+
+    if (!assignedProfile) {
+      logger.error(`CRÍTICO: Estoque esgotado para ${serviceName}`);
+      return res.status(503).json({ error: 'Nenhum perfil disponível no momento' });
+    }
+
+    logger.info(`✅ Perfil ${assignedProfile.id} de ${serviceName} atribuído ao usuário ${user.id} (${email})`);
+    res.status(200).json({ 
+      received: true, 
+      profile_assigned: true,
+      profile_id: assignedProfile.id 
+    });
+
+  } catch (error) {
+    logger.error('Erro ao processar compra de streaming:', error);
+    res.status(500).json({ error: 'Erro interno' });
   }
 }
 
