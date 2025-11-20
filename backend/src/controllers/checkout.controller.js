@@ -388,9 +388,14 @@ async function handleStreamingPurchaseFromProducts(req, res, { event, customer, 
       return res.status(400).json({ error: 'Serviço de streaming não identificado' });
     }
 
-    const service = await collections.streamingServices().findOne({ name: serviceName });
+    const service = await collections.streamingServices().findOne({ 
+      name: { $regex: new RegExp(`^${serviceName}$`, 'i') } 
+    });
     if (!service) {
       logger.error(`Serviço ${serviceName} não encontrado no banco de dados`);
+      // Listar serviços disponíveis para debug
+      const allServices = await collections.streamingServices().find({}).toArray();
+      logger.error(`Serviços disponíveis: ${allServices.map(s => s.name).join(', ')}`);
       return res.status(404).json({ error: 'Serviço não cadastrado' });
     }
 
