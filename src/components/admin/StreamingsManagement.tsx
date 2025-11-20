@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, Layers } from 'lucide-react';
+import { Plus, Pencil, Trash2, Layers, Users, X } from 'lucide-react';
 
 export const StreamingsManagement = () => {
     const { toast } = useToast();
@@ -16,9 +16,11 @@ export const StreamingsManagement = () => {
     const [loading, setLoading] = useState(true);
     const [showServiceDialog, setShowServiceDialog] = useState(false);
     const [showInventoryDialog, setShowInventoryDialog] = useState(false);
+    const [showAssignmentsDialog, setShowAssignmentsDialog] = useState(false);
     const [editingService, setEditingService] = useState<StreamingService | null>(null);
     const [selectedService, setSelectedService] = useState<StreamingService | null>(null);
     const [accounts, setAccounts] = useState<StreamingAccount[]>([]);
+    const [assignedProfiles, setAssignedProfiles] = useState<any[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
 
     const [serviceForm, setServiceForm] = useState({
@@ -157,6 +159,60 @@ export const StreamingsManagement = () => {
         }
     };
 
+    const openAssignmentsDialog = async (service: StreamingService) => {
+        setSelectedService(service);
+        try {
+            const response = await fetch(`/api/streaming/services/${service.id}/assigned-profiles`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            const data = await response.json();
+            setAssignedProfiles(data);
+        } catch (error) {
+            toast({
+                title: 'Erro',
+                description: 'Falha ao carregar atribuições',
+                variant: 'destructive',
+            });
+        }
+        setShowAssignmentsDialog(true);
+    };
+
+    const handleUnassignProfile = async (profileId: string) => {
+        if (!confirm('Deseja realmente desvincular este perfil? O usuário perderá acesso imediatamente.')) {
+            return;
+        }
+
+        try {
+            await fetch(`/api/streaming/profiles/${profileId}/unassign`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+
+            toast({ title: 'Sucesso', description: 'Perfil desvinculado' });
+            
+            // Recarregar lista
+            if (selectedService) {
+                const response = await fetch(`/api/streaming/services/${selectedService.id}/assigned-profiles`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                const data = await response.json();
+                setAssignedProfiles(data);
+            }
+        } catch (error) {
+            toast({
+                title: 'Erro',
+                description: 'Falha ao desvincular perfil',
+                variant: 'destructive',
+            });
+        }
+    };
+
     const filteredServices = services.filter((service) =>
         service.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -208,6 +264,15 @@ export const StreamingsManagement = () => {
                                 >
                                     <Layers className="h-4 w-4 mr-2" />
                                     Estoque
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/30"
+                                    onClick={() => openAssignmentsDialog(service)}
+                                >
+                                    <Users className="h-4 w-4 mr-2" />
+                                    Atribuições
                                 </Button>
                                 <Button
                                     size="sm"
@@ -413,6 +478,89 @@ export const StreamingsManagement = () => {
                                 </Card>
                             ))}
                         </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Assignments Dialog */}
+            <Dialog open={showAssignmentsDialog} onOpenChange={setShowAssignmentsDialog}>
+                <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>
+                            Perfis Atribuídos - {selectedService?.name}
+                        </DialogTitle>
+                    </DialogHeader>
+
+                    <div className="space-y-4">
+                        {assignedProfiles.length === 0 ? (
+                            <div className="text-center py-8 text-muted-foreground">
+                                Nenhum perfil atribuído no momento
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {assignedProfiles.map((profile) => {
+                                    const daysRemaining = profile.assignment_info?.days_remaining || 0;
+                                    const isExpired = profile.assignment_info?.is_expired;
+                                    
+                                    return (
+                                        <Card key={profile.id} className={`border ${isExpired ? 'border-red-500/50 bg-red-500/5' : daysRemaining < 7 ? 'border-yellow-500/50 bg-yellow-500/5' : 'border-green-500/50'}`}>
+                                            <CardContent className="p-4">
+                                                <div className="flex items-start justify-between gap-4">
+                                                    <div className="flex-1 space-y-2">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="font-semibold text-lg">
+                                                                {profile.profile_name || 'Perfil sem nome'}
+                                                            </div>
+                                                            <span className={`text-xs px-2 py-1 rounded-full ${
+                                                                isExpired ? 'bg-red-500 text-white' : 
+                                                                daysRemaining < 7 ? 'bg-yellow-500 text-black' : 
+                                                                'bg-green-500 text-white'
+                                                            }`}>
+                                                                {isExpired ? 'EXPIRADO' : `${daysRemaining} dias`}
+                                                            </span>
+                                                        </div>
+                                                        
+                                                        <div className="grid grid-cols-2 gap-2 text-sm">
+                                                            <div>
+                                                                <span className="text-muted-foreground">Cliente:</span>
+                                                                <div className="font-medium">{profile.user?.full_name || 'N/A'}</div>
+                                                                <div className="text-xs text-muted-foreground">{profile.user?.email}</div>
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-muted-foreground">Conta:</span>
+                                                                <div className="font-medium">{profile.email}</div>
+                                                                <div className="text-xs text-muted-foreground">PIN: {profile.pin}</div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="flex gap-4 text-xs text-muted-foreground">
+                                                            <div>
+                                                                <span>Atribuído em:</span>{' '}
+                                                                {new Date(profile.assigned_at).toLocaleDateString('pt-BR')}
+                                                            </div>
+                                                            <div>
+                                                                <span>Expira em:</span>{' '}
+                                                                {new Date(profile.assignment_info?.expiration_date).toLocaleDateString('pt-BR')}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <Button
+                                                        size="sm"
+                                                        variant="destructive"
+                                                        className="shrink-0"
+                                                        onClick={() => handleUnassignProfile(profile.id)}
+                                                    >
+                                                        <X className="h-4 w-4 mr-1" />
+                                                        Desvincular
+                                                    </Button>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
                 </DialogContent>
             </Dialog>
