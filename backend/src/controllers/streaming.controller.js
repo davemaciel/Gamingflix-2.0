@@ -110,7 +110,9 @@ export const createAccount = async (req, res) => {
                 id: crypto.randomUUID(),
                 account_id: accountId,
                 service_id, // Denormalized for easier querying
-                name: p.name,
+                profile_name: p.name || p.profile_name, // Nome do perfil (user1, user2, etc)
+                email: email, // Email da conta (denormalizado para facilitar exibição)
+                password: password, // Senha da conta (denormalizado)
                 pin: p.pin,
                 status: 'available',
                 assigned_to: null,
