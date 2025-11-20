@@ -42,18 +42,47 @@ export const handleWebhook = async (req, res) => {
 
     const { event, customer, payment, products } = payload;
 
+    // DEBUG: Verificar se products existe
+    logger.info(`📦 DEBUG - Products recebido: ${products ? 'SIM' : 'NÃO'}`);
+    if (products) {
+      logger.info(`📦 DEBUG - É array? ${Array.isArray(products) ? 'SIM' : 'NÃO'}`);
+      logger.info(`📦 DEBUG - Quantidade: ${Array.isArray(products) ? products.length : 'N/A'}`);
+      if (Array.isArray(products) && products.length > 0) {
+        products.forEach((p, i) => {
+          logger.info(`📦 DEBUG - Produto ${i + 1}: ${JSON.stringify(p)}`);
+        });
+      }
+    }
+
     // DETECÇÃO DE STREAMING (Método 2): Payload antigo, mas produto é de streaming
-    if (products && Array.isArray(products)) {
+    if (products && Array.isArray(products) && products.length > 0) {
       const streamingKeywords = ['netflix', 'disney', 'hbo', 'max', 'prime', 'paramount', 'apple tv', 'crunchyroll'];
+      
+      logger.info(`🔍 Verificando ${products.length} produto(s) contra keywords de streaming...`);
+      
       const isStreamingProduct = products.some(p => {
         const productName = (p.name || p.title || '').toLowerCase();
-        return streamingKeywords.some(keyword => productName.includes(keyword));
+        logger.info(`🔍 Verificando produto: "${productName}"`);
+        
+        const matchesKeyword = streamingKeywords.some(keyword => {
+          const matches = productName.includes(keyword);
+          if (matches) {
+            logger.info(`✅ Match encontrado: "${keyword}" em "${productName}"`);
+          }
+          return matches;
+        });
+        
+        return matchesKeyword;
       });
 
       if (isStreamingProduct) {
         logger.info('🎬 Produto de streaming detectado! Processando como streaming...');
         return handleStreamingPurchaseFromProducts(req, res, { event, customer, payment, products });
+      } else {
+        logger.info('❌ Nenhum produto de streaming detectado. Processando como jogos.');
       }
+    } else {
+      logger.info('⚠️ Payload não contém array de products válido. Processando como jogos.');
     }
 
     // Validação opcional do secret (se configurado)
