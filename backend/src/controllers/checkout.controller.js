@@ -388,8 +388,9 @@ async function handleStreamingPurchaseFromProducts(req, res, { event, customer, 
       return res.status(400).json({ error: 'Serviço de streaming não identificado' });
     }
 
+    // Busca parcial: encontra "Netflix" em "Netflix Premium", etc.
     const service = await collections.streamingServices().findOne({ 
-      name: { $regex: new RegExp(`^${serviceName}$`, 'i') } 
+      name: { $regex: new RegExp(serviceName, 'i') } 
     });
     if (!service) {
       logger.error(`Serviço ${serviceName} não encontrado no banco de dados`);
