@@ -10,6 +10,7 @@ import {
     getAccountsByService,
     getMyProfileForService,
     assignProfile,
+    cancelMyProfile,
     getAssignedProfiles,
     unassignProfile,
     runExpirationCheck
@@ -28,6 +29,7 @@ router.get('/services/:id', authenticateToken, getServiceById);
 // User Actions
 router.get('/services/:serviceId/my-profile', authenticateToken, getMyProfileForService);
 router.post('/assign', authenticateToken, assignProfile);
+router.delete('/services/:serviceId/cancel-my-profile', authenticateToken, cancelMyProfile);
 
 // Admin Actions - Services
 router.post('/services', authenticateToken, requireAdmin, createService);

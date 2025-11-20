@@ -227,6 +227,44 @@ export const assignProfile = async (req, res) => {
     }
 };
 
+/**
+ * Cancela/Desvincula o próprio perfil (User)
+ */
+export const cancelMyProfile = async (req, res) => {
+    try {
+        const { serviceId } = req.params;
+        const userId = req.user.id;
+
+        // Buscar perfil atribuído ao usuário
+        const profile = await collections.streamingProfiles().findOne({
+            service_id: serviceId,
+            assigned_to: userId
+        });
+
+        if (!profile) {
+            return res.status(404).json({ error: 'Você não possui perfil ativo neste serviço' });
+        }
+
+        // Desatribuir o perfil
+        await collections.streamingProfiles().updateOne(
+            { id: profile.id },
+            {
+                $set: {
+                    status: 'available',
+                    assigned_to: null,
+                    assigned_at: null
+                }
+            }
+        );
+
+        logger.info(`User ${userId} cancelled their profile ${profile.id} for service ${serviceId}`);
+        res.json({ message: 'Perfil cancelado com sucesso' });
+    } catch (error) {
+        logger.error('Error cancelling user profile:', error);
+        res.status(500).json({ error: 'Erro ao cancelar perfil' });
+    }
+};
+
 // --- Admin: Gerenciamento de Atribuições ---
 
 /**
