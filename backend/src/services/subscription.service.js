@@ -5,6 +5,7 @@ import {
   sendSubscriptionExpiring3DaysEmail,
   sendSubscriptionExpiredEmail
 } from './subscription-emails.service.js';
+import { checkExpiredAssignments } from '../controllers/streaming.controller.js';
 
 /**
  * Verifica e expira assinaturas vencidas
@@ -281,6 +282,13 @@ export async function runAllSubscriptionChecks() {
   await checkExpiredSubscriptions();
   await checkExpiring7DaysSubscriptions();
   await checkExpiring3DaysSubscriptions();
+  
+  // Verificar perfis de streaming expirados (30 dias)
+  try {
+    await checkExpiredAssignments();
+  } catch (error) {
+    logger.error('Error checking streaming profile expirations:', error);
+  }
 
   logger.info('Subscription checks completed');
 }

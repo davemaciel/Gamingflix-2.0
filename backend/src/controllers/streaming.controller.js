@@ -226,3 +226,163 @@ export const assignProfile = async (req, res) => {
         res.status(500).json({ error: 'Erro ao atribuir perfil' });
     }
 };
+
+// --- Admin: Gerenciamento de Atribuições ---
+
+/**
+ * Lista todos os perfis atribuídos com informações do usuário
+ */
+export const getAssignedProfiles = async (req, res) => {
+    try {
+        const { serviceId } = req.params;
+
+        // Buscar perfis atribuídos para o serviço
+        const assignedProfiles = await collections.streamingProfiles()
+            .find({
+                service_id: serviceId,
+                assigned_to: { $exists: true, $ne: null }
+            })
+            .toArray();
+
+        // Enriquecer com informações do usuário
+        const profilesWithUsers = await Promise.all(
+            assignedProfiles.map(async (profile) => {
+                const user = await collections.profiles().findOne({ id: profile.assigned_to });
+                
+                // Calcular dias restantes (30 dias desde assigned_at)
+                const assignedDate = new Date(profile.assigned_at);
+                const expirationDate = new Date(assignedDate);
+                expirationDate.setDate(expirationDate.getDate() + 30);
+                
+                const now = new Date();
+                const daysRemaining = Math.ceil((expirationDate - now) / (1000 * 60 * 60 * 24));
+                const isExpired = daysRemaining <= 0;
+
+                return {
+                    ...profile,
+                    user: user ? {
+                        id: user.id,
+                        email: user.email,
+                        full_name: user.full_name
+                    } : null,
+                    assignment_info: {
+                        assigned_at: profile.assigned_at,
+                        expiration_date: expirationDate,
+                        days_remaining: daysRemaining,
+                        is_expired: isExpired
+                    }
+                };
+            })
+        );
+
+        res.json(profilesWithUsers);
+    } catch (error) {
+        logger.error('Error fetching assigned profiles:', error);
+        res.status(500).json({ error: 'Erro ao buscar perfis atribuídos' });
+    }
+};
+
+/**
+ * Desvincula um perfil manualmente (Admin)
+ */
+export const unassignProfile = async (req, res) => {
+    try {
+        const { profileId } = req.params;
+
+        const profile = await collections.streamingProfiles().findOne({ id: profileId });
+
+        if (!profile) {
+            return res.status(404).json({ error: 'Perfil não encontrado' });
+        }
+
+        if (!profile.assigned_to) {
+            return res.status(400).json({ error: 'Perfil não está atribuído' });
+        }
+
+        // Desatribuir o perfil
+        await collections.streamingProfiles().updateOne(
+            { id: profileId },
+            {
+                $set: {
+                    status: 'available',
+                    assigned_to: null,
+                    assigned_at: null
+                }
+            }
+        );
+
+        logger.info(`Profile ${profileId} manually unassigned from user ${profile.assigned_to}`);
+        res.json({ message: 'Perfil desvinculado com sucesso' });
+    } catch (error) {
+        logger.error('Error unassigning profile:', error);
+        res.status(500).json({ error: 'Erro ao desvincular perfil' });
+    }
+};
+
+/**
+ * Verifica e remove atribuições expiradas (30 dias)
+ * Esta função deve ser chamada por um cron job
+ */
+export const checkExpiredAssignments = async () => {
+    try {
+        const now = new Date();
+        const thirtyDaysAgo = new Date(now);
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        // Buscar perfis atribuídos há mais de 30 dias
+        const expiredProfiles = await collections.streamingProfiles()
+            .find({
+                assigned_to: { $exists: true, $ne: null },
+                assigned_at: { $lt: thirtyDaysAgo }
+            })
+            .toArray();
+
+        if (expiredProfiles.length === 0) {
+            logger.info('Nenhum perfil expirado encontrado');
+            return { expired: 0 };
+        }
+
+        // Desatribuir perfis expirados
+        const result = await collections.streamingProfiles().updateMany(
+            {
+                assigned_to: { $exists: true, $ne: null },
+                assigned_at: { $lt: thirtyDaysAgo }
+            },
+            {
+                $set: {
+                    status: 'available',
+                    assigned_to: null,
+                    assigned_at: null
+                }
+            }
+        );
+
+        logger.info(`${result.modifiedCount} perfis expirados desvinculados automaticamente`);
+        
+        // Log cada perfil expirado
+        expiredProfiles.forEach(profile => {
+            logger.info(`Perfil expirado: ${profile.profile_name} (${profile.id}) - Usuário: ${profile.assigned_to}`);
+        });
+
+        return { expired: result.modifiedCount };
+    } catch (error) {
+        logger.error('Error checking expired assignments:', error);
+        throw error;
+    }
+};
+
+/**
+ * Endpoint manual para verificar expirados (Admin pode chamar)
+ */
+export const runExpirationCheck = async (req, res) => {
+    try {
+        const result = await checkExpiredAssignments();
+        res.json({
+            message: 'Verificação de expiração executada',
+            profiles_expired: result.expired
+        });
+    } catch (error) {
+        logger.error('Error running expiration check:', error);
+        res.status(500).json({ error: 'Erro ao verificar expirações' });
+    }
+};

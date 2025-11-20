@@ -9,7 +9,10 @@ import {
     createAccount,
     getAccountsByService,
     getMyProfileForService,
-    assignProfile
+    assignProfile,
+    getAssignedProfiles,
+    unassignProfile,
+    runExpirationCheck
 } from '../controllers/streaming.controller.js';
 import { handleStreamingPayment } from '../controllers/webhook-streaming.controller.js';
 
@@ -26,12 +29,18 @@ router.get('/services/:id', authenticateToken, getServiceById);
 router.get('/services/:serviceId/my-profile', authenticateToken, getMyProfileForService);
 router.post('/assign', authenticateToken, assignProfile);
 
-// Admin Actions
+// Admin Actions - Services
 router.post('/services', authenticateToken, requireAdmin, createService);
 router.put('/services/:id', authenticateToken, requireAdmin, updateService);
 router.delete('/services/:id', authenticateToken, requireAdmin, deleteService);
 
+// Admin Actions - Accounts
 router.post('/accounts', authenticateToken, requireAdmin, createAccount);
 router.get('/services/:serviceId/accounts', authenticateToken, requireAdmin, getAccountsByService);
+
+// Admin Actions - Gerenciamento de Atribuições
+router.get('/services/:serviceId/assigned-profiles', authenticateToken, requireAdmin, getAssignedProfiles);
+router.delete('/profiles/:profileId/unassign', authenticateToken, requireAdmin, unassignProfile);
+router.post('/check-expirations', authenticateToken, requireAdmin, runExpirationCheck);
 
 export default router;
