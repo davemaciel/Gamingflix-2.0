@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { transactionsApi, checkoutApi } from '@/lib/api';
+import { transactionsApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Header } from '@/components/Header';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, FileText, CreditCard, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import { Loader2, FileText, ExternalLink, AlertCircle, CheckCircle, Clock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
     Table,
@@ -29,7 +29,7 @@ const Invoices = () => {
     const { user } = useAuth();
     const { toast } = useToast();
     const [loading, setLoading] = useState(true);
-    const [generating, setGenerating] = useState(false);
+
     const [invoices, setInvoices] = useState<Invoice[]>([]);
 
     const fetchInvoices = async () => {
@@ -55,31 +55,7 @@ const Invoices = () => {
         }
     }, [user]);
 
-    const handleGenerateInvoice = async () => {
-        setGenerating(true);
-        try {
-            const response = await checkoutApi.createInvoice();
-            toast({
-                title: 'Sucesso',
-                description: 'Fatura gerada com sucesso!',
-            });
 
-            // Se tiver URL de checkout, redireciona
-            if (response.checkout_url) {
-                window.location.href = response.checkout_url;
-            } else {
-                fetchInvoices();
-            }
-        } catch (error: any) {
-            toast({
-                title: 'Erro',
-                description: error.message || 'Erro ao gerar fatura.',
-                variant: 'destructive',
-            });
-        } finally {
-            setGenerating(false);
-        }
-    };
 
     const getStatusBadge = (status: string) => {
         switch (status) {
@@ -120,10 +96,7 @@ const Invoices = () => {
                         </p>
                     </div>
 
-                    <Button onClick={handleGenerateInvoice} disabled={generating}>
-                        {generating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CreditCard className="mr-2 h-4 w-4" />}
-                        Gerar Nova Fatura
-                    </Button>
+
                 </div>
 
                 <Card>
@@ -142,6 +115,9 @@ const Invoices = () => {
                             <div className="text-center py-12 text-muted-foreground">
                                 <FileText className="h-12 w-12 mx-auto mb-4 opacity-20" />
                                 <p>Nenhuma fatura encontrada.</p>
+                                <p className="text-sm mt-2">
+                                    As faturas são geradas automaticamente quando você inicia um pagamento.
+                                </p>
                             </div>
                         ) : (
                             <div className="rounded-md border">
@@ -176,8 +152,9 @@ const Invoices = () => {
                                                         <Button
                                                             size="sm"
                                                             variant="default"
-                                                            onClick={() => window.location.href = 'https://www.ggcheckout.com/checkout/v2/Et6D7G1DJX9xxt6mCOcA'} // URL fixa por enquanto, idealmente viria do backend
+                                                            onClick={() => window.open('https://www.ggcheckout.com/checkout/v2/Et6D7G1DJX9xxt6mCOcA', '_blank')}
                                                         >
+                                                            <ExternalLink className="mr-2 h-4 w-4" />
                                                             Pagar Agora
                                                         </Button>
                                                     )}

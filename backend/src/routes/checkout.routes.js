@@ -1,5 +1,5 @@
 import express from 'express';
-import { getCheckoutSession, handleWebhook, createInvoice } from '../controllers/checkout.controller.js';
+import { getCheckoutSession, handleWebhook } from '../controllers/checkout.controller.js';
 import { authenticateToken } from '../middleware/jwtAuth.js';
 import { logger } from '../utils/logger.js';
 
@@ -7,9 +7,6 @@ const router = express.Router();
 
 // Endpoint para obter URL do checkout
 router.get('/session', authenticateToken, getCheckoutSession);
-
-// Endpoint para gerar fatura manual
-router.post('/invoice', authenticateToken, createInvoice);
 
 // Webhook do GGCheckout (sem autenticação JWT, usa secret do webhook)
 router.post('/webhook', handleWebhook);

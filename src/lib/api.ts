@@ -285,7 +285,6 @@ export interface TransactionStats {
 
 export const checkoutApi = {
   getSession: () => apiClient.get<CheckoutSession>('/checkout/session'),
-  createInvoice: () => apiClient.post<{ message: string; transaction: Transaction; checkout_url?: string }>('/checkout/invoice'),
 };
 
 export const transactionsApi = {
