@@ -117,6 +117,10 @@ export const Header = ({ onSearch, initialQuery = '' }: HeaderProps) => {
                   <User className="mr-2 h-4 w-4" />
                   {user.username || user.email}
                 </Button>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/streaming')}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  Streamings
+                </Button>
                 <Button variant="ghost" size="sm" onClick={() => navigate('/invoices')}>
                   <FileText className="mr-2 h-4 w-4" />
                   Faturas
@@ -198,6 +202,13 @@ export const Header = ({ onSearch, initialQuery = '' }: HeaderProps) => {
                             <Button variant="ghost" className="justify-start" onClick={() => navigate('/profile')}>
                               <User className="mr-2 h-4 w-4" />
                               Meu Perfil
+                            </Button>
+                          </SheetClose>
+
+                          <SheetClose asChild>
+                            <Button variant="ghost" className="justify-start" onClick={() => navigate('/streaming')}>
+                              <FileText className="mr-2 h-4 w-4" />
+                              Streamings
                             </Button>
                           </SheetClose>
 

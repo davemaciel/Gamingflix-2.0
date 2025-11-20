@@ -11,11 +11,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Pencil, Trash2, Plus, Copy, Users, Gamepad2, MessageSquare, DollarSign } from 'lucide-react';
+import { Pencil, Trash2, Plus, Copy, Users, Gamepad2, MessageSquare, DollarSign, Tv } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { UsersManagement } from '@/components/admin/UsersManagement';
 import { TransactionsManagement } from '@/components/admin/TransactionsManagement';
+import { StreamingsManagement } from '@/components/admin/StreamingsManagement';
 
 type ContentLanguage = 'pt' | 'en' | 'es';
 
@@ -349,7 +350,7 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header onSearch={() => {}} />
+      <Header onSearch={() => { }} />
 
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
         <div className="mb-6 sm:mb-8">
@@ -360,10 +361,14 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="games" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 max-w-3xl mb-6">
+          <TabsList className="grid w-full grid-cols-4 max-w-4xl mb-6">
             <TabsTrigger value="games" className="flex items-center gap-2">
               <Gamepad2 className="h-4 w-4" />
               Jogos
+            </TabsTrigger>
+            <TabsTrigger value="streamings" className="flex items-center gap-2">
+              <Tv className="h-4 w-4" />
+              Streamings
             </TabsTrigger>
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
@@ -399,222 +404,226 @@ const Admin = () => {
               </div>
             </div>
 
-        <div className="grid gap-3 sm:gap-4 md:gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-          {filteredGames.map((game) => (
-            <Card key={game.id} className="border-border bg-card/60 backdrop-blur">
-              <CardContent className="p-4 sm:p-6 space-y-4">
-                <div className="flex justify-between items-start gap-4">
-                  <div>
-                    <h2 className="text-lg sm:text-xl font-semibold text-foreground">{game.title}</h2>
-                    <p className="text-xs sm:text-sm text-muted-foreground mt-1 break-words">
-                      {game.description}
+            <div className="grid gap-3 sm:gap-4 md:gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+              {filteredGames.map((game) => (
+                <Card key={game.id} className="border-border bg-card/60 backdrop-blur">
+                  <CardContent className="p-4 sm:p-6 space-y-4">
+                    <div className="flex justify-between items-start gap-4">
+                      <div>
+                        <h2 className="text-lg sm:text-xl font-semibold text-foreground">{game.title}</h2>
+                        <p className="text-xs sm:text-sm text-muted-foreground mt-1 break-words">
+                          {game.description}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="text-xs uppercase tracking-wide text-muted-foreground">Informações de acesso</div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div className="rounded-lg border border-border/50 bg-background/70 p-3 text-sm">
+                          <span className="block text-muted-foreground text-xs mb-1">Login</span>
+                          <span className="font-medium text-foreground break-words">{game.login}</span>
+                        </div>
+                        <div className="rounded-lg border border-border/50 bg-background/70 p-3 text-sm">
+                          <span className="block text-muted-foreground text-xs mb-1">Senha</span>
+                          <span className="font-medium text-foreground break-words">{game.password}</span>
+                        </div>
+                      </div>
+                      {game.family_code && (
+                        <div className="rounded-lg border border-border/50 bg-background/70 p-3 text-sm">
+                          <span className="block text-muted-foreground text-xs mb-1">Modo Família</span>
+                          <span className="font-medium text-foreground break-words">{game.family_code}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 justify-end">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-lg"
+                        onClick={() => openEditDialog(game)}
+                      >
+                        <Pencil className="h-4 w-4 mr-2" />
+                        Editar
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="rounded-lg"
+                        onClick={() => openDuplicateDialog(game)}
+                      >
+                        <Copy className="h-4 w-4 mr-2" />
+                        Duplicar
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="rounded-lg"
+                        onClick={() => handleDelete(game.id)}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Excluir
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+
+              {games.length === 0 && (
+                <div className="col-span-full border border-dashed border-border/60 rounded-2xl p-10 text-center text-muted-foreground">
+                  Nenhum jogo cadastrado ainda.
+                </div>
+              )}
+              {games.length > 0 && filteredGames.length === 0 && (
+                <div className="col-span-full border border-dashed border-border/60 rounded-2xl p-10 text-center text-muted-foreground">
+                  Nenhum jogo encontrado para a busca atual.
+                </div>
+              )}
+            </div>
+
+            <Dialog open={showDialog} onOpenChange={setShowDialog}>
+              <DialogContent className="max-w-[95vw] sm:max-w-[90vw] md:max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl p-4 sm:p-6">
+                <DialogHeader>
+                  <DialogTitle className="text-lg sm:text-xl md:text-2xl">
+                    {editingGame ? 'Editar Jogo' : 'Adicionar Novo Jogo'}
+                  </DialogTitle>
+                </DialogHeader>
+
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title" className="text-sm sm:text-base">Título</Label>
+                    <Input
+                      id="title"
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      className="h-9 sm:h-10 rounded-xl text-sm sm:text-base"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="cover_url" className="text-sm sm:text-base">URL da Capa</Label>
+                    <Input
+                      id="cover_url"
+                      value={formData.cover_url}
+                      onChange={(e) => setFormData({ ...formData, cover_url: e.target.value })}
+                      className="h-9 sm:h-10 rounded-xl text-sm sm:text-base"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm sm:text-base">
+                        {DESCRIPTION_LABELS[activeContentLanguage]}
+                      </Label>
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        {LANGUAGE_OPTIONS.map(({ id, label }) => (
+                          <Button
+                            key={id}
+                            type="button"
+                            size="sm"
+                            variant={activeContentLanguage === id ? 'default' : 'outline'}
+                            className="h-8 px-3"
+                            onClick={() => setActiveContentLanguage(id)}
+                          >
+                            {label}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                    <Textarea
+                      value={descriptionValue}
+                      onChange={(e) => handleDescriptionChange(e.target.value)}
+                      rows={3}
+                      className="rounded-xl text-sm sm:text-base resize-none"
+                      required={activeContentLanguage === 'pt'}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="gradient" className="text-sm sm:text-base">Gradiente (classes Tailwind)</Label>
+                    <Input
+                      id="gradient"
+                      value={formData.gradient}
+                      onChange={(e) => setFormData({ ...formData, gradient: e.target.value })}
+                      placeholder="from-red-600 to-orange-700"
+                      className="h-9 sm:h-10 rounded-xl text-sm sm:text-base"
+                      required
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="login" className="text-sm sm:text-base">Login Steam</Label>
+                      <Input
+                        id="login"
+                        value={formData.login}
+                        onChange={(e) => setFormData({ ...formData, login: e.target.value })}
+                        className="h-9 sm:h-10 rounded-xl text-sm sm:text-base"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="password" className="text-sm sm:text-base">Senha</Label>
+                      <Input
+                        id="password"
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        className="h-9 sm:h-10 rounded-xl text-sm sm:text-base"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="family_code" className="text-sm sm:text-base">Código Modo Família (opcional)</Label>
+                    <Input
+                      id="family_code"
+                      value={formData.family_code}
+                      onChange={(e) => setFormData({ ...formData, family_code: e.target.value })}
+                      className="h-9 sm:h-10 rounded-xl text-sm sm:text-base"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm sm:text-base">
+                      {TUTORIAL_LABELS[activeContentLanguage]}
+                    </Label>
+                    <Textarea
+                      value={tutorialValue}
+                      onChange={(e) => handleTutorialChange(e.target.value)}
+                      rows={5}
+                      placeholder={TUTORIAL_PLACEHOLDERS[activeContentLanguage]}
+                      className="rounded-xl text-sm sm:text-base resize-none"
+                      required={activeContentLanguage === 'pt'}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Use uma linha por passo. Altere a aba acima para editar as traduções.
                     </p>
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <div className="text-xs uppercase tracking-wide text-muted-foreground">Informações de acesso</div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <div className="rounded-lg border border-border/50 bg-background/70 p-3 text-sm">
-                      <span className="block text-muted-foreground text-xs mb-1">Login</span>
-                      <span className="font-medium text-foreground break-words">{game.login}</span>
-                    </div>
-                    <div className="rounded-lg border border-border/50 bg-background/70 p-3 text-sm">
-                      <span className="block text-muted-foreground text-xs mb-1">Senha</span>
-                      <span className="font-medium text-foreground break-words">{game.password}</span>
-                    </div>
-                  </div>
-                  {game.family_code && (
-                    <div className="rounded-lg border border-border/50 bg-background/70 p-3 text-sm">
-                      <span className="block text-muted-foreground text-xs mb-1">Modo Família</span>
-                      <span className="font-medium text-foreground break-words">{game.family_code}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex flex-wrap gap-2 justify-end">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="rounded-lg"
-                    onClick={() => openEditDialog(game)}
-                  >
-                    <Pencil className="h-4 w-4 mr-2" />
-                    Editar
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    className="rounded-lg"
-                    onClick={() => openDuplicateDialog(game)}
-                  >
-                    <Copy className="h-4 w-4 mr-2" />
-                    Duplicar
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    className="rounded-lg"
-                    onClick={() => handleDelete(game.id)}
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Excluir
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-
-          {games.length === 0 && (
-            <div className="col-span-full border border-dashed border-border/60 rounded-2xl p-10 text-center text-muted-foreground">
-              Nenhum jogo cadastrado ainda.
-            </div>
-          )}
-          {games.length > 0 && filteredGames.length === 0 && (
-            <div className="col-span-full border border-dashed border-border/60 rounded-2xl p-10 text-center text-muted-foreground">
-              Nenhum jogo encontrado para a busca atual.
-            </div>
-          )}
-        </div>
-
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="max-w-[95vw] sm:max-w-[90vw] md:max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl p-4 sm:p-6">
-          <DialogHeader>
-            <DialogTitle className="text-lg sm:text-xl md:text-2xl">
-              {editingGame ? 'Editar Jogo' : 'Adicionar Novo Jogo'}
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-3 sm:space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="title" className="text-sm sm:text-base">Título</Label>
-              <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="h-9 sm:h-10 rounded-xl text-sm sm:text-base"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="cover_url" className="text-sm sm:text-base">URL da Capa</Label>
-              <Input
-                id="cover_url"
-                value={formData.cover_url}
-                onChange={(e) => setFormData({ ...formData, cover_url: e.target.value })}
-                className="h-9 sm:h-10 rounded-xl text-sm sm:text-base"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label className="text-sm sm:text-base">
-                  {DESCRIPTION_LABELS[activeContentLanguage]}
-                </Label>
-                <div className="flex items-center gap-1 sm:gap-2">
-                  {LANGUAGE_OPTIONS.map(({ id, label }) => (
+                  <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-2">
                     <Button
-                      key={id}
-                      type="button"
-                      size="sm"
-                      variant={activeContentLanguage === id ? 'default' : 'outline'}
-                      className="h-8 px-3"
-                      onClick={() => setActiveContentLanguage(id)}
+                      variant="outline"
+                      onClick={() => setShowDialog(false)}
+                      className="w-full sm:w-auto rounded-xl text-sm sm:text-base"
                     >
-                      {label}
+                      Cancelar
                     </Button>
-                  ))}
+                    <Button onClick={handleSave} className="w-full sm:w-auto rounded-xl text-sm sm:text-base">
+                      {editingGame ? 'Atualizar' : 'Criar'}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-              <Textarea
-                value={descriptionValue}
-                onChange={(e) => handleDescriptionChange(e.target.value)}
-                rows={3}
-                className="rounded-xl text-sm sm:text-base resize-none"
-                required={activeContentLanguage === 'pt'}
-              />
-            </div>
+              </DialogContent>
+            </Dialog>
+          </TabsContent>
 
-            <div className="space-y-2">
-              <Label htmlFor="gradient" className="text-sm sm:text-base">Gradiente (classes Tailwind)</Label>
-              <Input
-                id="gradient"
-                value={formData.gradient}
-                onChange={(e) => setFormData({ ...formData, gradient: e.target.value })}
-                placeholder="from-red-600 to-orange-700"
-                className="h-9 sm:h-10 rounded-xl text-sm sm:text-base"
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="login" className="text-sm sm:text-base">Login Steam</Label>
-                <Input
-                  id="login"
-                  value={formData.login}
-                  onChange={(e) => setFormData({ ...formData, login: e.target.value })}
-                  className="h-9 sm:h-10 rounded-xl text-sm sm:text-base"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm sm:text-base">Senha</Label>
-                <Input
-                  id="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="h-9 sm:h-10 rounded-xl text-sm sm:text-base"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="family_code" className="text-sm sm:text-base">Código Modo Família (opcional)</Label>
-              <Input
-                id="family_code"
-                value={formData.family_code}
-                onChange={(e) => setFormData({ ...formData, family_code: e.target.value })}
-                className="h-9 sm:h-10 rounded-xl text-sm sm:text-base"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm sm:text-base">
-                {TUTORIAL_LABELS[activeContentLanguage]}
-              </Label>
-              <Textarea
-                value={tutorialValue}
-                onChange={(e) => handleTutorialChange(e.target.value)}
-                rows={5}
-                placeholder={TUTORIAL_PLACEHOLDERS[activeContentLanguage]}
-                className="rounded-xl text-sm sm:text-base resize-none"
-                required={activeContentLanguage === 'pt'}
-              />
-              <p className="text-xs text-muted-foreground">
-                Use uma linha por passo. Altere a aba acima para editar as traduções.
-              </p>
-            </div>
-
-            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-2">
-              <Button
-                variant="outline"
-                onClick={() => setShowDialog(false)}
-                className="w-full sm:w-auto rounded-xl text-sm sm:text-base"
-              >
-                Cancelar
-              </Button>
-              <Button onClick={handleSave} className="w-full sm:w-auto rounded-xl text-sm sm:text-base">
-                {editingGame ? 'Atualizar' : 'Criar'}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+          <TabsContent value="streamings">
+            <StreamingsManagement />
           </TabsContent>
 
           <TabsContent value="users">

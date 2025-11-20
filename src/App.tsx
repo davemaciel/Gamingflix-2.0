@@ -21,6 +21,11 @@ import { SteamGuard } from "./pages/SteamGuard";
 import { CheckoutSuccess } from "./pages/CheckoutSuccess";
 import NotFound from "./pages/NotFound";
 import Invoices from "./pages/Invoices";
+import StreamingCatalog from "./pages/StreamingCatalog";
+import StreamingDetail from "./pages/StreamingDetail";
+import { ServicesList } from "./pages/admin/Streaming/ServicesList";
+import { ServiceForm } from "./pages/admin/Streaming/ServiceForm";
+import { ManageInventory } from "./pages/admin/Streaming/ManageInventory";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +48,12 @@ const App = () => (
             <Route path="/admin" element={<Admin />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/invoices" element={<Invoices />} />
+            <Route path="/streaming" element={<StreamingCatalog />} />
+            <Route path="/streaming/:id" element={<StreamingDetail />} />
+            <Route path="/admin/streaming" element={<ServicesList />} />
+            <Route path="/admin/streaming/new" element={<ServiceForm />} />
+            <Route path="/admin/streaming/:id/edit" element={<ServiceForm />} />
+            <Route path="/admin/streaming/:id/inventory" element={<ManageInventory />} />
             <Route path="/releases" element={<Releases />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />

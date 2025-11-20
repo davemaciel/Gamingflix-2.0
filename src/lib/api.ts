@@ -308,3 +308,18 @@ export const transactionsApi = {
     return apiClient.get<TransactionsResponse>(`/transactions/my-invoices?${query.toString()}`);
   },
 };
+
+export const streamingApi = {
+  getAllServices: () => apiClient.get<import('@/types/streaming').StreamingService[]>('/streaming/services'),
+  getServiceById: (id: string) => apiClient.get<import('@/types/streaming').StreamingService>(`/streaming/services/${id}`),
+  getMyProfile: (serviceId: string) => apiClient.get<import('@/types/streaming').UserProfileResponse>(`/streaming/services/${serviceId}/my-profile`),
+  assignProfile: (serviceId: string) => apiClient.post<any>('/streaming/assign', { serviceId }),
+
+  // Admin
+  createService: (data: Partial<import('@/types/streaming').StreamingService>) => apiClient.post<import('@/types/streaming').StreamingService>('/streaming/services', data),
+  updateService: (id: string, data: Partial<import('@/types/streaming').StreamingService>) => apiClient.put<import('@/types/streaming').StreamingService>(`/streaming/services/${id}`, data),
+  deleteService: (id: string) => apiClient.delete(`/streaming/services/${id}`),
+
+  createAccount: (data: Partial<import('@/types/streaming').StreamingAccount>) => apiClient.post<import('@/types/streaming').StreamingAccount>('/streaming/accounts', data),
+  getAccountsByService: (serviceId: string) => apiClient.get<import('@/types/streaming').StreamingAccount[]>(`/streaming/services/${serviceId}/accounts`),
+};

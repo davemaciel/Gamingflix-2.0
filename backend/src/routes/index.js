@@ -6,6 +6,7 @@ import usersRoutes from './users.routes.js';
 import steamGuardRoutes from './steamguard.routes.js';
 import checkoutRoutes from './checkout.routes.js';
 import transactionsRoutes from './transactions.routes.js';
+import streamingRoutes from './streaming.routes.js';
 
 export function setupRoutes(app) {
   app.use('/api/auth', authRoutes);
@@ -16,7 +17,8 @@ export function setupRoutes(app) {
   app.use('/api/steam-guard', steamGuardRoutes);
   app.use('/api/checkout', checkoutRoutes);
   app.use('/api/transactions', transactionsRoutes);
-  
+  app.use('/api/streaming', streamingRoutes);
+
   app.all('/api/whatsapp/*', (req, res) => {
     return res.status(503).json({ success: false, error: 'WhatsApp temporariamente desativado' });
   });

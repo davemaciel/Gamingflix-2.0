@@ -17,7 +17,7 @@ export async function connectDatabase() {
     client = new MongoClient(MONGODB_URL);
     await client.connect();
     db = client.db(MONGODB_DB_NAME);
-    
+
     logger.info(`Connected to MongoDB database: ${MONGODB_DB_NAME}`);
     return db;
   } catch (error) {
@@ -50,4 +50,7 @@ export const collections = {
   transactions: () => getDatabase().collection('checkout_transactions'),
   userGameSelections: () => getDatabase().collection('user_game_selections'),
   userRoles: () => getDatabase().collection('user_roles'),
+  streamingServices: () => getDatabase().collection('streaming_services'),
+  streamingAccounts: () => getDatabase().collection('streaming_accounts'),
+  streamingProfiles: () => getDatabase().collection('streaming_profiles'),
 };
