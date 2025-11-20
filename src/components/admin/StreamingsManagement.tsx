@@ -162,12 +162,7 @@ export const StreamingsManagement = () => {
     const openAssignmentsDialog = async (service: StreamingService) => {
         setSelectedService(service);
         try {
-            const response = await fetch(`/api/streaming/services/${service.id}/assigned-profiles`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-            const data = await response.json();
+            const data = await streamingApi.getAssignedProfiles(service.id);
             setAssignedProfiles(data);
         } catch (error) {
             toast({
@@ -185,23 +180,13 @@ export const StreamingsManagement = () => {
         }
 
         try {
-            await fetch(`/api/streaming/profiles/${profileId}/unassign`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
+            await streamingApi.unassignProfile(profileId);
 
             toast({ title: 'Sucesso', description: 'Perfil desvinculado' });
             
             // Recarregar lista
             if (selectedService) {
-                const response = await fetch(`/api/streaming/services/${selectedService.id}/assigned-profiles`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-                const data = await response.json();
+                const data = await streamingApi.getAssignedProfiles(selectedService.id);
                 setAssignedProfiles(data);
             }
         } catch (error) {

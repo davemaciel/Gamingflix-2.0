@@ -322,4 +322,8 @@ export const streamingApi = {
 
   createAccount: (data: Partial<import('@/types/streaming').StreamingAccount>) => apiClient.post<import('@/types/streaming').StreamingAccount>('/streaming/accounts', data),
   getAccountsByService: (serviceId: string) => apiClient.get<import('@/types/streaming').StreamingAccount[]>(`/streaming/services/${serviceId}/accounts`),
+  
+  // Gerenciamento de Atribuições
+  getAssignedProfiles: (serviceId: string) => apiClient.get<any[]>(`/streaming/services/${serviceId}/assigned-profiles`),
+  unassignProfile: (profileId: string) => apiClient.delete(`/streaming/profiles/${profileId}/unassign`),
 };
