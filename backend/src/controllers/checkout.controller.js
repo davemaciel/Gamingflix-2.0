@@ -322,22 +322,21 @@ async function handleStreamingPurchaseFromProducts(req, res, { event, customer, 
   try {
     logger.info('=== PROCESSANDO COMPRA DE STREAMING (formato antigo) ===');
 
-    // Validar assinatura
+    // Validar assinatura (OPCIONAL - GGCheckout não envia por padrão)
     if (WEBHOOK_SECRET) {
       const signature = req.headers['x-ggcheckout-signature'];
       if (!signature) {
-        logger.warn('Webhook de streaming sem assinatura');
-        return res.status(401).json({ error: 'Assinatura ausente' });
-      }
+        logger.warn('⚠️ Webhook sem assinatura HMAC (não enviada pelo GGCheckout). Continuando...');
+      } else {
+        const hmac = crypto.createHmac('sha256', WEBHOOK_SECRET);
+        const digest = hmac.update(JSON.stringify(req.body)).digest('hex');
 
-      const hmac = crypto.createHmac('sha256', WEBHOOK_SECRET);
-      const digest = hmac.update(JSON.stringify(req.body)).digest('hex');
-
-      if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest))) {
-        logger.warn('Assinatura de webhook inválida');
-        return res.status(401).json({ error: 'Assinatura inválida' });
+        if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest))) {
+          logger.warn('❌ Assinatura de webhook inválida!');
+          return res.status(401).json({ error: 'Assinatura inválida' });
+        }
+        logger.info('✅ Assinatura HMAC validada');
       }
-      logger.info('✅ Assinatura validada');
     }
 
     // Validar se é evento de sucesso
