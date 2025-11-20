@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import { collections } from '../config/database.js';
 import { logger } from '../utils/logger.js';
 import { sendSubscriptionCreatedEmail } from '../services/subscription-emails.service.js';
+import { handleStreamingPayment } from './webhook-streaming.controller.js';
 
 const CHECKOUT_URL = process.env.GG_CHECKOUT_CHECKOUT_URL || 'https://www.ggcheckout.com/checkout/v2/Et6D7G1DJX9xxt6mCOcA';
 const WEBHOOK_SECRET = process.env.GG_CHECKOUT_WEBHOOK_SECRET;
@@ -32,6 +33,12 @@ export const handleWebhook = async (req, res) => {
     logger.info('=== WEBHOOK RECEBIDO ===');
     logger.info('Headers:', JSON.stringify(req.headers, null, 2));
     logger.info('Body:', JSON.stringify(payload, null, 2));
+
+    // DETECÇÃO DE STREAMING: Se for payload de streaming, repassa para o controller específico
+    if (payload.service_id && payload.user_id) {
+      logger.info('🔄 Redirecionando webhook para controller de Streaming...');
+      return handleStreamingPayment(req, res);
+    }
 
     // Validação opcional do secret (se configurado)
     if (WEBHOOK_SECRET) {
