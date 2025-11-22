@@ -220,11 +220,24 @@ export const getCategoryItems = async (req, res) => {
         
         let items = [];
         
-        // Se for categoria automática de últimas adições
+        // Se for categoria automática de últimas adições (agora "Novidades e Lançamentos")
         if (category.type === 'auto_latest') {
             const limit = category.max_items || 12;
             
-            // Buscar jogos e streamings recentes
+            // Buscar lançamentos marcados
+            const releaseGames = await collections.games()
+                .find({ is_release: true })
+                .sort({ created_at: -1 })
+                .limit(limit)
+                .toArray();
+
+            const releaseStreamings = await collections.streamingServices()
+                .find({ is_release: true })
+                .sort({ created_at: -1 })
+                .limit(limit)
+                .toArray();
+
+            // Buscar recentes (geral)
             const recentGames = await collections.games()
                 .find({})
                 .sort({ created_at: -1 })
@@ -237,14 +250,29 @@ export const getCategoryItems = async (req, res) => {
                 .limit(limit)
                 .toArray();
             
-            // Combinar e ordenar por data
-            const allItems = [
-                ...recentGames.map(g => ({ ...g, item_type: 'game', date: g.created_at })),
-                ...recentStreamings.map(s => ({ ...s, item_type: 'streaming', date: s.created_at }))
+            // Combinar tudo
+            const allItemsRaw = [
+                ...releaseGames.map(g => ({ ...g, item_type: 'game', is_release: true })),
+                ...releaseStreamings.map(s => ({ ...s, item_type: 'streaming', is_release: true })),
+                ...recentGames.map(g => ({ ...g, item_type: 'game' })),
+                ...recentStreamings.map(s => ({ ...s, item_type: 'streaming' }))
             ];
+
+            // Remover duplicatas (pelo ID)
+            const seen = new Set();
+            const uniqueItems = allItemsRaw.filter(item => {
+                const duplicate = seen.has(item.id);
+                seen.add(item.id);
+                return !duplicate;
+            });
             
-            items = allItems
-                .sort((a, b) => new Date(b.date) - new Date(a.date))
+            // Ordenar: Lançamentos primeiro, depois por data
+            items = uniqueItems
+                .sort((a, b) => {
+                    if (a.is_release && !b.is_release) return -1;
+                    if (!a.is_release && b.is_release) return 1;
+                    return new Date(b.created_at || b.date) - new Date(a.created_at || a.date);
+                })
                 .slice(0, limit)
                 .map((item, index) => ({
                     id: crypto.randomUUID(),
@@ -253,7 +281,8 @@ export const getCategoryItems = async (req, res) => {
                     order: index,
                     title: item.title || item.name,
                     cover_url: item.cover_url || item.logo_url,
-                    description: item.description
+                    description: item.description,
+                    is_release: item.is_release
                 }));
         } else {
             // Categoria manual - buscar itens vinculados

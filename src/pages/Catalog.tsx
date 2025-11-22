@@ -33,6 +33,9 @@ const Catalog = () => {
 
     const urlQuery = searchParams.get('q') || '';
 
+    const [gamesLibrary, setGamesLibrary] = useState<any[]>([]);
+    const [streamingsLibrary, setStreamingsLibrary] = useState<any[]>([]);
+
     useEffect(() => {
         if (urlQuery) {
             setSearchQuery(urlQuery);
@@ -60,32 +63,92 @@ const Catalog = () => {
 
     const fetchData = async () => {
         try {
-            // Fetch active categories
-            const activeCategories = await categoriesApi.getActiveCategories();
+            // Fetch everything in parallel
+            const [activeCategories, allGamesList, allStreamings] = await Promise.all([
+                categoriesApi.getActiveCategories(),
+                gamesApi.getAll(),
+                streamingApi.getAllServices()
+            ]);
+
+            // Process Games & Streamings separately
+            const gamesFormatted = (allGamesList || []).map(g => ({ ...g, item_type: 'game', item_id: g.id }));
+            const streamingsFormatted = (allStreamings || []).map(s => ({ 
+                ...s, 
+                item_type: 'streaming', 
+                item_id: s.id, 
+                title: s.name, 
+                cover_url: s.logo_url 
+            }));
+            
+            setGamesLibrary(gamesFormatted);
+            setStreamingsLibrary(streamingsFormatted);
             setCategories(activeCategories);
 
-            // Fetch category items in parallel
+            // Fetch category items
             const categoryPromises = activeCategories.map(cat =>
                 categoriesApi.getCategoryItems(cat.id)
             );
             const categoryResults = await Promise.all(categoryPromises);
 
             const dataMap = new Map();
+            let hasCategoryItems = false;
+
             categoryResults.forEach((result, index) => {
-                dataMap.set(activeCategories[index].id, result.items || []);
+                const items = result.items || [];
+                if (items.length > 0) hasCategoryItems = true;
+                dataMap.set(activeCategories[index].id, items);
             });
             setCategoryData(dataMap);
 
-            // Setup hero items - Get 5 random items from all categories
-            const allItems: any[] = [];
-            categoryResults.forEach(result => {
-                if (result.items) {
-                    allItems.push(...result.items);
-                }
+            // --- LÓGICA DE NOVIDADES AUTOMÁTICA (25 DIAS) ---
+            const twentyFiveDaysAgo = new Date();
+            twentyFiveDaysAgo.setDate(twentyFiveDaysAgo.getDate() - 25);
+
+            // Filtra jogos e streamings recentes ou marcados como lançamento
+            const allMixedItems: any[] = [...gamesFormatted, ...streamingsFormatted];
+            
+            const recentItems = allMixedItems.filter(item => {
+                const dateStr = item.created_at || item.added_at;
+                const itemDate = dateStr ? new Date(dateStr) : new Date(0);
+                const isRecent = itemDate >= twentyFiveDaysAgo;
+                const isRelease = item.is_release === true;
+                return isRecent || isRelease;
             });
 
-            // Shuffle and take first 5 for hero
-            const shuffled = allItems.sort(() => 0.5 - Math.random());
+            // Ordena: Lançamentos primeiro, depois por data
+            const sortedRecentItems = recentItems.sort((a, b) => {
+                if (a.is_release && !b.is_release) return -1;
+                if (!a.is_release && b.is_release) return 1;
+                const dateA = a.created_at || a.added_at || 0;
+                const dateB = b.created_at || b.added_at || 0;
+                return new Date(dateB).getTime() - new Date(dateA).getTime();
+            });
+
+            // Se tiver itens recentes, cria uma categoria "virtual" para exibir
+            if (sortedRecentItems.length > 0) {
+                // Adiciona aos dados do mapa com um ID fixo 'latest'
+                dataMap.set('latest', sortedRecentItems.slice(0, 15)); // Limite de 15 itens
+            }
+            // -----------------------------------------------------
+
+            // Setup Hero Items
+            let heroCandidates: any[] = [];
+            
+            // 1. Try items from categories
+            if (hasCategoryItems) {
+                categoryResults.forEach(result => {
+                    if (result.items) heroCandidates.push(...result.items);
+                });
+            }
+            
+            // 2. Fallback to random games if not enough category items
+            if (heroCandidates.length < 5 && gamesFormatted.length > 0) {
+                const randomGames = [...gamesFormatted].sort(() => 0.5 - Math.random()).slice(0, 5);
+                heroCandidates = [...heroCandidates, ...randomGames];
+            }
+
+            // Shuffle final selection
+            const shuffled = heroCandidates.sort(() => 0.5 - Math.random());
             setHeroItems(shuffled.slice(0, 5));
 
         } catch (error) {
@@ -220,6 +283,15 @@ const Catalog = () => {
                             </div>
                         )}
 
+                        {/* Auto Generated: Latest & Releases */}
+                        {categoryData.get('latest') && (
+                            <CategoryCarousel
+                                title="Novidades e Lançamentos"
+                                items={categoryData.get('latest') || []}
+                                color="#EAB308" // Yellow-500
+                            />
+                        )}
+
                         {/* Category Carousels */}
                         {categories.map((category) => {
                             const items = categoryData.get(category.id) || [];
@@ -235,8 +307,8 @@ const Catalog = () => {
                             );
                         })}
 
-                        {/* Empty State */}
-                        {categories.length === 0 && (
+                        {/* Empty State - Only show if truly empty */}
+                        {categories.length === 0 && gamesLibrary.length === 0 && streamingsLibrary.length === 0 && (
                             <div className="container mx-auto px-4 sm:px-6 md:px-12 py-20 text-center">
                                 <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-muted mb-4">
                                     <Sparkles className="h-10 w-10 text-muted-foreground" />
@@ -245,6 +317,48 @@ const Catalog = () => {
                                 <p className="text-muted-foreground max-w-md mx-auto">
                                     O catálogo está sendo organizado. Em breve teremos categorias incríveis para você explorar!
                                 </p>
+                            </div>
+                        )}
+
+                        {/* Streamings Section (Fallback) */}
+                        {streamingsLibrary.length > 0 && (
+                            <div className="container mx-auto px-4 sm:px-6 md:px-12 py-8 mt-8">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="w-1 h-6 bg-purple-500 rounded-full" />
+                                    <h2 className="text-xl font-bold">Serviços de Streaming</h2>
+                                </div>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                                    {streamingsLibrary.map((item) => (
+                                        <GameCard
+                                            key={item.id}
+                                            game={item}
+                                            user={user}
+                                            hasCatalogAccess={hasCatalogAccess}
+                                            subscriptionLoading={subscriptionLoading}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Games Section (Fallback) */}
+                        {gamesLibrary.length > 0 && (
+                            <div className="container mx-auto px-4 sm:px-6 md:px-12 py-8">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="w-1 h-6 bg-blue-500 rounded-full" />
+                                    <h2 className="text-xl font-bold">Todos os Jogos</h2>
+                                </div>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                                    {gamesLibrary.map((item) => (
+                                        <GameCard
+                                            key={item.id}
+                                            game={item}
+                                            user={user}
+                                            hasCatalogAccess={hasCatalogAccess}
+                                            subscriptionLoading={subscriptionLoading}
+                                        />
+                                    ))}
+                                </div>
                             </div>
                         )}
                     </div>

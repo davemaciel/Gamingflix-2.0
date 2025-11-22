@@ -9,6 +9,7 @@ interface Game {
   title: string;
   cover_url: string;
   gradient: string;
+  is_release?: boolean;
 }
 
 interface User {
@@ -66,6 +67,15 @@ export const GameCard = ({ game, user, hasCatalogAccess, subscriptionLoading }: 
             loading="lazy"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          
+          {/* Badge de Lançamento */}
+          {game.is_release && (
+            <div className="absolute top-2 right-2 z-10">
+              <span className="px-2 py-1 bg-yellow-500 text-black text-[10px] font-bold uppercase tracking-wider rounded-full shadow-lg animate-pulse">
+                NOVO
+              </span>
+            </div>
+          )}
         </div>
         <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-4 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
           <h3 className="text-foreground font-semibold text-xs sm:text-sm line-clamp-2 drop-shadow-lg">

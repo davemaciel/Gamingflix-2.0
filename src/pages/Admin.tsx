@@ -10,8 +10,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { Pencil, Trash2, Plus, Copy, Users, Gamepad2, MessageSquare, DollarSign, Tv, Settings } from 'lucide-react';
+import { Pencil, Trash2, Plus, Copy, Users, Gamepad2, MessageSquare, DollarSign, Tv, Settings, Sparkles } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { UsersManagement } from '@/components/admin/UsersManagement';
@@ -33,6 +34,7 @@ interface Game {
   login: string;
   password: string;
   family_code?: string | null;
+  is_release?: boolean;
   tutorial: any;
   tutorial_en?: any;
   tutorial_es?: any;
@@ -48,6 +50,7 @@ interface GameFormState {
   login: string;
   password: string;
   family_code: string;
+  is_release: boolean;
   tutorial: string;
   tutorial_en: string;
   tutorial_es: string;
@@ -87,6 +90,7 @@ const initialFormState: GameFormState = {
   login: '',
   password: '',
   family_code: '',
+  is_release: false,
   tutorial: '',
   tutorial_en: '',
   tutorial_es: '',
@@ -166,6 +170,7 @@ const Admin = () => {
       login: '',
       password: '',
       family_code: '',
+      is_release: false,
       tutorial: arrayToMultiline(game.tutorial),
       tutorial_en: arrayToMultiline(game.tutorial_en),
       tutorial_es: arrayToMultiline(game.tutorial_es),
@@ -187,6 +192,7 @@ const Admin = () => {
         login: game.login,
         password: game.password,
         family_code: game.family_code ?? '',
+        is_release: game.is_release ?? false,
         tutorial: arrayToMultiline(game.tutorial),
         tutorial_en: arrayToMultiline(game.tutorial_en),
         tutorial_es: arrayToMultiline(game.tutorial_es),
@@ -218,6 +224,7 @@ const Admin = () => {
         login: formData.login,
         password: formData.password,
         family_code: formData.family_code || null,
+        is_release: formData.is_release,
         tutorial: tutorialPt,
         tutorial_en: tutorialEn,
         tutorial_es: tutorialEs,
@@ -553,6 +560,22 @@ const Admin = () => {
                       placeholder="from-red-600 to-orange-700"
                       className="h-9 sm:h-10 rounded-xl text-sm sm:text-base"
                       required
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 sm:p-4 border border-border/50 rounded-xl bg-background/50">
+                    <div className="space-y-0.5">
+                      <Label className="text-sm sm:text-base flex items-center gap-2">
+                        <Sparkles className="h-4 w-4 text-yellow-500" />
+                        É Lançamento?
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        Se marcado, aparecerá com destaque em Novidades
+                      </p>
+                    </div>
+                    <Switch
+                      checked={formData.is_release}
+                      onCheckedChange={(checked) => setFormData({ ...formData, is_release: checked })}
                     />
                   </div>
 
