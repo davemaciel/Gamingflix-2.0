@@ -53,4 +53,7 @@ export const collections = {
   streamingServices: () => getDatabase().collection('streaming_services'),
   streamingAccounts: () => getDatabase().collection('streaming_accounts'),
   streamingProfiles: () => getDatabase().collection('streaming_profiles'),
+  categories: () => getDatabase().collection('categories'),
+  categoryItems: () => getDatabase().collection('category_items'),
+  globalSettings: () => getDatabase().collection('global_settings'),
 };

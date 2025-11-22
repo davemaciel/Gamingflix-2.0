@@ -330,3 +330,25 @@ export const streamingApi = {
   // Edição de Perfis
   updateProfile: (profileId: string, data: { name?: string; pin?: string }) => apiClient.put(`/streaming/profiles/${profileId}`, data),
 };
+
+// Categories API
+export const categoriesApi = {
+  // Settings
+  getGlobalSettings: () => apiClient.get<import('@/types/category').GlobalSettings>('/categories/settings'),
+  updateGlobalSettings: (data: Partial<import('@/types/category').GlobalSettings>) => apiClient.put<import('@/types/category').GlobalSettings>('/categories/settings', data),
+  
+  // Categories
+  getAllCategories: () => apiClient.get<import('@/types/category').Category[]>('/categories'),
+  getActiveCategories: () => apiClient.get<import('@/types/category').Category[]>('/categories/active'),
+  getCategoryById: (id: string) => apiClient.get<import('@/types/category').Category>(`/categories/${id}`),
+  createCategory: (data: Partial<import('@/types/category').Category>) => apiClient.post<import('@/types/category').Category>('/categories', data),
+  updateCategory: (id: string, data: Partial<import('@/types/category').Category>) => apiClient.put<import('@/types/category').Category>(`/categories/${id}`, data),
+  deleteCategory: (id: string) => apiClient.delete(`/categories/${id}`),
+  reorderCategories: (categories: Array<{ id: string; order: number }>) => apiClient.post('/categories/reorder', { categories }),
+  
+  // Category Items
+  getCategoryItems: (categoryId: string) => apiClient.get<import('@/types/category').CategoryWithItems>(`/categories/${categoryId}/items`),
+  addItemToCategory: (categoryId: string, data: { item_id: string; item_type: 'game' | 'streaming' }) => apiClient.post(`/categories/${categoryId}/items`, data),
+  removeItemFromCategory: (categoryId: string, itemId: string) => apiClient.delete(`/categories/${categoryId}/items/${itemId}`),
+  reorderCategoryItems: (categoryId: string, items: Array<{ item_id: string; order: number }>) => apiClient.post(`/categories/${categoryId}/items/reorder`, { items }),
+};

@@ -11,12 +11,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Pencil, Trash2, Plus, Copy, Users, Gamepad2, MessageSquare, DollarSign, Tv } from 'lucide-react';
+import { Pencil, Trash2, Plus, Copy, Users, Gamepad2, MessageSquare, DollarSign, Tv, Settings } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { UsersManagement } from '@/components/admin/UsersManagement';
 import { TransactionsManagement } from '@/components/admin/TransactionsManagement';
 import { StreamingsManagement } from '@/components/admin/StreamingsManagement';
+import { GlobalSettings } from '@/components/admin/GlobalSettings';
+import { CategoriesManagement } from '@/components/admin/CategoriesManagement';
 
 type ContentLanguage = 'pt' | 'en' | 'es';
 
@@ -361,7 +363,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="games" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 max-w-4xl mb-6">
+          <TabsList className="grid w-full grid-cols-5 max-w-5xl mb-6">
             <TabsTrigger value="games" className="flex items-center gap-2">
               <Gamepad2 className="h-4 w-4" />
               Jogos
@@ -378,10 +380,10 @@ const Admin = () => {
               <DollarSign className="h-4 w-4" />
               Transações
             </TabsTrigger>
-            {/* <TabsTrigger value="support" className="flex items-center gap-2">
-              <MessageSquare className="h-4 w-4" />
-              Suporte
-            </TabsTrigger> */}
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              Configurações
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="games" className="space-y-6">
@@ -632,6 +634,13 @@ const Admin = () => {
 
           <TabsContent value="transactions">
             <TransactionsManagement />
+          </TabsContent>
+
+          <TabsContent value="settings" className="space-y-8">
+            <GlobalSettings />
+            <div className="border-t pt-8">
+              <CategoriesManagement />
+            </div>
           </TabsContent>
         </Tabs>
       </div>
