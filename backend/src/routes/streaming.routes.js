@@ -14,7 +14,8 @@ import {
     getAssignedProfiles,
     unassignProfile,
     runExpirationCheck,
-    updateProfile
+    updateProfile,
+    deleteAccount
 } from '../controllers/streaming.controller.js';
 import { handleStreamingPayment } from '../controllers/webhook-streaming.controller.js';
 
@@ -40,6 +41,7 @@ router.delete('/services/:id', authenticateToken, requireAdmin, deleteService);
 // Admin Actions - Accounts
 router.post('/accounts', authenticateToken, requireAdmin, createAccount);
 router.get('/services/:serviceId/accounts', authenticateToken, requireAdmin, getAccountsByService);
+router.delete('/accounts/:accountId', authenticateToken, requireAdmin, deleteAccount);
 
 // Admin Actions - Gerenciamento de Atribuições
 router.get('/services/:serviceId/assigned-profiles', authenticateToken, requireAdmin, getAssignedProfiles);

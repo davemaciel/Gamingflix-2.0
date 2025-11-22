@@ -71,14 +71,31 @@ const Catalog = () => {
             ]);
 
             // Process Games & Streamings separately
-            const gamesFormatted = (allGamesList || []).map(g => ({ ...g, item_type: 'game', item_id: g.id }));
-            const streamingsFormatted = (allStreamings || []).map(s => ({ 
-                ...s, 
-                item_type: 'streaming', 
-                item_id: s.id, 
-                title: s.name, 
-                cover_url: s.logo_url 
-            }));
+            const gamesFormatted = (allGamesList || [])
+                .map(g => ({ ...g, item_type: 'game', item_id: g.id }))
+                .sort((a: any, b: any) => {
+                    // Prioridade para Lançamentos
+                    if (a.is_release && !b.is_release) return -1;
+                    if (!a.is_release && b.is_release) return 1;
+                    // Desempate por ordem alfabética
+                    return a.title.localeCompare(b.title);
+                });
+
+            const streamingsFormatted = (allStreamings || [])
+                .map(s => ({ 
+                    ...s, 
+                    item_type: 'streaming', 
+                    item_id: s.id, 
+                    title: s.name, 
+                    cover_url: s.logo_url 
+                }))
+                .sort((a: any, b: any) => {
+                    // Prioridade para Lançamentos
+                    if (a.is_release && !b.is_release) return -1;
+                    if (!a.is_release && b.is_release) return 1;
+                    // Desempate por ordem alfabética
+                    return a.title.localeCompare(b.title);
+                });
             
             setGamesLibrary(gamesFormatted);
             setStreamingsLibrary(streamingsFormatted);

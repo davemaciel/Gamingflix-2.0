@@ -8,7 +8,17 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Plus, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeft, Plus, CheckCircle, XCircle, Trash2 } from 'lucide-react';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const ManageInventory = () => {
     const navigate = useNavigate();
@@ -23,6 +33,7 @@ export const ManageInventory = () => {
         password: '',
         profiles: [{ name: '', pin: '' }],
     });
+    const [accountToDelete, setAccountToDelete] = useState<string | null>(null);
 
     useEffect(() => {
         loadData();
@@ -80,6 +91,24 @@ export const ManageInventory = () => {
                 description: 'Falha ao adicionar conta',
                 variant: 'destructive',
             });
+        }
+    };
+
+    const handleDeleteAccount = async () => {
+        if (!accountToDelete) return;
+
+        try {
+            await streamingApi.deleteAccount(accountToDelete);
+            toast({ title: 'Sucesso', description: 'Conta excluída' });
+            loadData();
+        } catch (error) {
+            toast({
+                title: 'Erro',
+                description: 'Falha ao excluir conta',
+                variant: 'destructive',
+            });
+        } finally {
+            setAccountToDelete(null);
         }
     };
 
@@ -206,8 +235,16 @@ export const ManageInventory = () => {
             <div className="space-y-4">
                 {accounts.map((account) => (
                     <Card key={account.id}>
-                        <CardHeader>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-lg">{account.email}</CardTitle>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-destructive hover:text-destructive/90"
+                                onClick={() => setAccountToDelete(account.id)}
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-2">
@@ -237,6 +274,22 @@ export const ManageInventory = () => {
                     </Card>
                 ))}
             </div>
+            <AlertDialog open={!!accountToDelete} onOpenChange={() => setAccountToDelete(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Excluir Conta?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Esta ação não pode ser desfeita. Isso excluirá permanentemente a conta e todos os seus perfis associados.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                            Excluir
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 };

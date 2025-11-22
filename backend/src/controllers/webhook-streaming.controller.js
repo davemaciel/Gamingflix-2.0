@@ -19,7 +19,7 @@ export const handleStreamingPayment = async (req, res) => {
         // A assinatura vem no header X-GGCheckout-Signature
         if (WEBHOOK_SECRET) {
             const signature = req.headers['x-ggcheckout-signature'];
-            
+
             if (!signature) {
                 logger.warn('Webhook sem assinatura recebido');
                 return res.status(401).json({ error: 'Assinatura ausente' });
@@ -34,7 +34,7 @@ export const handleStreamingPayment = async (req, res) => {
                 logger.warn('Assinatura de webhook inválida');
                 return res.status(401).json({ error: 'Assinatura inválida' });
             }
-            
+
             logger.info('✅ Assinatura validada com sucesso');
         } else {
             logger.warn('⚠️ GGCHECKOUT_WEBHOOK_SECRET não configurado. Pule a validação de assinatura apenas em dev.');
@@ -75,7 +75,7 @@ export const handleStreamingPayment = async (req, res) => {
         // 5. Processar Pagamento Aprovado
         if (event === 'payment.approved') {
             logger.info(`💰 Pagamento aprovado para user ${user_id}, serviço ${service_id}`);
-            
+
             await assignStreamingProfile(user_id, service_id, transaction_id);
         } else {
             logger.info(`Evento ${event} ignorado (não é aprovação de pagamento).`);
@@ -109,18 +109,14 @@ async function assignStreamingProfile(userId, serviceId, transactionId) {
         // Mas se for uma NOVA transação, ele pode querer um segundo perfil?
         // O código existente em streaming.controller.js bloqueia múltiplos perfis: "Você já possui um perfil para este serviço".
         // Vamos manter essa lógica para ser consistente, mas logar um aviso.
-        
+
         const existingProfile = await collections.streamingProfiles().findOne({
             service_id: serviceId,
             assigned_to: userId
         });
 
         if (existingProfile) {
-            logger.warn(`Usuário ${userId} já possui perfil no serviço ${serviceId}. Verifique se isso é intencional.`);
-            // Se a regra for estrita, poderíamos parar aqui. Mas como ele PAGOU, talvez devêssemos entregar outro?
-            // Vamos seguir a lógica do controller existente e NÃO entregar outro, mas logar um erro CRÍTICO para resolução manual.
-            logger.error(`CRÍTICO: Usuário pagou mas já tinha perfil. Transação: ${transactionId}`);
-            return;
+            logger.info(`Usuário ${userId} já possui perfil no serviço ${serviceId}. Atribuindo perfil adicional.`);
         }
 
         // 3. Buscar e Atribuir Perfil Disponível (Atomicamente)

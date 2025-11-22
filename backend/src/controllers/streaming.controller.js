@@ -150,6 +150,28 @@ export const getAccountsByService = async (req, res) => {
     }
 };
 
+export const deleteAccount = async (req, res) => {
+    try {
+        const { accountId } = req.params;
+
+        // Delete account
+        const accountResult = await collections.streamingAccounts().deleteOne({ id: accountId });
+
+        if (accountResult.deletedCount === 0) {
+            return res.status(404).json({ error: 'Conta não encontrada' });
+        }
+
+        // Delete profiles associated with this account
+        await collections.streamingProfiles().deleteMany({ account_id: accountId });
+
+        logger.info(`Account ${accountId} and associated profiles deleted`);
+        res.json({ message: 'Conta excluída com sucesso' });
+    } catch (error) {
+        logger.error('Error deleting account:', error);
+        res.status(500).json({ error: 'Erro ao excluir conta' });
+    }
+};
+
 // --- User Logic ---
 
 export const getMyProfileForService = async (req, res) => {
@@ -157,29 +179,32 @@ export const getMyProfileForService = async (req, res) => {
         const { serviceId } = req.params;
         const userId = req.user.id; // From auth middleware
 
-        // Find profile assigned to this user for this service
-        const profile = await collections.streamingProfiles().findOne({
+        // Find ALL profiles assigned to this user for this service
+        const profiles = await collections.streamingProfiles().find({
             service_id: serviceId,
             assigned_to: userId
-        });
+        }).toArray();
 
-        if (!profile) {
+        if (!profiles || profiles.length === 0) {
             return res.status(404).json({ message: 'Nenhum perfil atribuído' });
         }
 
-        // Get account details (email/pass)
-        const account = await collections.streamingAccounts().findOne({ id: profile.account_id });
+        // Enrich each profile with account details
+        const profilesWithAccounts = await Promise.all(profiles.map(async (profile) => {
+            const account = await collections.streamingAccounts().findOne({ id: profile.account_id });
+            return {
+                profile,
+                account: account ? {
+                    email: account.email,
+                    password: account.password
+                } : null
+            };
+        }));
 
-        res.json({
-            profile,
-            account: {
-                email: account.email,
-                password: account.password
-            }
-        });
+        res.json(profilesWithAccounts);
     } catch (error) {
-        logger.error('Error fetching user profile:', error);
-        res.status(500).json({ error: 'Erro ao buscar perfil do usuário' });
+        logger.error('Error fetching user profiles:', error);
+        res.status(500).json({ error: 'Erro ao buscar perfis do usuário' });
     }
 };
 
@@ -286,12 +311,12 @@ export const getAssignedProfiles = async (req, res) => {
         const profilesWithUsers = await Promise.all(
             assignedProfiles.map(async (profile) => {
                 const user = await collections.profiles().findOne({ id: profile.assigned_to });
-                
+
                 // Calcular dias restantes (30 dias desde assigned_at)
                 const assignedDate = new Date(profile.assigned_at);
                 const expirationDate = new Date(assignedDate);
                 expirationDate.setDate(expirationDate.getDate() + 30);
-                
+
                 const now = new Date();
                 const daysRemaining = Math.ceil((expirationDate - now) / (1000 * 60 * 60 * 24));
                 const isExpired = daysRemaining <= 0;
@@ -396,7 +421,7 @@ export const checkExpiredAssignments = async () => {
         );
 
         logger.info(`${result.modifiedCount} perfis expirados desvinculados automaticamente`);
-        
+
         // Log cada perfil expirado
         expiredProfiles.forEach(profile => {
             logger.info(`Perfil expirado: ${profile.profile_name} (${profile.id}) - Usuário: ${profile.assigned_to}`);

@@ -312,7 +312,7 @@ export const transactionsApi = {
 export const streamingApi = {
   getAllServices: () => apiClient.get<import('@/types/streaming').StreamingService[]>('/streaming/services'),
   getServiceById: (id: string) => apiClient.get<import('@/types/streaming').StreamingService>(`/streaming/services/${id}`),
-  getMyProfile: (serviceId: string) => apiClient.get<import('@/types/streaming').UserProfileResponse>(`/streaming/services/${serviceId}/my-profile`),
+  getMyProfile: (serviceId: string) => apiClient.get<import('@/types/streaming').UserProfileResponse[]>(`/streaming/services/${serviceId}/my-profile`),
   assignProfile: (serviceId: string) => apiClient.post<any>('/streaming/assign', { serviceId }),
 
   // Admin
@@ -321,12 +321,13 @@ export const streamingApi = {
   deleteService: (id: string) => apiClient.delete(`/streaming/services/${id}`),
 
   createAccount: (data: Partial<import('@/types/streaming').StreamingAccount>) => apiClient.post<import('@/types/streaming').StreamingAccount>('/streaming/accounts', data),
+  deleteAccount: (accountId: string) => apiClient.delete(`/streaming/accounts/${accountId}`),
   getAccountsByService: (serviceId: string) => apiClient.get<import('@/types/streaming').StreamingAccount[]>(`/streaming/services/${serviceId}/accounts`),
-  
+
   // Gerenciamento de Atribuições
   getAssignedProfiles: (serviceId: string) => apiClient.get<any[]>(`/streaming/services/${serviceId}/assigned-profiles`),
   unassignProfile: (profileId: string) => apiClient.delete(`/streaming/profiles/${profileId}/unassign`),
-  
+
   // Edição de Perfis
   updateProfile: (profileId: string, data: { name?: string; pin?: string }) => apiClient.put(`/streaming/profiles/${profileId}`, data),
 };
@@ -336,7 +337,7 @@ export const categoriesApi = {
   // Settings
   getGlobalSettings: () => apiClient.get<import('@/types/category').GlobalSettings>('/categories/settings'),
   updateGlobalSettings: (data: Partial<import('@/types/category').GlobalSettings>) => apiClient.put<import('@/types/category').GlobalSettings>('/categories/settings', data),
-  
+
   // Categories
   getAllCategories: () => apiClient.get<import('@/types/category').Category[]>('/categories'),
   getActiveCategories: () => apiClient.get<import('@/types/category').Category[]>('/categories/active'),
@@ -345,7 +346,7 @@ export const categoriesApi = {
   updateCategory: (id: string, data: Partial<import('@/types/category').Category>) => apiClient.put<import('@/types/category').Category>(`/categories/${id}`, data),
   deleteCategory: (id: string) => apiClient.delete(`/categories/${id}`),
   reorderCategories: (categories: Array<{ id: string; order: number }>) => apiClient.post('/categories/reorder', { categories }),
-  
+
   // Category Items
   getCategoryItems: (categoryId: string) => apiClient.get<import('@/types/category').CategoryWithItems>(`/categories/${categoryId}/items`),
   addItemToCategory: (categoryId: string, data: { item_id: string; item_type: 'game' | 'streaming' }) => apiClient.post(`/categories/${categoryId}/items`, data),
