@@ -424,3 +424,45 @@ export const runExpirationCheck = async (req, res) => {
         res.status(500).json({ error: 'Erro ao verificar expirações' });
     }
 };
+
+/**
+ * Atualiza informações de um perfil (nome e/ou PIN)
+ */
+export const updateProfile = async (req, res) => {
+    try {
+        const { profileId } = req.params;
+        const { name, pin } = req.body;
+
+        const profile = await collections.streamingProfiles().findOne({ id: profileId });
+
+        if (!profile) {
+            return res.status(404).json({ error: 'Perfil não encontrado' });
+        }
+
+        // Preparar dados de atualização
+        const updateData = {};
+        if (name !== undefined) {
+            updateData.profile_name = name;
+        }
+        if (pin !== undefined) {
+            updateData.pin = pin;
+        }
+
+        if (Object.keys(updateData).length === 0) {
+            return res.status(400).json({ error: 'Nenhum dado para atualizar' });
+        }
+
+        // Atualizar perfil
+        const result = await collections.streamingProfiles().findOneAndUpdate(
+            { id: profileId },
+            { $set: updateData },
+            { returnDocument: 'after' }
+        );
+
+        logger.info(`Profile ${profileId} updated by admin`);
+        res.json(result);
+    } catch (error) {
+        logger.error('Error updating profile:', error);
+        res.status(500).json({ error: 'Erro ao atualizar perfil' });
+    }
+};

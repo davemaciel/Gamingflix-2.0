@@ -260,26 +260,28 @@ const GameDetail = () => {
           </Button>
         </Link>
 
-        <div className="grid md:grid-cols-2 gap-6 sm:gap-8">
-          <div>
-            <div className="aspect-square rounded-xl sm:rounded-2xl overflow-hidden">
+        <div className="max-w-4xl mx-auto">
+          {/* Header com Capa Compacta */}
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden flex-shrink-0 border-2 border-border shadow-lg">
               <img
                 src={game.cover_url}
                 alt={game.title}
                 className="w-full h-full object-cover"
               />
             </div>
-          </div>
-
-          <div className="space-y-4 sm:space-y-6">
-            <div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
                 {game.title}
               </h1>
-              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
                 {localizedDescription}
               </p>
             </div>
+          </div>
+
+          {/* Conteúdo Principal */}
+          <div className="space-y-4 sm:space-y-6">
 
             {/* Informações de Acesso - Apenas para usuários autenticados com plano */}
             {user && hasCatalogAccess ? (

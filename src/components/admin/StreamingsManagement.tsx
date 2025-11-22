@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, Layers, Users, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, Layers, Users, X, Edit } from 'lucide-react';
 
 export const StreamingsManagement = () => {
     const { toast } = useToast();
@@ -17,10 +17,13 @@ export const StreamingsManagement = () => {
     const [showServiceDialog, setShowServiceDialog] = useState(false);
     const [showInventoryDialog, setShowInventoryDialog] = useState(false);
     const [showAssignmentsDialog, setShowAssignmentsDialog] = useState(false);
+    const [showEditProfileDialog, setShowEditProfileDialog] = useState(false);
     const [editingService, setEditingService] = useState<StreamingService | null>(null);
     const [selectedService, setSelectedService] = useState<StreamingService | null>(null);
     const [accounts, setAccounts] = useState<StreamingAccount[]>([]);
     const [assignedProfiles, setAssignedProfiles] = useState<any[]>([]);
+    const [editingProfile, setEditingProfile] = useState<any>(null);
+    const [profileEditForm, setProfileEditForm] = useState({ name: '', pin: '' });
     const [searchTerm, setSearchTerm] = useState('');
 
     const [serviceForm, setServiceForm] = useState({
@@ -193,6 +196,44 @@ export const StreamingsManagement = () => {
             toast({
                 title: 'Erro',
                 description: 'Falha ao desvincular perfil',
+                variant: 'destructive',
+            });
+        }
+    };
+
+    const openEditProfileDialog = (profile: any) => {
+        setEditingProfile(profile);
+        setProfileEditForm({
+            name: profile.profile_name || profile.name || '',
+            pin: profile.pin || '',
+        });
+        setShowEditProfileDialog(true);
+    };
+
+    const handleSaveProfileEdit = async () => {
+        if (!editingProfile) return;
+
+        try {
+            await streamingApi.updateProfile(editingProfile.id, profileEditForm);
+            
+            toast({ title: 'Sucesso', description: 'Perfil atualizado' });
+            setShowEditProfileDialog(false);
+            
+            // Recarregar listas
+            if (selectedService) {
+                if (showInventoryDialog) {
+                    const data = await streamingApi.getAccountsByService(selectedService.id);
+                    setAccounts(data);
+                }
+                if (showAssignmentsDialog) {
+                    const data = await streamingApi.getAssignedProfiles(selectedService.id);
+                    setAssignedProfiles(data);
+                }
+            }
+        } catch (error) {
+            toast({
+                title: 'Erro',
+                description: 'Falha ao atualizar perfil',
                 variant: 'destructive',
             });
         }
@@ -448,14 +489,25 @@ export const StreamingsManagement = () => {
                                         <h4 className="font-medium mb-3">{account.email}</h4>
                                         <div className="space-y-2">
                                             {account.profiles?.map((profile) => (
-                                                <div key={profile.id} className="flex justify-between items-center p-2 border rounded">
-                                                    <div>
-                                                        <span className="font-medium">{profile.name}</span>
-                                                        <span className="text-sm text-muted-foreground ml-2">PIN: {profile.pin}</span>
+                                                <div key={profile.id} className="flex justify-between items-center p-3 border rounded-lg hover:border-primary/50 transition-colors">
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-semibold text-base">{profile.profile_name || profile.name || 'Sem nome'}</span>
+                                                            <span className={`text-xs px-2 py-0.5 rounded-full ${profile.status === 'available' ? 'bg-green-500/20 text-green-600' : 'bg-red-500/20 text-red-600'}`}>
+                                                                {profile.status === 'available' ? 'Disponível' : 'Atribuído'}
+                                                            </span>
+                                                        </div>
+                                                        <span className="text-sm text-muted-foreground">PIN: {profile.pin || 'Não definido'}</span>
                                                     </div>
-                                                    <span className={`text-sm ${profile.status === 'available' ? 'text-green-600' : 'text-red-600'}`}>
-                                                        {profile.status === 'available' ? 'Disponível' : 'Atribuído'}
-                                                    </span>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() => openEditProfileDialog(profile)}
+                                                        className="ml-2"
+                                                    >
+                                                        <Edit className="h-4 w-4 mr-1" />
+                                                        Editar
+                                                    </Button>
                                                 </div>
                                             ))}
                                         </div>
@@ -530,15 +582,24 @@ export const StreamingsManagement = () => {
                                                         </div>
                                                     </div>
 
-                                                    <Button
-                                                        size="sm"
-                                                        variant="destructive"
-                                                        className="shrink-0"
-                                                        onClick={() => handleUnassignProfile(profile.id)}
-                                                    >
-                                                        <X className="h-4 w-4 mr-1" />
-                                                        Desvincular
-                                                    </Button>
+                                                    <div className="flex gap-2 shrink-0">
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            onClick={() => openEditProfileDialog(profile)}
+                                                        >
+                                                            <Edit className="h-4 w-4 mr-1" />
+                                                            Editar
+                                                        </Button>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="destructive"
+                                                            onClick={() => handleUnassignProfile(profile.id)}
+                                                        >
+                                                            <X className="h-4 w-4 mr-1" />
+                                                            Desvincular
+                                                        </Button>
+                                                    </div>
                                                 </div>
                                             </CardContent>
                                         </Card>
@@ -546,6 +607,50 @@ export const StreamingsManagement = () => {
                                 })}
                             </div>
                         )}
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Edit Profile Dialog */}
+            <Dialog open={showEditProfileDialog} onOpenChange={setShowEditProfileDialog}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Editar Perfil</DialogTitle>
+                    </DialogHeader>
+
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label>Nome do Perfil</Label>
+                            <Input
+                                placeholder="Ex: Perfil 1"
+                                value={profileEditForm.name}
+                                onChange={(e) => setProfileEditForm({ ...profileEditForm, name: e.target.value })}
+                            />
+                            <p className="text-xs text-muted-foreground">
+                                Este nome será exibido para o cliente selecionar após o login
+                            </p>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>PIN do Perfil</Label>
+                            <Input
+                                placeholder="Ex: 1234"
+                                value={profileEditForm.pin}
+                                onChange={(e) => setProfileEditForm({ ...profileEditForm, pin: e.target.value })}
+                            />
+                            <p className="text-xs text-muted-foreground">
+                                PIN que o cliente usará para acessar o perfil
+                            </p>
+                        </div>
+
+                        <div className="flex gap-2 justify-end pt-4">
+                            <Button variant="outline" onClick={() => setShowEditProfileDialog(false)}>
+                                Cancelar
+                            </Button>
+                            <Button onClick={handleSaveProfileEdit}>
+                                Salvar Alterações
+                            </Button>
+                        </div>
                     </div>
                 </DialogContent>
             </Dialog>

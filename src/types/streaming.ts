@@ -22,7 +22,10 @@ export interface StreamingProfile {
     id: string;
     account_id: string;
     service_id: string;
-    name: string;
+    name?: string; // Alias para compatibilidade
+    profile_name?: string; // Nome real no banco de dados
+    email?: string; // Email da conta (denormalizado)
+    password?: string; // Senha da conta (denormalizado)
     pin: string;
     status: 'available' | 'assigned';
     assigned_to?: string | null;

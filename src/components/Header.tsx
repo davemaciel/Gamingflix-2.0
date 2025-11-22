@@ -14,7 +14,7 @@ import {
   SheetTrigger,
   SheetClose
 } from "@/components/ui/sheet";
-import { Search, LogOut, Settings, Crown, User, FileText, Menu as MenuIcon } from 'lucide-react';
+import { Search, LogOut, Settings, Crown, User, FileText, Menu as MenuIcon, Tv, Receipt } from 'lucide-react';
 import { LanguageSelector, LanguageSelectorCompact } from '@/components/LanguageSelector';
 import logo from '@/assets/logo.png';
 
@@ -118,11 +118,11 @@ export const Header = ({ onSearch, initialQuery = '' }: HeaderProps) => {
                   {user.username || user.email}
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => navigate('/streaming')}>
-                  <FileText className="mr-2 h-4 w-4" />
+                  <Tv className="mr-2 h-4 w-4" />
                   Streamings
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => navigate('/invoices')}>
-                  <FileText className="mr-2 h-4 w-4" />
+                  <Receipt className="mr-2 h-4 w-4" />
                   Faturas
                 </Button>
                 {isAdmin && (
@@ -207,14 +207,14 @@ export const Header = ({ onSearch, initialQuery = '' }: HeaderProps) => {
 
                           <SheetClose asChild>
                             <Button variant="ghost" className="justify-start" onClick={() => navigate('/streaming')}>
-                              <FileText className="mr-2 h-4 w-4" />
+                              <Tv className="mr-2 h-4 w-4" />
                               Streamings
                             </Button>
                           </SheetClose>
 
                           <SheetClose asChild>
                             <Button variant="ghost" className="justify-start" onClick={() => navigate('/invoices')}>
-                              <FileText className="mr-2 h-4 w-4" />
+                              <Receipt className="mr-2 h-4 w-4" />
                               Minhas Faturas
                             </Button>
                           </SheetClose>

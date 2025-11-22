@@ -326,4 +326,7 @@ export const streamingApi = {
   // Gerenciamento de Atribuições
   getAssignedProfiles: (serviceId: string) => apiClient.get<any[]>(`/streaming/services/${serviceId}/assigned-profiles`),
   unassignProfile: (profileId: string) => apiClient.delete(`/streaming/profiles/${profileId}/unassign`),
+  
+  // Edição de Perfis
+  updateProfile: (profileId: string, data: { name?: string; pin?: string }) => apiClient.put(`/streaming/profiles/${profileId}`, data),
 };

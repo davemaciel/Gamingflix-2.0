@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
-import { ArrowLeft, Copy, Shield } from 'lucide-react';
+import { ArrowLeft, Copy, Shield, Mail, Lock, User, Hash, Calendar, CheckCircle2, AlertCircle } from 'lucide-react';
 import { AuthDialog } from '@/components/AuthDialog';
 import { UpgradeModal } from '@/components/UpgradeModal';
 
@@ -133,94 +133,200 @@ const StreamingDetail = () => {
                     </Button>
                 </Link>
 
-                <div className="grid md:grid-cols-2 gap-6 sm:gap-8">
-                    <div>
-                        {service.cover_url ? (
-                            <div className="aspect-square rounded-xl sm:rounded-2xl overflow-hidden">
+                <div className="max-w-4xl mx-auto">
+                    {/* Header com Logo Compacto */}
+                    <div className="flex items-center gap-4 mb-6">
+                        {service.logo_url ? (
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden flex-shrink-0 bg-background border-2 border-border">
                                 <img
-                                    src={service.cover_url}
+                                    src={service.logo_url}
                                     alt={service.name}
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-contain p-2"
                                 />
                             </div>
                         ) : (
-                            <div className="aspect-square rounded-xl sm:rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                                <span className="text-6xl font-bold text-primary">
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center flex-shrink-0">
+                                <span className="text-2xl font-bold text-primary">
                                     {service.name.charAt(0)}
                                 </span>
                             </div>
                         )}
-                    </div>
-
-                    <div className="space-y-4 sm:space-y-6">
-                        <div>
-                            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">
+                        <div className="flex-1">
+                            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
                                 {service.name}
                             </h1>
                             {service.description && (
-                                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                                <p className="text-sm text-muted-foreground mt-1">
                                     {service.description}
                                 </p>
                             )}
                         </div>
+                    </div>
+
+                    {/* Conteúdo Principal */}
+                    <div className="space-y-4 sm:space-y-6">
 
                         {userProfile ? (
-                            <Card className="bg-card border-border">
-                                <CardHeader>
-                                    <CardTitle className="text-primary text-base sm:text-lg">
-                                        Suas Credenciais
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-2 sm:space-y-3">
-                                    <div className="flex items-center justify-between p-2 sm:p-3 bg-muted rounded-lg">
-                                        <div className="min-w-0 flex-1 mr-2">
-                                            <p className="text-xs sm:text-sm font-semibold text-foreground">Email</p>
-                                            <p className="text-xs sm:text-sm text-muted-foreground truncate">
-                                                {userProfile.account.email}
-                                            </p>
-                                        </div>
-                                        <Button size="icon" variant="ghost" onClick={() => copyToClipboard(userProfile.account.email, 'Email')} className="flex-shrink-0 h-8 w-8 sm:h-9 sm:w-9">
-                                            <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
-                                        </Button>
+                            <div className="space-y-4">
+                                {/* Status Badge */}
+                                <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+                                    <CheckCircle2 className="h-5 w-5 text-green-500" />
+                                    <div>
+                                        <p className="text-sm font-semibold text-green-500">Acesso Ativo</p>
+                                        <p className="text-xs text-muted-foreground">Suas credenciais estão disponíveis abaixo</p>
                                     </div>
+                                </div>
 
-                                    <div className="flex items-center justify-between p-2 sm:p-3 bg-muted rounded-lg">
-                                        <div className="min-w-0 flex-1 mr-2">
-                                            <p className="text-xs sm:text-sm font-semibold text-foreground">Senha</p>
-                                            <p className="text-xs sm:text-sm text-muted-foreground truncate">
-                                                {userProfile.account.password}
-                                            </p>
-                                        </div>
-                                        <Button size="icon" variant="ghost" onClick={() => copyToClipboard(userProfile.account.password, 'Senha')} className="flex-shrink-0 h-8 w-8 sm:h-9 sm:w-9">
-                                            <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
-                                        </Button>
-                                    </div>
+                                <Card className="bg-gradient-to-br from-card to-card/50 border-2 border-primary/20">
+                                    <CardHeader className="pb-4">
+                                        <CardTitle className="text-primary text-xl sm:text-2xl flex items-center gap-2">
+                                            <Shield className="h-6 w-6" />
+                                            Suas Credenciais
+                                        </CardTitle>
+                                        <p className="text-xs sm:text-sm text-muted-foreground mt-2">
+                                            Clique em <Copy className="inline h-3 w-3 mx-0.5" /> para copiar rapidamente
+                                        </p>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        {/* Seção de Login */}
+                                        <div className="space-y-3">
+                                            <div className="flex items-center gap-2 mb-3">
+                                                <div className="h-px bg-gradient-to-r from-primary/50 to-transparent flex-1"></div>
+                                                <span className="text-xs font-semibold text-primary uppercase tracking-wider">Credenciais de Login</span>
+                                                <div className="h-px bg-gradient-to-l from-primary/50 to-transparent flex-1"></div>
+                                            </div>
 
-                                    <div className="flex items-center justify-between p-2 sm:p-3 bg-muted rounded-lg">
-                                        <div className="min-w-0 flex-1 mr-2">
-                                            <p className="text-xs sm:text-sm font-semibold text-foreground">Perfil</p>
-                                            <p className="text-xs sm:text-sm text-muted-foreground truncate">
-                                                {userProfile.profile.name}
-                                            </p>
-                                        </div>
-                                        <Button size="icon" variant="ghost" onClick={() => copyToClipboard(userProfile.profile.name, 'Perfil')} className="flex-shrink-0 h-8 w-8 sm:h-9 sm:w-9">
-                                            <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
-                                        </Button>
-                                    </div>
+                                            {/* Email */}
+                                            <div className="group">
+                                                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-1.5 mb-2">
+                                                    <Mail className="h-3.5 w-3.5" />
+                                                    Email da Conta
+                                                </label>
+                                                <div className="flex items-center gap-2 p-3.5 bg-background border-2 border-border rounded-lg hover:border-primary/50 hover:shadow-md transition-all">
+                                                    <p className="text-sm sm:text-base font-mono text-foreground flex-1 break-all">
+                                                        {userProfile.account.email}
+                                                    </p>
+                                                    <Button 
+                                                        size="sm" 
+                                                        variant="ghost" 
+                                                        onClick={() => copyToClipboard(userProfile.account.email, 'Email')} 
+                                                        className="flex-shrink-0 h-9 w-9 hover:bg-primary/10 hover:scale-110 transition-transform"
+                                                        title="Copiar email"
+                                                    >
+                                                        <Copy className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </div>
 
-                                    <div className="flex items-center justify-between p-2 sm:p-3 bg-muted rounded-lg">
-                                        <div className="min-w-0 flex-1 mr-2">
-                                            <p className="text-xs sm:text-sm font-semibold text-foreground">PIN</p>
-                                            <p className="text-xs sm:text-sm text-muted-foreground truncate">
-                                                {userProfile.profile.pin}
-                                            </p>
+                                            {/* Senha */}
+                                            <div className="group">
+                                                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-1.5 mb-2">
+                                                    <Lock className="h-3.5 w-3.5" />
+                                                    Senha da Conta
+                                                </label>
+                                                <div className="flex items-center gap-2 p-3.5 bg-background border-2 border-border rounded-lg hover:border-primary/50 hover:shadow-md transition-all">
+                                                    <p className="text-sm sm:text-base font-mono text-foreground flex-1 break-all">
+                                                        {userProfile.account.password}
+                                                    </p>
+                                                    <Button 
+                                                        size="sm" 
+                                                        variant="ghost" 
+                                                        onClick={() => copyToClipboard(userProfile.account.password, 'Senha')} 
+                                                        className="flex-shrink-0 h-9 w-9 hover:bg-primary/10 hover:scale-110 transition-transform"
+                                                        title="Copiar senha"
+                                                    >
+                                                        <Copy className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <Button size="icon" variant="ghost" onClick={() => copyToClipboard(userProfile.profile.pin, 'PIN')} className="flex-shrink-0 h-8 w-8 sm:h-9 sm:w-9">
-                                            <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
-                                        </Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
+
+                                        <div className="relative py-2">
+                                            <div className="absolute inset-0 flex items-center">
+                                                <div className="w-full border-t-2 border-dashed border-border/60"></div>
+                                            </div>
+                                            <div className="relative flex justify-center">
+                                                <span className="bg-card px-3 text-xs text-muted-foreground font-medium">Após fazer login</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Seção de Perfil */}
+                                        <div className="space-y-3">
+                                            <div className="flex items-center gap-2 mb-3">
+                                                <div className="h-px bg-gradient-to-r from-primary/50 to-transparent flex-1"></div>
+                                                <span className="text-xs font-semibold text-primary uppercase tracking-wider">Dados do Perfil</span>
+                                                <div className="h-px bg-gradient-to-l from-primary/50 to-transparent flex-1"></div>
+                                            </div>
+
+                                            {/* Perfil */}
+                                            <div className="group">
+                                                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-1.5 mb-2">
+                                                    <User className="h-3.5 w-3.5" />
+                                                    Nome do Perfil
+                                                </label>
+                                                <div className="p-4 bg-primary/10 border-2 border-primary/30 rounded-lg">
+                                                    <p className="text-xl sm:text-2xl font-bold text-primary mb-1">
+                                                        {userProfile.profile.profile_name || userProfile.profile.name || 'Perfil Principal'}
+                                                    </p>
+                                                    <p className="text-xs text-muted-foreground">Selecione este perfil após fazer login</p>
+                                                </div>
+                                            </div>
+
+                                            {/* PIN */}
+                                            <div className="group">
+                                                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-1.5 mb-2">
+                                                    <Hash className="h-3.5 w-3.5" />
+                                                    PIN do Perfil
+                                                </label>
+                                                <div className="flex items-center gap-2 p-3.5 bg-background border-2 border-border rounded-lg hover:border-primary/50 hover:shadow-md transition-all">
+                                                    <p className="text-sm sm:text-base font-mono text-foreground flex-1 break-all">
+                                                        {userProfile.profile.pin}
+                                                    </p>
+                                                    <Button 
+                                                        size="sm" 
+                                                        variant="ghost" 
+                                                        onClick={() => copyToClipboard(userProfile.profile.pin, 'PIN')} 
+                                                        className="flex-shrink-0 h-9 w-9 hover:bg-primary/10 hover:scale-110 transition-transform"
+                                                        title="Copiar PIN"
+                                                    >
+                                                        <Copy className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Instruções */}
+                                        <div className="mt-4 p-4 bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-2 border-blue-500/20 rounded-lg">
+                                            <div className="flex items-start gap-3">
+                                                <div className="p-2 bg-blue-500/20 rounded-lg">
+                                                    <AlertCircle className="h-5 w-5 text-blue-500" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="font-semibold text-foreground mb-2 text-sm">📋 Como Usar:</p>
+                                                    <ol className="space-y-2 text-xs text-muted-foreground">
+                                                        <li className="flex items-start gap-2">
+                                                            <span className="font-bold text-primary min-w-[20px]">1.</span>
+                                                            <span>Acesse o site do {service.name} e clique em <strong>Login</strong></span>
+                                                        </li>
+                                                        <li className="flex items-start gap-2">
+                                                            <span className="font-bold text-primary min-w-[20px]">2.</span>
+                                                            <span>Use o <strong>Email</strong> e <strong>Senha</strong> acima para entrar</span>
+                                                        </li>
+                                                        <li className="flex items-start gap-2">
+                                                            <span className="font-bold text-primary min-w-[20px]">3.</span>
+                                                            <span>Selecione o perfil chamado <strong className="text-primary">{userProfile.profile.profile_name || userProfile.profile.name || 'Perfil Principal'}</strong></span>
+                                                        </li>
+                                                        <li className="flex items-start gap-2">
+                                                            <span className="font-bold text-primary min-w-[20px]">4.</span>
+                                                            <span>Se solicitado, digite o <strong>PIN</strong> para acessar</span>
+                                                        </li>
+                                                    </ol>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </div>
                         ) : (
                             <Card className="bg-card border-border border-2 border-primary/30">
                                 <CardContent className="p-8 text-center">
