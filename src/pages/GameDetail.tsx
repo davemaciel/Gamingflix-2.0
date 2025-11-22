@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { gamesApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Copy, Loader2, CheckCircle, XCircle, Shield } from 'lucide-react';
+import { ArrowLeft, Copy, Loader2, CheckCircle, XCircle, Shield, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Header } from '@/components/Header';
 import { getSteamCode } from '@/services/steamGuard';
@@ -74,7 +74,7 @@ const GameDetail = () => {
       if (!id) {
         throw new Error('Game ID is required');
       }
-      
+
       const data = await gamesApi.getById(id);
       setGame(data);
     } catch (error) {
@@ -249,267 +249,352 @@ const GameDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
-      <Header onSearch={() => {}} />
-      <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
-        <Link to="/catalogo">
-          <Button variant="ghost" className="mb-4 sm:mb-6">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            <span className="hidden sm:inline">{t.backToCatalog}</span>
-            <span className="sm:hidden">{t.back}</span>
-          </Button>
-        </Link>
+    <div className="min-h-screen bg-background font-sans selection:bg-primary/30">
+      <Header onSearch={() => { }} />
 
-        <div className="max-w-4xl mx-auto">
-          {/* Header com Capa Compacta */}
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden flex-shrink-0 border-2 border-border shadow-lg">
-              <img
-                src={game.cover_url}
-                alt={game.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="flex-1">
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-                {game.title}
-              </h1>
-              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                {localizedDescription}
-              </p>
-            </div>
-          </div>
+      {/* Hero Section with Background Image */}
+      <div className="relative w-full h-[50vh] min-h-[400px] lg:h-[60vh] overflow-hidden">
+        {/* Background Image with Blur and Overlay */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src={game.cover_url}
+            alt={game.title}
+            className="w-full h-full object-cover opacity-60 blur-sm scale-105 transform transition-transform duration-1000"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/50 to-transparent" />
+        </div>
 
-          {/* Conteúdo Principal */}
-          <div className="space-y-4 sm:space-y-6">
+        {/* Hero Content */}
+        <div className="relative z-10 container mx-auto px-4 h-full flex flex-col justify-end pb-12 sm:pb-16">
+          <Link to="/catalogo" className="absolute top-6 left-4 sm:left-8">
+            <Button variant="outline" className="bg-black/20 backdrop-blur-md border-white/10 hover:bg-white/10 text-white">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              {t.backToCatalog}
+            </Button>
+          </Link>
 
-            {/* Informações de Acesso - Apenas para usuários autenticados com plano */}
-            {user && hasCatalogAccess ? (
-              <Card className="bg-card border-border">
-                <CardHeader>
-                  <CardTitle className="text-primary text-base sm:text-lg">
+          <div className="max-w-4xl animate-in fade-in slide-in-from-bottom-8 duration-700">
+            <div className="flex items-end gap-6 mb-6">
+              <div className="hidden sm:block w-32 h-44 rounded-lg overflow-hidden shadow-2xl border-2 border-white/10 rotate-[-2deg] hover:rotate-0 transition-transform duration-500">
+                <img
+                  src={game.cover_url}
+                  alt={game.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div>
+                <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight mb-4 drop-shadow-lg">
+                  {game.title}
+                </h1>
+                <div className="flex flex-wrap gap-3">
+                  <span className="px-3 py-1 rounded-full bg-primary/20 backdrop-blur-md border border-primary/30 text-primary text-sm font-medium">
                     {t.gameDetail.accessInfoTitle}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2 sm:space-y-3">
-                  <div className="flex items-center justify-between p-2 sm:p-3 bg-muted rounded-lg">
-                    <div className="min-w-0 flex-1 mr-2">
-                      <p className="text-xs sm:text-sm font-semibold text-foreground">
-                        {t.gameDetail.loginLabel}
-                      </p>
-                      <p className="text-xs sm:text-sm text-muted-foreground truncate">
-                        {game.login}
-                      </p>
-                    </div>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => copyToClipboard(game.login, t.gameDetail.clipboardLabels.login)}
-                      className="flex-shrink-0 h-8 w-8 sm:h-9 sm:w-9"
-                    >
-                      <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
-                    </Button>
-                  </div>
+                  </span>
+                  {hasCatalogAccess && (
+                    <span className="px-3 py-1 rounded-full bg-green-500/20 backdrop-blur-md border border-green-500/30 text-green-400 text-sm font-medium flex items-center gap-1">
+                      <CheckCircle className="w-3 h-3" />
+                      {t.gameDetail.steamGuardSuccessTitle}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
 
-                  <div className="flex items-center justify-between p-2 sm:p-3 bg-muted rounded-lg">
-                    <div className="min-w-0 flex-1 mr-2">
-                      <p className="text-xs sm:text-sm font-semibold text-foreground">
-                        {t.gameDetail.passwordLabel}
-                      </p>
-                      <p className="text-xs sm:text-sm text-muted-foreground truncate">
-                        {game.password}
-                      </p>
-                    </div>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() =>
-                        copyToClipboard(game.password, t.gameDetail.clipboardLabels.password)
-                      }
-                      className="flex-shrink-0 h-8 w-8 sm:h-9 sm:w-9"
-                    >
-                      <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
-                    </Button>
-                  </div>
+            <p className="text-lg sm:text-xl text-gray-200 max-w-2xl leading-relaxed drop-shadow-md">
+              {localizedDescription}
+            </p>
+          </div>
+        </div>
+      </div>
 
-                  {game.family_code && (
-                    <div className="flex items-center justify-between p-2 sm:p-3 bg-muted rounded-lg">
-                      <div className="min-w-0 flex-1 mr-2">
-                        <p className="text-xs sm:text-sm font-semibold text-foreground">
-                          {t.gameDetail.familyCodeLabel}
+      <div className="container mx-auto px-4 py-12 -mt-8 relative z-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+
+          {/* Step 1: Credentials */}
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-12 duration-700 delay-100">
+            <div className="flex items-center gap-4 mb-2">
+              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg shadow-lg shadow-primary/20">
+                1
+              </div>
+              <h2 className="text-2xl font-bold text-foreground">{t.gameDetail.accessInfoTitle}</h2>
+            </div>
+
+            {user && hasCatalogAccess ? (
+              <Card className="bg-card/50 backdrop-blur-xl border-white/5 shadow-xl overflow-hidden">
+                <CardContent className="p-6 space-y-6">
+                  <div className="group relative overflow-hidden rounded-xl bg-black/20 border border-white/5 p-4 transition-all hover:bg-black/30 hover:border-primary/20">
+                    <div className="flex items-center justify-between relative z-10">
+                      <div className="min-w-0 flex-1 mr-4">
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
+                          {t.gameDetail.loginLabel}
                         </p>
-                        <p className="text-xs sm:text-sm text-muted-foreground truncate">
-                          {game.family_code}
+                        <p className="text-lg text-foreground font-mono font-semibold truncate select-all">
+                          {game.login}
+                        </p>
+                      </div>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => copyToClipboard(game.login, t.gameDetail.clipboardLabels.login)}
+                        className="h-10 w-10 rounded-full hover:bg-primary/10 hover:text-primary transition-colors"
+                      >
+                        <Copy className="h-5 w-5" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="group relative overflow-hidden rounded-xl bg-black/20 border border-white/5 p-4 transition-all hover:bg-black/30 hover:border-primary/20">
+                    <div className="flex items-center justify-between relative z-10">
+                      <div className="min-w-0 flex-1 mr-4">
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
+                          {t.gameDetail.passwordLabel}
+                        </p>
+                        <p className="text-lg text-foreground font-mono font-semibold truncate select-all">
+                          {game.password}
                         </p>
                       </div>
                       <Button
                         size="icon"
                         variant="ghost"
                         onClick={() =>
-                          copyToClipboard(game.family_code!, t.gameDetail.clipboardLabels.familyCode)
+                          copyToClipboard(game.password, t.gameDetail.clipboardLabels.password)
                         }
-                        className="flex-shrink-0 h-8 w-8 sm:h-9 sm:w-9"
+                        className="h-10 w-10 rounded-full hover:bg-primary/10 hover:text-primary transition-colors"
                       >
-                        <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <Copy className="h-5 w-5" />
                       </Button>
+                    </div>
+                  </div>
+
+                  {game.family_code && (
+                    <div className="group relative overflow-hidden rounded-xl bg-black/20 border border-white/5 p-4 transition-all hover:bg-black/30 hover:border-primary/20">
+                      <div className="flex items-center justify-between relative z-10">
+                        <div className="min-w-0 flex-1 mr-4">
+                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
+                            {t.gameDetail.familyCodeLabel}
+                          </p>
+                          <p className="text-lg text-foreground font-mono font-semibold truncate select-all">
+                            {game.family_code}
+                          </p>
+                        </div>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() =>
+                            copyToClipboard(game.family_code!, t.gameDetail.clipboardLabels.familyCode)
+                          }
+                          className="h-10 w-10 rounded-full hover:bg-primary/10 hover:text-primary transition-colors"
+                        >
+                          <Copy className="h-5 w-5" />
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </CardContent>
               </Card>
             ) : (
-              <Card className="bg-card border-border border-2 border-primary/30">
-                <CardContent className="p-8 text-center">
-                  <Shield className="h-16 w-16 mx-auto text-primary/50 mb-4" />
+              <Card className="bg-card/50 backdrop-blur-xl border-primary/20 shadow-xl overflow-hidden relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
+                <CardContent className="p-8 text-center relative z-10">
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                    <Shield className="h-8 w-8 text-primary" />
+                  </div>
                   <h3 className="text-xl font-bold mb-2">
                     {!user ? 'Faça Login para Acessar' : 'Assine para Desbloquear'}
                   </h3>
-                  <p className="text-muted-foreground mb-6">
+                  <p className="text-muted-foreground mb-6 max-w-xs mx-auto">
                     {!user
                       ? 'Você precisa fazer login para visualizar as informações de acesso deste jogo.'
                       : 'Assine um plano para ter acesso ilimitado a todos os jogos do catálogo.'}
                   </p>
                   <Button
                     onClick={() => !user ? setShowAuthDialog(true) : setShowUpgradeModal(true)}
-                    className="w-full sm:w-auto"
+                    className="w-full sm:w-auto shadow-lg shadow-primary/20"
+                    size="lg"
                   >
                     {!user ? 'Fazer Login' : 'Ver Planos'}
                   </Button>
                 </CardContent>
               </Card>
             )}
+          </div>
 
-            <Card className="bg-card border-border">
-              <CardHeader>
-                <CardTitle className="text-base sm:text-lg">{t.gameDetail.tutorialTitle}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ol className="space-y-2 sm:space-y-3">
-                  {localizedTutorial.map((step: string, index: number) => (
-                    <li key={index} className="flex items-start gap-2 sm:gap-3">
-                      <span className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs sm:text-sm font-semibold">
-                        {index + 1}
-                      </span>
-                      <span className="text-xs sm:text-sm text-muted-foreground pt-1">{step}</span>
-                    </li>
-                  ))}
-                </ol>
-              </CardContent>
-            </Card>
+          {/* Step 2: Steam Guard */}
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-12 duration-700 delay-200">
+            <div className="flex items-center gap-4 mb-2">
+              <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-secondary-foreground font-bold text-lg shadow-lg shadow-secondary/20">
+                2
+              </div>
+              <h2 className="text-2xl font-bold text-foreground">{t.gameDetail.steamGuardTitle}</h2>
+            </div>
 
-            {/* Steam Guard - Apenas para usuários autenticados com plano */}
-            {user && hasCatalogAccess && (
-              <Card className="bg-card border-border">
-                <CardHeader>
-                  <CardTitle className="text-primary text-base sm:text-lg flex items-center gap-2">
-                    <Shield className="h-5 w-5" />
-                    {t.gameDetail.steamGuardTitle}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <Button
-                    className="w-full text-sm sm:text-base"
-                    size="lg"
-                    onClick={requestSteamGuard}
-                    disabled={searchingCode}
-                  >
-                  {searchingCode ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      {t.gameDetail.steamGuardButtonLoading}
-                    </>
-                  ) : (
-                    <>
-                      <Shield className="mr-2 h-4 w-4" />
-                      {t.gameDetail.steamGuardButtonIdle}
-                    </>
-                  )}
-                </Button>
-
-                {searchingCode && (
-                  <div className="space-y-2">
-                    <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-                      <div
-                        className="h-full bg-primary transition-all duration-500 ease-out"
-                        style={{ width: `${searchProgress}%` }}
-                      />
+            {user && hasCatalogAccess ? (
+              <Card className="bg-card/50 backdrop-blur-xl border-white/5 shadow-xl h-full min-h-[300px] flex flex-col">
+                <CardContent className="p-6 flex-1 flex flex-col justify-center space-y-6">
+                  <div className="text-center space-y-2">
+                    <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center mx-auto mb-2">
+                      <Shield className="h-8 w-8 text-blue-500" />
                     </div>
-                    <p className="text-xs text-center text-muted-foreground">
-                      {t.gameDetail.steamGuardProgress.replace(
-                        '{{progress}}',
-                        String(searchProgress)
-                      )}
+                    <h3 className="text-lg font-medium text-foreground">
+                      {t.gameDetail.steamGuardHint}
+                    </h3>
+                    <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                      Solicite o código apenas quando a Steam pedir. O código expira em breve.
                     </p>
                   </div>
-                )}
 
-                {steamCode && !searchingCode && (
-                  <div className="p-4 bg-green-500/10 border-2 border-green-500/50 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CheckCircle className="h-5 w-5 text-green-500" />
-                      <p className="text-sm font-semibold text-green-600 dark:text-green-400">
-                        {t.gameDetail.steamGuardSuccessTitle}
+                  <div className="pt-4">
+                    <Button
+                      className="w-full h-14 text-lg font-semibold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                      size="lg"
+                      onClick={requestSteamGuard}
+                      disabled={searchingCode}
+                    >
+                      {searchingCode ? (
+                        <>
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                          {t.gameDetail.steamGuardButtonLoading}
+                        </>
+                      ) : (
+                        <>
+                          <Shield className="mr-2 h-5 w-5" />
+                          {t.gameDetail.steamGuardButtonIdle}
+                        </>
+                      )}
+                    </Button>
+                  </div>
+
+                  {searchingCode && (
+                    <div className="space-y-2">
+                      <div className="w-full bg-muted/50 rounded-full h-2 overflow-hidden">
+                        <div
+                          className="h-full bg-primary transition-all duration-500 ease-out shadow-[0_0_10px_rgba(var(--primary),0.5)]"
+                          style={{ width: `${searchProgress}%` }}
+                        />
+                      </div>
+                      <p className="text-sm text-center text-muted-foreground animate-pulse">
+                        {t.gameDetail.steamGuardProgress.replace(
+                          '{{progress}}',
+                          String(searchProgress)
+                        )}
                       </p>
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-background rounded-md">
-                      <div className="flex-1">
-                        <p className="text-2xl font-bold tracking-widest text-foreground text-center">
-                          {steamCode}
+                  )}
+
+                  {steamCode && !searchingCode && (
+                    <div className="p-6 bg-green-500/10 border border-green-500/20 rounded-xl animate-in zoom-in-95 duration-300">
+                      <div className="flex items-center justify-center gap-2 mb-4">
+                        <CheckCircle className="h-5 w-5 text-green-500" />
+                        <p className="text-sm font-semibold text-green-500">
+                          {t.gameDetail.steamGuardSuccessTitle}
                         </p>
                       </div>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() =>
-                          copyToClipboard(steamCode, t.gameDetail.clipboardLabels.steamGuard)
-                        }
-                        className="flex-shrink-0 h-10 w-10"
-                      >
-                        <Copy className="h-5 w-5" />
-                      </Button>
-                    </div>
-                    <p className="text-xs text-center text-muted-foreground mt-2">
-                      {t.gameDetail.steamGuardSuccessDescription}
-                    </p>
-                  </div>
-                )}
-
-                {codeError && !searchingCode && (
-                  <div className="p-4 bg-red-500/10 border-2 border-red-500/50 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <XCircle className="h-5 w-5 text-red-500" />
-                      <p className="text-sm font-semibold text-red-600 dark:text-red-400">
-                        {t.gameDetail.steamGuardErrorTitle}
+                      <div className="flex items-center justify-between p-4 bg-background/50 backdrop-blur-sm rounded-lg border border-white/5 shadow-inner">
+                        <div className="flex-1 text-center">
+                          <p className="text-4xl font-black tracking-[0.3em] text-foreground font-mono">
+                            {steamCode}
+                          </p>
+                        </div>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() =>
+                            copyToClipboard(steamCode, t.gameDetail.clipboardLabels.steamGuard)
+                          }
+                          className="flex-shrink-0 h-12 w-12 hover:bg-green-500/10 hover:text-green-500 transition-colors"
+                        >
+                          <Copy className="h-6 w-6" />
+                        </Button>
+                      </div>
+                      <p className="text-xs text-center text-muted-foreground mt-4 opacity-70">
+                        {t.gameDetail.steamGuardSuccessDescription}
                       </p>
                     </div>
-                    <p className="text-xs text-muted-foreground">{codeError}</p>
-                  </div>
-                )}
+                  )}
 
-                {!steamCode && !searchingCode && !codeError && (
-                  <p className="text-xs sm:text-sm text-muted-foreground text-center">
-                    {t.gameDetail.steamGuardHint}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+                  {codeError && !searchingCode && (
+                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl animate-in shake duration-300">
+                      <div className="flex items-center gap-3">
+                        <XCircle className="h-5 w-5 text-red-500" />
+                        <div>
+                          <p className="text-sm font-semibold text-red-500">
+                            {t.gameDetail.steamGuardErrorTitle}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">{codeError}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="h-full min-h-[300px] rounded-xl border-2 border-dashed border-muted flex items-center justify-center p-6 text-center">
+                <div className="space-y-2 opacity-50">
+                  <Shield className="h-12 w-12 mx-auto" />
+                  <p className="text-lg font-medium">Bloqueado</p>
+                </div>
+              </div>
             )}
           </div>
         </div>
-      </div>
+        < div className="max-w-3xl mx-auto mt-20 animate-in fade-in slide-in-from-bottom-12 duration-700 delay-300" >
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-muted-foreground font-bold text-xl shadow-inner">
+              3
+            </div>
+            <h2 className="text-3xl font-bold text-foreground tracking-tight">
+              {t.gameDetail.tutorialTitle}
+            </h2>
+          </div>
+
+          {/* Important Alert */}
+          <div className="mb-10 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 flex items-start gap-4 animate-in zoom-in-95 duration-500">
+            <AlertTriangle className="h-6 w-6 text-yellow-500 flex-shrink-0 mt-1" />
+            <div>
+              <h4 className="text-base font-bold text-yellow-500 mb-1">Atenção Necessária</h4>
+              <p className="text-sm text-yellow-500/90 leading-relaxed">
+                Siga os passos abaixo atentamente para garantir que você consiga jogar com
+                tranquilidade e sem interrupções.
+              </p>
+            </div>
+          </div>
+
+          <div className="relative pl-8 sm:pl-10 space-y-8 before:absolute before:left-3 sm:before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-gradient-to-b before:from-primary before:via-primary/50 before:to-transparent">
+            {localizedTutorial.map((step: string, index: number) => (
+              <div key={index} className="relative group">
+                {/* Timeline Dot */}
+                <div className="absolute -left-[2.25rem] sm:-left-[2.5rem] top-0 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-background border-2 border-primary flex items-center justify-center z-10 group-hover:scale-110 transition-transform duration-300 shadow-[0_0_10px_rgba(var(--primary),0.3)]">
+                  <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-primary" />
+                </div>
+
+                {/* Content Card */}
+                <div className="bg-card/40 backdrop-blur-md border border-white/5 rounded-xl p-6 transition-all duration-300 hover:bg-card/60 hover:border-primary/20 hover:translate-x-2 shadow-lg">
+                  <div className="flex items-start gap-4">
+                    <span className="text-4xl font-black text-white/5 select-none absolute right-4 top-2">
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
+                    <p className="text-base sm:text-lg text-muted-foreground leading-relaxed relative z-10">
+                      {step}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div >
+      </div >
 
       {/* Auth Dialog */}
-      <AuthDialog
+      < AuthDialog
         open={showAuthDialog}
         onOpenChange={setShowAuthDialog}
         redirectTo={`/game/${id}`}
       />
 
       {/* Upgrade Modal */}
-      <UpgradeModal
-        open={showUpgradeModal}
-        onOpenChange={setShowUpgradeModal}
-      />
-    </div>
+      <UpgradeModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} />
+    </div >
   );
 };
 
