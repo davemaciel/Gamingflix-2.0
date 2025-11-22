@@ -1,223 +1,270 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
-import { useLanguage } from '@/hooks/useLanguage';
-import { gamesApi } from '@/lib/api';
+import { categoriesApi, gamesApi, streamingApi } from '@/lib/api';
 import { Header } from '@/components/Header';
+import { HeroSection } from '@/components/HeroSection';
+import { CategoryCarousel } from '@/components/CategoryCarousel';
 import { GameCard } from '@/components/GameCard';
-import { useToast } from '@/hooks/use-toast';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
+import { AuthDialog } from '@/components/AuthDialog';
+import { UpgradeModal } from '@/components/UpgradeModal';
+import { Category } from '@/types/category';
+import { Search, Sparkles } from 'lucide-react';
 
-interface Game {
-  id: string;
-  title: string;
-  cover_url: string;
-  description: string;
-  gradient: string;
-  created_at?: string;
-}
+const Catalog = () => {
+    const { user } = useAuth();
+    const { hasCatalogAccess, loading: subscriptionLoading } = useSubscription();
+    const [searchParams] = useSearchParams();
+    
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [categoryData, setCategoryData] = useState<Map<string, any[]>>(new Map());
+    const [heroItems, setHeroItems] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    
+    const [showAuthDialog, setShowAuthDialog] = useState(false);
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    
+    // Search
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<any[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
 
-const CATALOG_CACHE_TTL = 1000 * 60 * 5; // 5 minutos
-let catalogCache: { games: Game[]; timestamp: number } | null = null;
-let catalogPromise: Promise<Game[]> | null = null;
+    const urlQuery = searchParams.get('q') || '';
 
-const Index = () => {
-  const { user } = useAuth();
-  const { hasCatalogAccess, loading: subscriptionLoading } = useSubscription();
-  const { t } = useLanguage();
-  const { toast } = useToast();
-  const [searchParams] = useSearchParams();
-  const [games, setGames] = useState<Game[]>([]);
-  const [filteredGames, setFilteredGames] = useState<Game[]>([]);
-  const [loading, setLoading] = useState(true);
-  const initializedRef = useRef(false);
-
-  const urlQuery = searchParams.get('q') || '';
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const hydrateFromCache = () => {
-      if (
-        catalogCache &&
-        Date.now() - catalogCache.timestamp < CATALOG_CACHE_TTL &&
-        catalogCache.games.length > 0
-      ) {
-        setGames(catalogCache.games);
-        // O filtro será aplicado pelo useEffect abaixo
-        setLoading(false);
-        return true;
-      }
-      return false;
-    };
-
-    const fetchGames = async () => {
-      try {
-        const promise =
-          catalogPromise ||
-          (catalogPromise = gamesApi.getAll()
-            .then((data) => {
-              catalogPromise = null;
-              const list = data ?? [];
-              catalogCache = { games: list, timestamp: Date.now() };
-              return list;
-            }));
-
-        const fetchedGames = await promise;
-        if (!cancelled) {
-          setGames(fetchedGames);
-          setLoading(false);
+    useEffect(() => {
+        if (urlQuery) {
+            setSearchQuery(urlQuery);
+            handleSearch(urlQuery);
         }
-      } catch (error) {
-        console.error('Error fetching games:', error);
-        if (!cancelled) {
-          toast({
-            title: t.catalogErrorTitle,
-            description: t.catalogErrorDescription,
-            variant: 'destructive',
-          });
-          setGames([]);
-          setFilteredGames([]);
-          setLoading(false);
+    }, [urlQuery]);
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    // Check access after loading
+    useEffect(() => {
+        if (!loading && !subscriptionLoading) {
+            const timer = setTimeout(() => {
+                if (!user) {
+                    setShowAuthDialog(true);
+                } else if (!hasCatalogAccess) {
+                    setShowUpgradeModal(true);
+                }
+            }, 300);
+            return () => clearTimeout(timer);
         }
-      }
+    }, [user, hasCatalogAccess, loading, subscriptionLoading]);
+
+    const fetchData = async () => {
+        try {
+            // Fetch active categories
+            const activeCategories = await categoriesApi.getActiveCategories();
+            setCategories(activeCategories);
+
+            // Fetch category items in parallel
+            const categoryPromises = activeCategories.map(cat =>
+                categoriesApi.getCategoryItems(cat.id)
+            );
+            const categoryResults = await Promise.all(categoryPromises);
+
+            const dataMap = new Map();
+            categoryResults.forEach((result, index) => {
+                dataMap.set(activeCategories[index].id, result.items || []);
+            });
+            setCategoryData(dataMap);
+
+            // Setup hero items - Get 5 random items from all categories
+            const allItems: any[] = [];
+            categoryResults.forEach(result => {
+                if (result.items) {
+                    allItems.push(...result.items);
+                }
+            });
+
+            // Shuffle and take first 5 for hero
+            const shuffled = allItems.sort(() => 0.5 - Math.random());
+            setHeroItems(shuffled.slice(0, 5));
+
+        } catch (error) {
+            console.error('Error fetching catalog data:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    if (!initializedRef.current) {
-      initializedRef.current = true;
-      const hasCache = hydrateFromCache();
-      if (!hasCache) {
-        fetchGames();
-      } else {
-        // Atualiza em background para manter dados frescos
-        fetchGames();
-      }
-    } else if (!catalogCache || Date.now() - catalogCache.timestamp >= CATALOG_CACHE_TTL) {
-      fetchGames();
-    }
+    const handleSearch = async (query: string) => {
+        if (!query.trim()) {
+            setSearchResults([]);
+            setIsSearching(false);
+            return;
+        }
 
-    return () => {
-      cancelled = true;
+        setIsSearching(true);
+        try {
+            // Search in games and streamings
+            const [games, streamings] = await Promise.all([
+                gamesApi.getAll(),
+                streamingApi.getAllServices(),
+            ]);
+
+            const lowerQuery = query.toLowerCase();
+            
+            const gameResults = games
+                .filter(g => g.title.toLowerCase().includes(lowerQuery))
+                .map(g => ({ ...g, item_type: 'game', item_id: g.id }));
+            
+            const streamingResults = streamings
+                .filter(s => s.name.toLowerCase().includes(lowerQuery))
+                .map(s => ({ 
+                    ...s, 
+                    item_type: 'streaming', 
+                    item_id: s.id, 
+                    title: s.name, 
+                    cover_url: s.logo_url 
+                }));
+
+            setSearchResults([...gameResults, ...streamingResults]);
+        } catch (error) {
+            console.error('Search error:', error);
+        } finally {
+            setIsSearching(false);
+        }
     };
-  }, [t, toast]);
 
-  useEffect(() => {
-    if (!user) return;
-    if (!catalogCache || Date.now() - catalogCache.timestamp >= 30_000) {
-      gamesApi.getAll()
-        .then((data) => {
-          const list = data ?? [];
-          catalogCache = { games: list, timestamp: Date.now() };
-          setGames(list);
-        })
-        .catch((error) => {
-          console.error('Error refreshing games for authenticated user:', error);
-        });
-    }
-  }, [user]);
-
-  // Aplica o filtro quando 'games' ou 'urlQuery' mudam
-  useEffect(() => {
-    if (urlQuery.trim()) {
-      const filtered = games.filter((game) =>
-        game.title.toLowerCase().includes(urlQuery.toLowerCase())
-      );
-      setFilteredGames(filtered);
-    } else {
-      setFilteredGames(games);
-    }
-  }, [games, urlQuery]);
-
-  const handleSearch = (query: string) => {
-    // Atualiza a URL sem recarregar a página se já estivermos no catálogo
-    // Mas como o Header já gerencia a navegação para /catalogo?q=..., 
-    // aqui só precisamos filtrar localmente se a prop onSearch for chamada diretamente
-    // ou se quisermos atualizar a URL para refletir a busca em tempo real.
-
-    // Para simplificar e manter compatibilidade com o Header atual:
-    if (!query.trim()) {
-      setFilteredGames(games);
-      return;
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-background">
+                <LoadingOverlay
+                    open={loading}
+                    title="Carregando catálogo premium..."
+                    footerLabel="GamingFlix"
+                />
+            </div>
+        );
     }
 
-    const filtered = games.filter((game) =>
-      game.title.toLowerCase().includes(query.toLowerCase())
-    );
-    setFilteredGames(filtered);
-  };
-
-  if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <LoadingOverlay
-          open={loading}
-          title={t.loadingCatalog}
-          footerLabel="GamingFlix Ultimate Founders"
-        />
-      </div>
+        <div className="min-h-screen bg-background">
+            <Header 
+                onSearch={handleSearch}
+                initialQuery={searchQuery}
+            />
+
+            {/* Search Results */}
+            {searchQuery && (
+                <div className="container mx-auto px-4 sm:px-6 md:px-12 py-8 mt-16">
+                    <div className="mb-6">
+                        <h2 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
+                            <Search className="h-7 w-7 text-primary" />
+                            Resultados para "{searchQuery}"
+                        </h2>
+                        <p className="text-muted-foreground mt-2 text-lg">
+                            {searchResults.length} {searchResults.length === 1 ? 'resultado encontrado' : 'resultados encontrados'}
+                        </p>
+                    </div>
+
+                    {isSearching ? (
+                        <div className="flex items-center justify-center py-20">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                            {searchResults.map((item) => (
+                                <GameCard
+                                    key={item.id}
+                                    game={item}
+                                    user={user}
+                                    hasCatalogAccess={hasCatalogAccess}
+                                    subscriptionLoading={subscriptionLoading}
+                                />
+                            ))}
+                        </div>
+                    )}
+
+                    {!isSearching && searchResults.length === 0 && (
+                        <div className="text-center py-20">
+                            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-muted mb-4">
+                                <Search className="h-10 w-10 text-muted-foreground" />
+                            </div>
+                            <h3 className="text-xl font-semibold mb-2">Nenhum resultado encontrado</h3>
+                            <p className="text-muted-foreground">
+                                Não encontramos nada para "{searchQuery}". Tente outro termo.
+                            </p>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Main Catalog - Only show if not searching */}
+            {!searchQuery && (
+                <div className="space-y-0">
+                    {/* Hero Section */}
+                    {heroItems.length > 0 && (
+                        <HeroSection items={heroItems} autoPlay={true} interval={6000} />
+                    )}
+
+                    {/* Categories Section */}
+                    <div className="relative py-8 space-y-12">
+                        {/* Featured Label */}
+                        {categories.length > 0 && (
+                            <div className="container mx-auto px-4 sm:px-6 md:px-12 mb-4">
+                                <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full">
+                                    <Sparkles className="h-4 w-4 text-primary" />
+                                    <span className="text-sm font-semibold text-primary">
+                                        Conteúdo Exclusivo
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Category Carousels */}
+                        {categories.map((category) => {
+                            const items = categoryData.get(category.id) || [];
+                            if (items.length === 0) return null;
+
+                            return (
+                                <CategoryCarousel
+                                    key={category.id}
+                                    title={category.name}
+                                    items={items}
+                                    color={category.color}
+                                />
+                            );
+                        })}
+
+                        {/* Empty State */}
+                        {categories.length === 0 && (
+                            <div className="container mx-auto px-4 sm:px-6 md:px-12 py-20 text-center">
+                                <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-muted mb-4">
+                                    <Sparkles className="h-10 w-10 text-muted-foreground" />
+                                </div>
+                                <h3 className="text-xl font-semibold mb-2">Nenhuma categoria disponível</h3>
+                                <p className="text-muted-foreground max-w-md mx-auto">
+                                    O catálogo está sendo organizado. Em breve teremos categorias incríveis para você explorar!
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Auth Dialog */}
+            <AuthDialog
+                open={showAuthDialog}
+                onOpenChange={setShowAuthDialog}
+                redirectTo="/catalogo"
+            />
+
+            {/* Upgrade Modal */}
+            <UpgradeModal
+                open={showUpgradeModal}
+                onOpenChange={setShowUpgradeModal}
+            />
+        </div>
     );
-  }
-
-  const gamesCountText =
-    filteredGames.length === 1
-      ? t.catalogCountSingular.replace('{{count}}', '1')
-      : t.catalogCountPlural.replace('{{count}}', String(filteredGames.length));
-
-  return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
-      <Header onSearch={handleSearch} initialQuery={urlQuery} />
-
-      <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
-        <div className="mb-6 sm:mb-8">
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
-            {t.catalogTitle}
-          </h2>
-          <p className="text-sm sm:text-base text-muted-foreground">{gamesCountText}</p>
-        </div>
-
-        {filteredGames.length === 0 ? (
-          <div className="text-center py-16">
-            <p className="text-muted-foreground text-base sm:text-lg">{t.noGamesFound}</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
-            {filteredGames.map((game) => (
-              <GameCard
-                key={game.id}
-                game={game}
-                user={user}
-                hasCatalogAccess={hasCatalogAccess}
-                subscriptionLoading={subscriptionLoading}
-              />
-            ))}
-          </div>
-        )}
-      </main>
-
-      <footer className="border-t border-border mt-12 sm:mt-16 py-6 sm:py-8">
-        <div className="container mx-auto px-3 sm:px-4 text-center">
-          <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-3 sm:gap-4 mb-4 text-xs sm:text-sm">
-            <a href="/releases" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
-              <span className="text-base sm:text-lg">📋</span>
-              <span>{t.changelog}</span>
-            </a>
-            <span className="hidden sm:inline text-muted-foreground">•</span>
-            <a href="/terms" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
-              <span className="text-base sm:text-lg">📄</span>
-              <span>{t.terms}</span>
-            </a>
-            <span className="hidden sm:inline text-muted-foreground">•</span>
-            <a href="/privacy" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
-              <span className="text-base sm:text-lg">🔒</span>
-              <span>{t.privacy}</span>
-            </a>
-          </div>
-          <p className="text-xs sm:text-sm text-muted-foreground">© 2025 GamingFlix. {t.allRightsReserved}</p>
-        </div>
-      </footer>
-    </div>
-  );
 };
 
-export default Index;
+export default Catalog;
