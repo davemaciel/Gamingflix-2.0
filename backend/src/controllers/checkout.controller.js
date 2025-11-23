@@ -57,13 +57,13 @@ export const handleWebhook = async (req, res) => {
     // DETECÇÃO DE STREAMING (Método 2): Payload antigo, mas produto é de streaming
     if (products && Array.isArray(products) && products.length > 0) {
       const streamingKeywords = ['netflix', 'disney', 'hbo', 'max', 'prime', 'paramount', 'apple tv', 'crunchyroll'];
-      
+
       logger.info(`🔍 Verificando ${products.length} produto(s) contra keywords de streaming...`);
-      
+
       const isStreamingProduct = products.some(p => {
         const productName = (p.name || p.title || '').toLowerCase();
         logger.info(`🔍 Verificando produto: "${productName}"`);
-        
+
         const matchesKeyword = streamingKeywords.some(keyword => {
           const matches = productName.includes(keyword);
           if (matches) {
@@ -71,7 +71,7 @@ export const handleWebhook = async (req, res) => {
           }
           return matches;
         });
-        
+
         return matchesKeyword;
       });
 
@@ -374,31 +374,34 @@ async function handleStreamingPurchaseFromProducts(req, res, { event, customer, 
     const productName = (products[0]?.name || products[0]?.title || '').toLowerCase();
     logger.info(`Buscando serviço de streaming para produto: ${productName}`);
 
-    // Mapear nome do produto para nome do serviço no banco
-    let serviceName = '';
-    if (productName.includes('netflix')) serviceName = 'Netflix';
-    else if (productName.includes('disney')) serviceName = 'Disney+';
-    else if (productName.includes('hbo') || productName.includes('max')) serviceName = 'HBO Max';
-    else if (productName.includes('prime')) serviceName = 'Prime Video';
-    else if (productName.includes('paramount')) serviceName = 'Paramount+';
-    else if (productName.includes('apple')) serviceName = 'Apple TV+';
-    else if (productName.includes('crunchyroll')) serviceName = 'Crunchyroll';
-    else {
+    // Keywords de streaming (mesmas usadas na detecção)
+    const streamingKeywords = ['netflix', 'disney', 'hbo', 'max', 'prime', 'paramount', 'apple tv', 'crunchyroll'];
+
+    // Encontrar qual keyword está presente no nome do produto
+    let matchedKeyword = streamingKeywords.find(keyword => productName.includes(keyword));
+
+    if (!matchedKeyword) {
       logger.error(`Não foi possível identificar serviço de streaming para: ${productName}`);
       return res.status(400).json({ error: 'Serviço de streaming não identificado' });
     }
 
-    // Busca parcial: encontra "Netflix" em "Netflix Premium", etc.
-    const service = await collections.streamingServices().findOne({ 
-      name: { $regex: new RegExp(serviceName, 'i') } 
+    logger.info(`Keyword detectada: "${matchedKeyword}". Buscando serviço no banco que contenha essa palavra...`);
+
+    // Buscar serviço cujo NOME contenha a keyword detectada
+    // Exemplos: "HBO" encontrará "HBO Max", "HBO Platinum", etc.
+    const service = await collections.streamingServices().findOne({
+      name: { $regex: new RegExp(matchedKeyword, 'i') }
     });
+
     if (!service) {
-      logger.error(`Serviço ${serviceName} não encontrado no banco de dados`);
+      logger.error(`Nenhum serviço encontrado no banco que contenha "${matchedKeyword}"`);
       // Listar serviços disponíveis para debug
       const allServices = await collections.streamingServices().find({}).toArray();
-      logger.error(`Serviços disponíveis: ${allServices.map(s => s.name).join(', ')}`);
-      return res.status(404).json({ error: 'Serviço não cadastrado' });
+      logger.error(`Serviços cadastrados: ${allServices.map(s => s.name).join(', ')}`);
+      return res.status(404).json({ error: `Nenhum serviço de streaming cadastrado contém "${matchedKeyword}" no nome. Crie o serviço no Admin primeiro.` });
     }
+
+    logger.info(`✅ Serviço encontrado: ${service.name} (ID: ${service.id})`);
 
     const transactionId = payment.id || crypto.randomUUID();
 
@@ -431,9 +434,9 @@ async function handleStreamingPurchaseFromProducts(req, res, { event, customer, 
 
     if (existingProfile) {
       logger.warn(`Usuário ${user.id} já possui perfil de ${serviceName}`);
-      return res.status(200).json({ 
-        received: true, 
-        warning: 'Usuário já possui perfil neste serviço' 
+      return res.status(200).json({
+        received: true,
+        warning: 'Usuário já possui perfil neste serviço'
       });
     }
 
@@ -460,10 +463,10 @@ async function handleStreamingPurchaseFromProducts(req, res, { event, customer, 
     }
 
     logger.info(`✅ Perfil ${assignedProfile.id} de ${serviceName} atribuído ao usuário ${user.id} (${email})`);
-    res.status(200).json({ 
-      received: true, 
+    res.status(200).json({
+      received: true,
       profile_assigned: true,
-      profile_id: assignedProfile.id 
+      profile_id: assignedProfile.id
     });
 
   } catch (error) {
