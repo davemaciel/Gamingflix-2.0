@@ -26,6 +26,11 @@ export const StreamingsManagement = () => {
     const [profileEditForm, setProfileEditForm] = useState({ name: '', pin: '' });
     const [searchTerm, setSearchTerm] = useState('');
 
+    const [showDeleteServiceDialog, setShowDeleteServiceDialog] = useState(false);
+    const [serviceToDelete, setServiceToDelete] = useState<StreamingService | null>(null);
+    const [showUnassignDialog, setShowUnassignDialog] = useState(false);
+    const [profileToUnassign, setProfileToUnassign] = useState<any>(null);
+
     const [serviceForm, setServiceForm] = useState({
         name: '',
         logo_url: '',
@@ -96,12 +101,18 @@ export const StreamingsManagement = () => {
         }
     };
 
-    const handleDeleteService = async (id: string) => {
-        if (!confirm('Tem certeza que deseja excluir este serviço?')) return;
+    const handleDeleteServiceClick = (service: StreamingService) => {
+        setServiceToDelete(service);
+        setShowDeleteServiceDialog(true);
+    };
+
+    const handleDeleteServiceConfirm = async () => {
+        if (!serviceToDelete) return;
 
         try {
-            await streamingApi.deleteService(id);
+            await streamingApi.deleteService(serviceToDelete.id);
             toast({ title: 'Sucesso', description: 'Serviço excluído' });
+            setShowDeleteServiceDialog(false);
             loadServices();
         } catch (error) {
             toast({
@@ -177,16 +188,20 @@ export const StreamingsManagement = () => {
         setShowAssignmentsDialog(true);
     };
 
-    const handleUnassignProfile = async (profileId: string) => {
-        if (!confirm('Deseja realmente desvincular este perfil? O usuário perderá acesso imediatamente.')) {
-            return;
-        }
+    const handleUnassignProfileClick = (profile: any) => {
+        setProfileToUnassign(profile);
+        setShowUnassignDialog(true);
+    };
+
+    const handleUnassignProfileConfirm = async () => {
+        if (!profileToUnassign) return;
 
         try {
-            await streamingApi.unassignProfile(profileId);
+            await streamingApi.unassignProfile(profileToUnassign.id);
 
             toast({ title: 'Sucesso', description: 'Perfil desvinculado' });
-            
+            setShowUnassignDialog(false);
+
             // Recarregar lista
             if (selectedService) {
                 const data = await streamingApi.getAssignedProfiles(selectedService.id);
@@ -215,10 +230,10 @@ export const StreamingsManagement = () => {
 
         try {
             await streamingApi.updateProfile(editingProfile.id, profileEditForm);
-            
+
             toast({ title: 'Sucesso', description: 'Perfil atualizado' });
             setShowEditProfileDialog(false);
-            
+
             // Recarregar listas
             if (selectedService) {
                 if (showInventoryDialog) {
@@ -313,7 +328,7 @@ export const StreamingsManagement = () => {
                                     size="sm"
                                     variant="destructive"
                                     className="rounded-lg"
-                                    onClick={() => handleDeleteService(service.id)}
+                                    onClick={() => handleDeleteServiceClick(service)}
                                 >
                                     <Trash2 className="h-4 w-4 mr-2" />
                                     Excluir
@@ -538,7 +553,7 @@ export const StreamingsManagement = () => {
                                 {assignedProfiles.map((profile) => {
                                     const daysRemaining = profile.assignment_info?.days_remaining || 0;
                                     const isExpired = profile.assignment_info?.is_expired;
-                                    
+
                                     return (
                                         <Card key={profile.id} className={`border ${isExpired ? 'border-red-500/50 bg-red-500/5' : daysRemaining < 7 ? 'border-yellow-500/50 bg-yellow-500/5' : 'border-green-500/50'}`}>
                                             <CardContent className="p-4">
@@ -548,15 +563,14 @@ export const StreamingsManagement = () => {
                                                             <div className="font-semibold text-lg">
                                                                 {profile.profile_name || 'Perfil sem nome'}
                                                             </div>
-                                                            <span className={`text-xs px-2 py-1 rounded-full ${
-                                                                isExpired ? 'bg-red-500 text-white' : 
-                                                                daysRemaining < 7 ? 'bg-yellow-500 text-black' : 
-                                                                'bg-green-500 text-white'
-                                                            }`}>
+                                                            <span className={`text-xs px-2 py-1 rounded-full ${isExpired ? 'bg-red-500 text-white' :
+                                                                    daysRemaining < 7 ? 'bg-yellow-500 text-black' :
+                                                                        'bg-green-500 text-white'
+                                                                }`}>
                                                                 {isExpired ? 'EXPIRADO' : `${daysRemaining} dias`}
                                                             </span>
                                                         </div>
-                                                        
+
                                                         <div className="grid grid-cols-2 gap-2 text-sm">
                                                             <div>
                                                                 <span className="text-muted-foreground">Cliente:</span>
@@ -594,7 +608,7 @@ export const StreamingsManagement = () => {
                                                         <Button
                                                             size="sm"
                                                             variant="destructive"
-                                                            onClick={() => handleUnassignProfile(profile.id)}
+                                                            onClick={() => handleUnassignProfileClick(profile)}
                                                         >
                                                             <X className="h-4 w-4 mr-1" />
                                                             Desvincular
@@ -651,6 +665,83 @@ export const StreamingsManagement = () => {
                                 Salvar Alterações
                             </Button>
                         </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Modal de Exclusão de Serviço */}
+            <Dialog open={showDeleteServiceDialog} onOpenChange={setShowDeleteServiceDialog}>
+                <DialogContent className="sm:max-w-md border-destructive/20">
+                    <DialogHeader>
+                        <div className="mx-auto w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+                            <Trash2 className="h-6 w-6 text-destructive" />
+                        </div>
+                        <DialogTitle className="text-center text-destructive">Excluir Serviço</DialogTitle>
+                    </DialogHeader>
+
+                    <div className="text-center space-y-4 py-4">
+                        <p className="text-muted-foreground">
+                            Tem certeza que deseja excluir permanentemente o serviço:
+                        </p>
+                        {serviceToDelete && (
+                            <div className="bg-destructive/5 border border-destructive/10 p-4 rounded-lg">
+                                <div className="font-semibold text-lg text-destructive">
+                                    {serviceToDelete.name}
+                                </div>
+                            </div>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                            Todas as contas e perfis associados também serão removidos.
+                        </p>
+                    </div>
+
+                    <div className="flex gap-2 justify-end">
+                        <Button variant="outline" onClick={() => setShowDeleteServiceDialog(false)} className="flex-1">
+                            Cancelar
+                        </Button>
+                        <Button variant="destructive" onClick={handleDeleteServiceConfirm} className="flex-1">
+                            Excluir Serviço
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Modal de Desvinculação de Perfil */}
+            <Dialog open={showUnassignDialog} onOpenChange={setShowUnassignDialog}>
+                <DialogContent className="sm:max-w-md border-destructive/20">
+                    <DialogHeader>
+                        <div className="mx-auto w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+                            <X className="h-6 w-6 text-destructive" />
+                        </div>
+                        <DialogTitle className="text-center text-destructive">Desvincular Perfil</DialogTitle>
+                    </DialogHeader>
+
+                    <div className="text-center space-y-4 py-4">
+                        <p className="text-muted-foreground">
+                            Deseja realmente desvincular este perfil?
+                        </p>
+                        {profileToUnassign && (
+                            <div className="bg-destructive/5 border border-destructive/10 p-4 rounded-lg">
+                                <div className="font-semibold text-lg text-destructive">
+                                    {profileToUnassign.profile_name || profileToUnassign.name || 'Perfil sem nome'}
+                                </div>
+                                <div className="text-sm text-destructive/80 mt-1">
+                                    Usuário: {profileToUnassign.user?.full_name || profileToUnassign.user?.email || 'N/A'}
+                                </div>
+                            </div>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                            O usuário perderá o acesso imediatamente e o perfil ficará disponível novamente.
+                        </p>
+                    </div>
+
+                    <div className="flex gap-2 justify-end">
+                        <Button variant="outline" onClick={() => setShowUnassignDialog(false)} className="flex-1">
+                            Cancelar
+                        </Button>
+                        <Button variant="destructive" onClick={handleUnassignProfileConfirm} className="flex-1">
+                            Confirmar Desvinculação
+                        </Button>
                     </div>
                 </DialogContent>
             </Dialog>

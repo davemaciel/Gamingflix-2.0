@@ -19,7 +19,9 @@ export const CategoriesManagement = () => {
     const [showItemsDialog, setShowItemsDialog] = useState(false);
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-    
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
+
     const [categoryForm, setCategoryForm] = useState({
         name: '',
         slug: '',
@@ -120,12 +122,18 @@ export const CategoriesManagement = () => {
         }
     };
 
-    const handleDeleteCategory = async (id: string) => {
-        if (!confirm('Tem certeza que deseja excluir esta categoria?')) return;
+    const handleDeleteCategoryClick = (category: Category) => {
+        setCategoryToDelete(category);
+        setShowDeleteDialog(true);
+    };
+
+    const handleDeleteCategoryConfirm = async () => {
+        if (!categoryToDelete) return;
 
         try {
-            await categoriesApi.deleteCategory(id);
+            await categoriesApi.deleteCategory(categoryToDelete.id);
             toast({ title: 'Sucesso', description: 'Categoria excluída' });
+            setShowDeleteDialog(false);
             fetchCategories();
         } catch (error) {
             toast({
@@ -179,7 +187,7 @@ export const CategoriesManagement = () => {
                 item_type: itemType,
             });
             toast({ title: 'Sucesso', description: 'Item adicionado à categoria' });
-            
+
             // Recarregar itens
             const data = await categoriesApi.getCategoryItems(selectedCategory.id);
             setCategoryItems(data.items || []);
@@ -198,7 +206,7 @@ export const CategoriesManagement = () => {
         try {
             await categoriesApi.removeItemFromCategory(selectedCategory.id, itemId);
             toast({ title: 'Sucesso', description: 'Item removido da categoria' });
-            
+
             const data = await categoriesApi.getCategoryItems(selectedCategory.id);
             setCategoryItems(data.items || []);
         } catch (error) {
@@ -260,7 +268,7 @@ export const CategoriesManagement = () => {
                         <CardContent className="p-4">
                             <div className="flex items-center gap-4">
                                 <GripVertical className="h-5 w-5 text-muted-foreground cursor-grab" />
-                                
+
                                 {category.color && (
                                     <div
                                         className="w-4 h-4 rounded-full flex-shrink-0"
@@ -321,7 +329,7 @@ export const CategoriesManagement = () => {
                                     <Button
                                         size="sm"
                                         variant="ghost"
-                                        onClick={() => handleDeleteCategory(category.id)}
+                                        onClick={() => handleDeleteCategoryClick(category)}
                                     >
                                         <Trash2 className="h-4 w-4" />
                                     </Button>
@@ -612,6 +620,43 @@ export const CategoriesManagement = () => {
                             </div>
                         </div>
                     )}
+                </DialogContent>
+            </Dialog>
+
+            {/* Modal de Exclusão de Categoria */}
+            <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <DialogContent className="sm:max-w-md border-destructive/20">
+                    <DialogHeader>
+                        <div className="mx-auto w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+                            <Trash2 className="h-6 w-6 text-destructive" />
+                        </div>
+                        <DialogTitle className="text-center text-destructive">Excluir Categoria</DialogTitle>
+                    </DialogHeader>
+
+                    <div className="text-center space-y-4 py-4">
+                        <p className="text-muted-foreground">
+                            Tem certeza que deseja excluir permanentemente a categoria:
+                        </p>
+                        {categoryToDelete && (
+                            <div className="bg-destructive/5 border border-destructive/10 p-4 rounded-lg">
+                                <div className="font-semibold text-lg text-destructive">
+                                    {categoryToDelete.name}
+                                </div>
+                            </div>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                            Esta ação não pode ser desfeita.
+                        </p>
+                    </div>
+
+                    <div className="flex gap-2 justify-end">
+                        <Button variant="outline" onClick={() => setShowDeleteDialog(false)} className="flex-1">
+                            Cancelar
+                        </Button>
+                        <Button variant="destructive" onClick={handleDeleteCategoryConfirm} className="flex-1">
+                            Excluir Categoria
+                        </Button>
+                    </div>
                 </DialogContent>
             </Dialog>
         </div>

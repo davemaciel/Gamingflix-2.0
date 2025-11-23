@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/hooks/useLanguage";
 import { CompleteProfileDialog } from "@/components/CompleteProfileDialog";
+import { AdminImpersonationBanner } from "@/components/AdminImpersonationBanner";
 import Landing from "./pages/Landing";
 import Catalog from "./pages/Catalog";
 import Auth from "./pages/Auth";
@@ -37,6 +38,7 @@ const App = () => (
         <Sonner />
         <CompleteProfileDialog />
         <BrowserRouter>
+          <AdminImpersonationBanner />
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/catalogo" element={<Catalog />} />

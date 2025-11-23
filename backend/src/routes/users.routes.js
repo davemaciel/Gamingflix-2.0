@@ -8,7 +8,9 @@ import {
   deleteUser,
   createUserSubscription,
   cancelUserSubscription,
-  renewUserSubscription
+  renewUserSubscription,
+  assignStreamingToUser,
+  loginAsUser
 } from '../controllers/users.controller.js';
 
 const router = express.Router();
@@ -28,5 +30,11 @@ router.delete('/:id', deleteUser);
 router.post('/:id/subscription', createUserSubscription);
 router.delete('/:id/subscription', cancelUserSubscription);
 router.put('/:id/subscription/renew', renewUserSubscription);
+
+// Atribuir streaming
+router.post('/:id/streaming', assignStreamingToUser);
+
+// Login as User (Impersonation)
+router.post('/:id/login-as', loginAsUser);
 
 export default router;

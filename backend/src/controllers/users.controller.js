@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 import { collections } from '../config/database.js';
 import { logger } from '../utils/logger.js';
 import {
@@ -25,7 +26,7 @@ export const getAllUsers = async (req, res) => {
           user_id: user.id,
           status: 'active'
         });
-        
+
         return {
           ...user,
           role: role?.role || 'client',
@@ -224,7 +225,7 @@ export const createUserSubscription = async (req, res) => {
     await collections.subscriptions().insertOne(subscription);
 
     logger.info(`Subscription created for user ${id}: plan ${plan_id}, expires ${expiresAt}`);
-    
+
     // Envia email de boas-vindas
     await sendSubscriptionCreatedEmail(
       user.email,
@@ -232,7 +233,7 @@ export const createUserSubscription = async (req, res) => {
       plan.name,
       expiresAt
     );
-    
+
     res.status(201).json(subscription);
   } catch (error) {
     logger.error('Error creating subscription:', error);
@@ -265,7 +266,7 @@ export const cancelUserSubscription = async (req, res) => {
     );
 
     logger.info(`Subscription cancelled for user ${id}`);
-    
+
     // Envia email de cancelamento
     if (user && plan) {
       await sendSubscriptionCancelledEmail(
@@ -275,7 +276,7 @@ export const cancelUserSubscription = async (req, res) => {
         reason || 'cancelamento'
       );
     }
-    
+
     res.json({ message: 'Assinatura cancelada com sucesso' });
   } catch (error) {
     logger.error('Error cancelling subscription:', error);
@@ -287,7 +288,7 @@ export const cancelUserSubscription = async (req, res) => {
 export const renewUserSubscription = async (req, res) => {
   try {
     const { id } = req.params;
-    const { duration_months } = req.body;
+    const { duration_months, duration_days, expiration_date } = req.body;
 
     const subscription = await collections.subscriptions().findOne({
       user_id: id,
@@ -299,8 +300,32 @@ export const renewUserSubscription = async (req, res) => {
     }
 
     const currentExpires = new Date(subscription.expires_at);
-    const newExpires = new Date(currentExpires);
-    newExpires.setMonth(newExpires.getMonth() + (duration_months || 1));
+    let newExpires;
+
+    if (expiration_date) {
+      // Define data específica
+      newExpires = new Date(expiration_date);
+      // Garante que é no futuro
+      if (newExpires <= new Date()) {
+        return res.status(400).json({ error: 'A nova data de expiração deve ser no futuro' });
+      }
+    } else if (duration_days) {
+      // Adiciona dias
+      newExpires = new Date(currentExpires);
+      // Se já expirou, começa a contar de agora
+      if (newExpires < new Date()) {
+        newExpires = new Date();
+      }
+      newExpires.setDate(newExpires.getDate() + parseInt(duration_days));
+    } else {
+      // Padrão: Adiciona meses (ou 1 mês se nada for passado)
+      newExpires = new Date(currentExpires);
+      // Se já expirou, começa a contar de agora
+      if (newExpires < new Date()) {
+        newExpires = new Date();
+      }
+      newExpires.setMonth(newExpires.getMonth() + (parseInt(duration_months) || 1));
+    }
 
     await collections.subscriptions().updateOne(
       { id: subscription.id },
@@ -316,11 +341,11 @@ export const renewUserSubscription = async (req, res) => {
     );
 
     logger.info(`Subscription renewed for user ${id}: new expiration ${newExpires}`);
-    
+
     // Envia email de renovação
     const user = await collections.profiles().findOne({ id });
     const plan = await collections.subscriptionPlans().findOne({ id: subscription.plan_id });
-    
+
     if (user && plan) {
       await sendSubscriptionRenewedEmail(
         user.email,
@@ -329,10 +354,118 @@ export const renewUserSubscription = async (req, res) => {
         newExpires
       );
     }
-    
+
     res.json({ message: 'Assinatura renovada com sucesso', expires_at: newExpires });
   } catch (error) {
     logger.error('Error renewing subscription:', error);
     res.status(500).json({ error: 'Erro ao renovar assinatura' });
+  }
+};
+
+// Atribuir streaming para usuário (Admin)
+export const assignStreamingToUser = async (req, res) => {
+  try {
+    const { id: userId } = req.params;
+    const { serviceId } = req.body;
+
+    if (!serviceId) {
+      return res.status(400).json({ error: 'serviceId é obrigatório' });
+    }
+
+    // Verifica se usuário existe
+    const user = await collections.profiles().findOne({ id: userId });
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+
+    // Verifica se o serviço existe
+    const service = await collections.streamingServices().findOne({ id: serviceId });
+    if (!service) {
+      return res.status(404).json({ error: 'Serviço de streaming não encontrado' });
+    }
+
+    // Verifica se o usuário já tem um perfil para este serviço
+    const existingProfile = await collections.streamingProfiles().findOne({
+      service_id: serviceId,
+      assigned_to: userId
+    });
+
+    if (existingProfile) {
+      return res.status(400).json({ error: 'Usuário já possui um perfil para este serviço' });
+    }
+
+    // Busca um perfil disponível
+    const assignedProfile = await collections.streamingProfiles().findOneAndUpdate(
+      {
+        service_id: serviceId,
+        status: 'available'
+      },
+      {
+        $set: {
+          status: 'assigned',
+          assigned_to: userId,
+          assigned_at: new Date()
+        }
+      },
+      { returnDocument: 'after' }
+    );
+
+    if (!assignedProfile) {
+      return res.status(404).json({ error: 'Nenhum perfil disponível no momento para este serviço' });
+    }
+
+    logger.info(`Admin assigned streaming profile ${assignedProfile.id} (${service.name}) to user ${userId}`);
+    res.json({
+      message: 'Perfil de streaming atribuído com sucesso',
+      profile: assignedProfile
+    });
+  } catch (error) {
+    logger.error('Error assigning streaming to user:', error);
+    res.status(500).json({ error: 'Erro ao atribuir streaming' });
+  }
+};
+
+// Login as User (Impersonation) - Admin only
+export const loginAsUser = async (req, res) => {
+  try {
+    const { id: targetUserId } = req.params;
+    const adminId = req.user.id;
+
+    // Busca o usuário alvo
+    const targetUser = await collections.profiles().findOne(
+      { id: targetUserId },
+      { projection: { password: 0 } }
+    );
+
+    if (!targetUser) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+
+    // Busca role do usuário
+    const userRole = await collections.userRoles().findOne({ user_id: targetUserId });
+
+    // Gera token JWT para o usuário alvo
+    const token = jwt.sign(
+      {
+        id: targetUser.id,
+        email: targetUser.email,
+        role: userRole?.role || 'client'
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    logger.info(`Admin ${adminId} logged in as user ${targetUserId} (${targetUser.email})`);
+
+    res.json({
+      user: {
+        ...targetUser,
+        role: userRole?.role || 'client'
+      },
+      token
+    });
+  } catch (error) {
+    logger.error('Error in loginAsUser:', error);
+    res.status(500).json({ error: 'Erro ao fazer login como usuário' });
   }
 };

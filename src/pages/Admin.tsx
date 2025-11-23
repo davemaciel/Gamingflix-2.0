@@ -126,6 +126,8 @@ const Admin = () => {
   const [loading, setLoading] = useState(true);
   const [editingGame, setEditingGame] = useState<Game | null>(null);
   const [showDialog, setShowDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [gameToDelete, setGameToDelete] = useState<Game | null>(null);
   const [formData, setFormData] = useState<GameFormState>(initialFormState);
   const [activeContentLanguage, setActiveContentLanguage] = useState<ContentLanguage>('pt');
   const [searchTerm, setSearchTerm] = useState('');
@@ -259,17 +261,23 @@ const Admin = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este jogo?')) return;
+  const handleDeleteClick = (game: Game) => {
+    setGameToDelete(game);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!gameToDelete) return;
 
     try {
-      await gamesApi.delete(id);
+      await gamesApi.delete(gameToDelete.id);
 
       toast({
         title: 'Jogo excluído',
         description: 'O jogo foi removido do catálogo.',
       });
 
+      setShowDeleteDialog(false);
       fetchGames();
     } catch (error: any) {
       toast({
@@ -371,25 +379,25 @@ const Admin = () => {
 
         <Tabs defaultValue="games" className="w-full">
           <TabsList className="grid w-full grid-cols-5 max-w-5xl mb-6">
-            <TabsTrigger value="games" className="flex items-center gap-2">
-              <Gamepad2 className="h-4 w-4" />
-              Jogos
+            <TabsTrigger value="games" className="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4">
+              <Gamepad2 className="h-4 w-4 flex-shrink-0" />
+              <span className="hidden sm:inline">Jogos</span>
             </TabsTrigger>
-            <TabsTrigger value="streamings" className="flex items-center gap-2">
-              <Tv className="h-4 w-4" />
-              Streamings
+            <TabsTrigger value="streamings" className="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4">
+              <Tv className="h-4 w-4 flex-shrink-0" />
+              <span className="hidden sm:inline">Streamings</span>
             </TabsTrigger>
-            <TabsTrigger value="users" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Usuários
+            <TabsTrigger value="users" className="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4">
+              <Users className="h-4 w-4 flex-shrink-0" />
+              <span className="hidden sm:inline">Usuários</span>
             </TabsTrigger>
-            <TabsTrigger value="transactions" className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4" />
-              Transações
+            <TabsTrigger value="transactions" className="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4">
+              <DollarSign className="h-4 w-4 flex-shrink-0" />
+              <span className="hidden sm:inline">Transações</span>
             </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              Configurações
+            <TabsTrigger value="settings" className="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4">
+              <Settings className="h-4 w-4 flex-shrink-0" />
+              <span className="hidden sm:inline">Configurações</span>
             </TabsTrigger>
           </TabsList>
 
@@ -469,7 +477,7 @@ const Admin = () => {
                         size="sm"
                         variant="destructive"
                         className="rounded-lg"
-                        onClick={() => handleDelete(game.id)}
+                        onClick={() => handleDeleteClick(game)}
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
                         Excluir
@@ -642,6 +650,43 @@ const Admin = () => {
                       {editingGame ? 'Atualizar' : 'Criar'}
                     </Button>
                   </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            {/* Modal de Exclusão de Jogo */}
+            <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+              <DialogContent className="sm:max-w-md border-destructive/20">
+                <DialogHeader>
+                  <div className="mx-auto w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+                    <Trash2 className="h-6 w-6 text-destructive" />
+                  </div>
+                  <DialogTitle className="text-center text-destructive">Excluir Jogo</DialogTitle>
+                </DialogHeader>
+
+                <div className="text-center space-y-4 py-4">
+                  <p className="text-muted-foreground">
+                    Tem certeza que deseja excluir permanentemente o jogo:
+                  </p>
+                  {gameToDelete && (
+                    <div className="bg-destructive/5 border border-destructive/10 p-4 rounded-lg">
+                      <div className="font-semibold text-lg text-destructive">
+                        {gameToDelete.title}
+                      </div>
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Esta ação não pode ser desfeita.
+                  </p>
+                </div>
+
+                <div className="flex gap-2 justify-end">
+                  <Button variant="outline" onClick={() => setShowDeleteDialog(false)} className="flex-1">
+                    Cancelar
+                  </Button>
+                  <Button variant="destructive" onClick={handleDeleteConfirm} className="flex-1">
+                    Excluir Jogo
+                  </Button>
                 </div>
               </DialogContent>
             </Dialog>

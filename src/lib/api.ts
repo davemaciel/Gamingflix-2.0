@@ -242,8 +242,14 @@ export const usersApi = {
 
   cancelSubscription: (id: string) => apiClient.delete(`/users/${id}/subscription`),
 
-  renewSubscription: (id: string, duration_months: number) =>
-    apiClient.put(`/users/${id}/subscription/renew`, { duration_months }),
+  renewSubscription: (id: string, options: { duration_months?: number; duration_days?: number; expiration_date?: string }) =>
+    apiClient.put(`/users/${id}/subscription/renew`, options),
+
+  assignStreamingPlan: (userId: string, serviceId: string) =>
+    apiClient.post(`/users/${userId}/streaming`, { serviceId }),
+
+  loginAsUser: (userId: string) =>
+    apiClient.post<AuthResponse>(`/users/${userId}/login-as`, {}),
 };
 
 export interface CheckoutSession {
