@@ -370,35 +370,52 @@ async function handleStreamingPurchaseFromProducts(req, res, { event, customer, 
       });
     }
 
-    // 2. Identificar serviço de streaming pelo nome do produto
-    const productName = (products[0]?.name || products[0]?.title || '').toLowerCase();
-    logger.info(`Buscando serviço de streaming para produto: ${productName}`);
+    // 2. Identificar serviço de streaming pelo ID do produto no GGCheckout
+    const productId = products[0]?.id;
+    const productName = (products[0]?.name || products[0]?.title || '');
 
-    // Keywords de streaming (mesmas usadas na detecção)
-    const streamingKeywords = ['netflix', 'disney', 'hbo', 'max', 'prime', 'paramount', 'apple tv', 'crunchyroll'];
+    logger.info(`📦 Produto do webhook: ID="${productId}", Nome="${productName}"`);
 
-    // Encontrar qual keyword está presente no nome do produto
-    let matchedKeyword = streamingKeywords.find(keyword => productName.includes(keyword));
-
-    if (!matchedKeyword) {
-      logger.error(`Não foi possível identificar serviço de streaming para: ${productName}`);
-      return res.status(400).json({ error: 'Serviço de streaming não identificado' });
+    if (!productId) {
+      logger.error('❌ Payload não contém product.id. Impossível identificar serviço.');
+      return res.status(400).json({ error: 'ID do produto não fornecido no webhook' });
     }
 
-    logger.info(`Keyword detectada: "${matchedKeyword}". Buscando serviço no banco que contenha essa palavra...`);
+    // Buscar serviço pelo ggcheckout_product_id
+    logger.info(`🔍 Buscando serviço com ggcheckout_product_id = "${productId}"...`);
 
-    // Buscar serviço cujo NOME contenha a keyword detectada
-    // Exemplos: "HBO" encontrará "HBO Max", "HBO Platinum", etc.
-    const service = await collections.streamingServices().findOne({
-      name: { $regex: new RegExp(matchedKeyword, 'i') }
+    let service = await collections.streamingServices().findOne({
+      ggcheckout_product_id: productId
     });
 
     if (!service) {
-      logger.error(`Nenhum serviço encontrado no banco que contenha "${matchedKeyword}"`);
-      // Listar serviços disponíveis para debug
-      const allServices = await collections.streamingServices().find({}).toArray();
-      logger.error(`Serviços cadastrados: ${allServices.map(s => s.name).join(', ')}`);
-      return res.status(404).json({ error: `Nenhum serviço de streaming cadastrado contém "${matchedKeyword}" no nome. Crie o serviço no Admin primeiro.` });
+      logger.warn(`⚠️ Nenhum serviço encontrado com ggcheckout_product_id = "${productId}"`);
+
+      // Fallback: tentar buscar por keywords (método antigo, apenas para compatibilidade temporária)
+      logger.warn('⚠️ Tentando fallback por keywords do nome do produto...');
+      const streamingKeywords = ['netflix', 'disney', 'hbo', 'max', 'prime', 'paramount', 'apple tv', 'crunchyroll'];
+      const productNameLower = productName.toLowerCase();
+      const matchedKeyword = streamingKeywords.find(keyword => productNameLower.includes(keyword));
+
+      if (matchedKeyword) {
+        logger.info(`🔍 Keyword "${matchedKeyword}" detectada. Buscando por nome...`);
+        service = await collections.streamingServices().findOne({
+          name: { $regex: new RegExp(matchedKeyword, 'i') }
+        });
+
+        if (service) {
+          logger.warn(`⚠️ Serviço encontrado via fallback: ${service.name}`);
+          logger.warn(`⚠️ ATENÇÃO ADMIN: Configure o ggcheckout_product_id="${productId}" no painel admin para este serviço!`);
+        }
+      }
+
+      if (!service) {
+        const allServices = await collections.streamingServices().find({}).toArray();
+        logger.error(`Serviços cadastrados: ${allServices.map(s => `${s.name} (product_id: ${s.ggcheckout_product_id || 'NÃO CONFIGURADO'})`).join(', ')}`);
+        return res.status(404).json({
+          error: `Serviço não encontrado para product_id="${productId}". Configure o ID do Produto no Admin.`
+        });
+      }
     }
 
     logger.info(`✅ Serviço encontrado: ${service.name} (ID: ${service.id})`);

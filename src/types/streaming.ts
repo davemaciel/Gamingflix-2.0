@@ -5,6 +5,7 @@ export interface StreamingService {
     cover_url?: string;
     description?: string;
     checkout_url?: string;
+    ggcheckout_product_id?: string; // ID do produto no GGCheckout para vinculação direta
     created_at?: string;
     updated_at?: string;
 }

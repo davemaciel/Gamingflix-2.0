@@ -37,6 +37,7 @@ export const StreamingsManagement = () => {
         cover_url: '',
         description: '',
         checkout_url: '',
+        ggcheckout_product_id: '', // ID do produto no GGCheckout
     });
 
     const [accountForm, setAccountForm] = useState({
@@ -73,10 +74,11 @@ export const StreamingsManagement = () => {
                 cover_url: service.cover_url || '',
                 description: service.description || '',
                 checkout_url: service.checkout_url || '',
+                ggcheckout_product_id: service.ggcheckout_product_id || '',
             });
         } else {
             setEditingService(null);
-            setServiceForm({ name: '', logo_url: '', cover_url: '', description: '', checkout_url: '' });
+            setServiceForm({ name: '', logo_url: '', cover_url: '', description: '', checkout_url: '', ggcheckout_product_id: '' });
         }
         setShowServiceDialog(true);
     };
@@ -383,6 +385,18 @@ export const StreamingsManagement = () => {
                             />
                             <p className="text-xs text-muted-foreground">
                                 URL do checkout criado no GGCheckout para este serviço
+                            </p>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>ID do Produto (GGCheckout) - IMPORTANTE</Label>
+                            <Input
+                                placeholder="Ex: 2vmUtRIMgKqjtgHcInDv"
+                                value={serviceForm.ggcheckout_product_id}
+                                onChange={(e) => setServiceForm({ ...serviceForm, ggcheckout_product_id: e.target.value })}
+                            />
+                            <p className="text-xs text-muted-foreground">
+                                Copie o ID do produto na lista de Produtos do GGCheckout. Usado para vincular pagamentos automaticamente ao serviço correto.
                             </p>
                         </div>
 
