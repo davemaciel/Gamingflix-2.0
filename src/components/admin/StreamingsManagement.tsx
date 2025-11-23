@@ -281,57 +281,66 @@ export const StreamingsManagement = () => {
 
             <div className="grid gap-3 sm:gap-4 md:gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
                 {filteredServices.map((service) => (
-                    <Card key={service.id} className="border-border bg-card/60 backdrop-blur">
-                        <CardContent className="p-4 sm:p-6 space-y-4">
-                            <div className="flex justify-between items-start gap-4">
-                                <div className="flex-1">
-                                    <h2 className="text-lg sm:text-xl font-semibold text-foreground">
-                                        {service.name}
-                                    </h2>
+                    <Card key={service.id} className="border-border bg-card/60 backdrop-blur hover:bg-card/80 transition-all duration-300 group">
+                        <CardContent className="p-5 flex flex-col h-full">
+                            <div className="flex justify-between items-start gap-4 mb-4">
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        {service.logo_url && (
+                                            <img
+                                                src={service.logo_url}
+                                                alt={service.name}
+                                                className="w-8 h-8 object-contain rounded-md bg-background/50 p-1 border border-border/50"
+                                            />
+                                        )}
+                                        <h2 className="text-lg font-semibold text-foreground truncate">
+                                            {service.name}
+                                        </h2>
+                                    </div>
                                     {service.description && (
-                                        <p className="text-xs sm:text-sm text-muted-foreground mt-1 break-words">
+                                        <p className="text-sm text-muted-foreground line-clamp-2 min-h-[2.5rem]">
                                             {service.description}
                                         </p>
                                     )}
                                 </div>
+                                <div className="flex gap-1 shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                                    <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                        onClick={() => openServiceDialog(service)}
+                                        title="Editar Serviço"
+                                    >
+                                        <Pencil className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                        onClick={() => handleDeleteServiceClick(service)}
+                                        title="Excluir Serviço"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
                             </div>
 
-                            <div className="flex flex-wrap gap-2 justify-end">
+                            <div className="mt-auto grid grid-cols-2 gap-3">
                                 <Button
-                                    size="sm"
                                     variant="outline"
-                                    className="rounded-lg"
+                                    className="w-full justify-center gap-2 hover:bg-primary/5 hover:text-primary hover:border-primary/20 transition-colors"
                                     onClick={() => openInventoryDialog(service)}
                                 >
-                                    <Layers className="h-4 w-4 mr-2" />
+                                    <Layers className="h-4 w-4" />
                                     Estoque
                                 </Button>
                                 <Button
-                                    size="sm"
                                     variant="outline"
-                                    className="rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/30"
+                                    className="w-full justify-center gap-2 hover:bg-blue-500/10 hover:text-blue-500 hover:border-blue-500/30 transition-colors"
                                     onClick={() => openAssignmentsDialog(service)}
                                 >
-                                    <Users className="h-4 w-4 mr-2" />
+                                    <Users className="h-4 w-4" />
                                     Atribuições
-                                </Button>
-                                <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="rounded-lg"
-                                    onClick={() => openServiceDialog(service)}
-                                >
-                                    <Pencil className="h-4 w-4 mr-2" />
-                                    Editar
-                                </Button>
-                                <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    className="rounded-lg"
-                                    onClick={() => handleDeleteServiceClick(service)}
-                                >
-                                    <Trash2 className="h-4 w-4 mr-2" />
-                                    Excluir
                                 </Button>
                             </div>
                         </CardContent>
@@ -441,8 +450,8 @@ export const StreamingsManagement = () => {
                                     <div className="space-y-2">
                                         <Label>Senha</Label>
                                         <Input
-                                            type="password"
-                                            placeholder="••••••"
+                                            type="text"
+                                            placeholder="Senha da conta"
                                             value={accountForm.password}
                                             onChange={(e) => setAccountForm({ ...accountForm, password: e.target.value })}
                                         />
@@ -564,8 +573,8 @@ export const StreamingsManagement = () => {
                                                                 {profile.profile_name || 'Perfil sem nome'}
                                                             </div>
                                                             <span className={`text-xs px-2 py-1 rounded-full ${isExpired ? 'bg-red-500 text-white' :
-                                                                    daysRemaining < 7 ? 'bg-yellow-500 text-black' :
-                                                                        'bg-green-500 text-white'
+                                                                daysRemaining < 7 ? 'bg-yellow-500 text-black' :
+                                                                    'bg-green-500 text-white'
                                                                 }`}>
                                                                 {isExpired ? 'EXPIRADO' : `${daysRemaining} dias`}
                                                             </span>
